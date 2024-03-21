@@ -77,24 +77,30 @@ class DataManipulation:
         return mXn, mYn, mvdd
 
     @staticmethod
-    def prepare_data_for_modeling(mXn, mYn, tr_tst):
-        pmod = int(mXn.shape[0] * tr_tst)
-        mtrainX = mXn[:pmod, :, :]
-        mtrainY = mYn[:pmod]
-        mtestX = mXn[pmod:, :, :]
-        mtestY = mYn[pmod:]
-        return mtrainX, mtrainY, mtestX, mtestY, pmod
+    def prepare_data_for_modeling(Xn, Yn, tr_tst, multi=False):
+        pmod = int(Xn.shape[0] * tr_tst)
+        if multi == False:  # Univariate
+            trainX = Xn.iloc[:pmod,:]
+            trainY = Yn.iloc[:pmod]
+            testX  = Xn.iloc[pmod:,:]
+            testY  = Yn.iloc[pmod:]
+        else:  # Multivariate
+            trainX = Xn[:pmod, :, :]
+            trainY = Yn[:pmod]
+            testX = Xn[pmod:, :, :]
+            testY = Yn[pmod:]
+        return trainX, trainY, testX, testY, pmod
 
     @staticmethod
-    def check_nan_values(mtrainX, mtestX, stock, ahead):
-        if np.isinf(mtrainX).any() or np.isnan(mtrainX).any():
+    def check_nan_values(trainX, testX, stock, ahead):
+        if np.isinf(trainX).any() or np.isnan(trainX).any():
             print("Stock {} ahead: {} has nans.".format(stock, ahead))
-            print(mtrainX)
+            print(trainX)
             import pdb
             pdb.set_trace()
-        if np.isnan(mtestX).any():
+        if np.isnan(testX).any():
             print("Stock {} ahead: {} has nans.".format(stock, ahead))
-            print(mtestX)
+            print(testX)
 
     @staticmethod
     def prepare_multivariate_data(dfX, mwin, m_ftrs, idx):
@@ -107,14 +113,23 @@ class DataManipulation:
         return mX, cols
 
     @staticmethod
-    def prepare_serial_dict(mXl, mYl, mXn, mYn, pmod, mvdd, mtrainX, mtrainY, mtestX, mtestY, cols, xdx, ahead):
-        mserial_dict = {
-            "x": mXl, "y": mYl, "nx": mXn, "ny": mYn, "numt": pmod,
-            "vdd": mvdd, "trX": mtrainX, "trY": mtrainY,
-            "tsX": mtestX, "tsY": mtestY, "cnms": cols,
-            "idtest": xdx[pmod:]
-        }
-        return mserial_dict
+    def prepare_serial_dict(x, y, Xn, Yn, pmod, vdd, trainX, trainY, testX, testY, cols=None, xdx=None):
+        if cols is None and xdx is None:
+            serial_dict = {
+                "x": x, "y": y, "nx": Xn, "ny": Yn, "numt": pmod,
+                "vdd": vdd, "trX": trainX, "trY": trainY,
+                "tsX": testX, "tsY": testY
+            }
+            return serial_dict
+
+        else:
+            mserial_dict = {
+                "x": x, "y": y, "nx": Xn, "ny": Yn, "numt": pmod,
+                "vdd": vdd, "trX": trainX, "trY": trainY,
+                "tsX": testX, "tsY": testY, "cnms": cols,
+                "idtest": xdx[pmod:]
+            }
+            return mserial_dict
     
 # from https://stackoverflow.com/questions/6076690/verbose-level-with-argparse-and-multiple-v-options
 class VAction(argparse.Action):
@@ -205,14 +220,10 @@ def main(args):
             cYn = cYn.astype('float32')
 
             # Data set preparation for modeling, starting from cXn and cYn
-            pmod   = int(cXn.shape[0]*tr_tst)  # 20% reserved for test data
-            trainX = cXn.iloc[:pmod,:]
-            trainY = cYn.iloc[:pmod]
-            testX  = cXn.iloc[pmod:,:]
-            testY  = cYn.iloc[pmod:]
+            trainX, trainY, testX, testY, pmod = data_manipulation.prepare_data_for_modeling(cXn, cYn, tr_tst)
+            
 
-            serial_dict[stock][ahead] = {'x':X,'y':Y, 'nx':cXn,'ny':cYn, 'numt':pmod, 'vdd':vdd, \
-                                        'trX':trainX,'trY':trainY, 'tsX':testX,'tsY':testY}
+            serial_dict[stock][ahead] = data_manipulation.prepare_serial_dict(X, Y, cXn, cYn, pmod, vdd, trainX, trainY, testX, testY)
             
             data_processor.tot_res["INP"] = serial_dict
             
@@ -260,12 +271,12 @@ def main(args):
             mXn = mXn.astype("float32")
             mYn = mYn.astype("float32")
 
-            mtrainX, mtrainY, mtestX, mtestY, pmod = data_manipulation.prepare_data_for_modeling(mXn, mYn, tr_tst)
+            mtrainX, mtrainY, mtestX, mtestY, pmod = data_manipulation.prepare_data_for_modeling(mXn, mYn, tr_tst, multi=True)
 
             data_manipulation.check_nan_values(mtrainX, mtestX, stock, ahead)
 
             xdx = idx[:-(ahead+1)]
-            mserial_dict[stock][ahead] = data_manipulation.prepare_serial_dict(mXl, mYl, mXn, mYn, pmod, mvdd, mtrainX, mtrainY, mtestX, mtestY, cols, xdx, ahead)
+            mserial_dict[stock][ahead] = data_manipulation.prepare_serial_dict(mXl, mYl, mXn, mYn, pmod, mvdd, mtrainX, mtrainY, mtestX, mtestY, cols, xdx)
 
         
         data_processor.tot_res["INP_MSERIAL"] = mserial_dict
