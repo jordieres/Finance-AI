@@ -25,6 +25,7 @@ class DataProcessor:
         self.path = "../../Datasets/"
         self.stock_list= ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"]
         self.df_dict = {}
+        self.tot_res = {}
 
     def load_data(self):
         for stock in self.stock_list:
@@ -36,6 +37,7 @@ class DataProcessor:
             df = df.dropna()
             print('{}: NaNs are about {}% in the original dataset. Size: {}'.format(stock, str(round(nans)), str(df.shape)))
             self.df_dict[stock] = df
+            self.tot_res['INP'] = self.df_dict
 
 class DataManipulation:
     @staticmethod
@@ -163,6 +165,67 @@ def main(args):
     tr_tst = config['tr_tst']
     lahead = [1, 7, 14, 30, 90]
 
+    win = config['win']
+    deep = config['deep']
+    n_ftrs = config['n_ftrs']
+
+# Univariate data preparation
+    for stock in data_processor.stock_list:
+        serial_dict = {}
+        serial_dict[stock] = {}
+        for ahead in lahead:
+            df = data_processor.df_dict[stock].copy()
+
+            # Window of relevant data
+            win_x = np.lib.stride_tricks.sliding_window_view(df.PX_OPEN.to_numpy(), window_shape = win)[::1]
+
+            # Shift the Y axis
+            Y= df.iloc[ahead+win:]['PX_OPEN']
+            X = pd.DataFrame.from_records(win_x)
+
+            # Cutting out records with no data in Y+ahead respecting the win+ahead offset
+            X = X.iloc[:-(ahead+1),:] # Skipping the gap in forecasting values
+            X.set_index(df.index[(win-1):-(ahead+1)],drop=True, inplace=True)
+
+            xm = X.mean(axis=1)
+            cX = X.sub(X.mean(axis=1), axis=0)
+
+            #  Scaling and storing ranges in vdd
+            mnx= round(min(cX.min())) # whole min
+            mxx= round(max(cX.max())) # whole max
+            vdd= pd.DataFrame({'mean':xm,'min':mnx,'max':mxx}) # DF with ranges
+            vdd.set_index(X.index,drop=True,inplace=True)
+
+            # Normalizing X and Y
+            cXn= cX.apply(lambda x: (x-mnx)/(mxx-mnx), axis=1)
+            cYn= pd.Series([((i-j)-mnx)/(mxx-mnx) for i,j in zip(Y.tolist(),xm.tolist())], index=Y.index)
+            cXn = cXn.astype('float32')
+            cYn = cYn.astype('float32')
+
+            # Data set preparation for modeling, starting from cXn and cYn
+            pmod   = int(cXn.shape[0]*tr_tst)  # 20% reserved for test data
+            trainX = cXn.iloc[:pmod,:]
+            trainY = cYn.iloc[:pmod]
+            testX  = cXn.iloc[pmod:,:]
+            testY  = cYn.iloc[pmod:]
+
+            serial_dict[stock][ahead] = {'x':X,'y':Y, 'nx':cXn,'ny':cYn, 'numt':pmod, 'vdd':vdd, \
+                                        'trX':trainX,'trY':trainY, 'tsX':testX,'tsY':testY}
+            
+        fdat1 = "../../DataProcessed/{:02}/input-output.pkl".format(win)
+        lpar  = [win, deep, n_ftrs,tr_tst]
+
+        with open(fdat1, 'wb') as file:
+            pickle.dump(path, file)
+            pickle.dump(fdat1,file)
+            pickle.dump(lahead,file)
+            pickle.dump(lpar,file)
+            pickle.dump(data_processor.stock_list,file)
+            pickle.dump(data_processor.tot_res, file)
+        file.close()
+                                                    
+
+# Multivariate data preparation
     for stock in data_processor.stock_list:
         mserial_dict = {}
         df = data_processor.df_dict[stock].copy()
@@ -197,6 +260,9 @@ def main(args):
             xdx = idx[:-(ahead+1)]
             mserial_dict[ahead] = data_manipulation.prepare_serial_dict(mXl, mYl, mXn, mYn, pmod, mvdd, mtrainX, mtrainY, mtestX, mtestY, cols, xdx, ahead)
 
+        
+        data_processor.tot_res["INP_MSERIAL"] = mserial_dict
+
         fdat2 = os.path.join(path, "{:02}/m-input-output.pkl".format(mwin))
         lpar = [mwin, mdeep, m_ftrs, tr_tst]
 
@@ -206,7 +272,7 @@ def main(args):
             pickle.dump(lahead, file)
             pickle.dump(lpar, file)
             pickle.dump(data_processor.stock_list, file)
-            pickle.dump(mserial_dict, file)
+            pickle.dump(data_processor.tot_res, file)
         file.close()
         
 if __name__ == "__main__":
