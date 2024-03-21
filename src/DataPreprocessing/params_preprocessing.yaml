@@ -4,3 +4,7 @@ mwin: 22
 mdeep: 10
 m_ftrs: 1
 tr_tst: 0.8
+
+win: 22
+deep: 10
+n_ftrs: 1
