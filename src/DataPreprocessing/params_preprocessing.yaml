@@ -1,0 +1,6 @@
+data_path: "../../Datasets/"
+output_path: "../../DataProcessed/"
+mwin: 22
+mdeep: 10
+m_ftrs: 1
+tr_tst: 0.8
