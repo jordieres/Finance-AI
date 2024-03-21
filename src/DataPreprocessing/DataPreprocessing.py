@@ -170,8 +170,10 @@ def main(args):
     n_ftrs = config['n_ftrs']
 
 # Univariate data preparation
+    
+    serial_dict = {}
     for stock in data_processor.stock_list:
-        serial_dict = {}
+
         serial_dict[stock] = {}
         for ahead in lahead:
             df = data_processor.df_dict[stock].copy()
@@ -212,6 +214,8 @@ def main(args):
             serial_dict[stock][ahead] = {'x':X,'y':Y, 'nx':cXn,'ny':cYn, 'numt':pmod, 'vdd':vdd, \
                                         'trX':trainX,'trY':trainY, 'tsX':testX,'tsY':testY}
             
+            data_processor.tot_res["INP"] = serial_dict
+            
         fdat1 = "../../DataProcessed/{:02}/input-output.pkl".format(win)
         lpar  = [win, deep, n_ftrs,tr_tst]
 
@@ -226,8 +230,11 @@ def main(args):
                                                     
 
 # Multivariate data preparation
+        
+    mserial_dict = {}
     for stock in data_processor.stock_list:
-        mserial_dict = {}
+        
+        mserial_dict[stock] = {}
         df = data_processor.df_dict[stock].copy()
         mdf = df[["PX_OPEN", "PX_LAST", "RSI_14D", "PX_TREND", "PX_VTREND"]]
         mdf.loc[:, "TWEETPR"] = data_manipulation.compute_sentiment_scores(df, "TWITTER_POS_SENTIMENT_COUNT", "TWITTER_PUBLICATION_COUNT")
@@ -258,7 +265,7 @@ def main(args):
             data_manipulation.check_nan_values(mtrainX, mtestX, stock, ahead)
 
             xdx = idx[:-(ahead+1)]
-            mserial_dict[ahead] = data_manipulation.prepare_serial_dict(mXl, mYl, mXn, mYn, pmod, mvdd, mtrainX, mtrainY, mtestX, mtestY, cols, xdx, ahead)
+            mserial_dict[stock][ahead] = data_manipulation.prepare_serial_dict(mXl, mYl, mXn, mYn, pmod, mvdd, mtrainX, mtrainY, mtestX, mtestY, cols, xdx, ahead)
 
         
         data_processor.tot_res["INP_MSERIAL"] = mserial_dict
