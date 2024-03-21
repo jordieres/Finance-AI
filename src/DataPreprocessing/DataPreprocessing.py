@@ -140,12 +140,12 @@ def main(args):
 
     with open(args.params_file, 'r') as f:
         config = yaml.safe_load(f)
-    
-    # Parametros
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-v", "--verbose", nargs='?', action=VAction,\
-            dest='verbose', help="Option for detailed information")
 
+    if args.verbose > 0:
+        print("Additional Info:")
+        # Add additional information here
+        print("Processing data with the configuration file:", args.params_file)
+    
     warnings.filterwarnings('ignore')
     mpl.rcParams['figure.figsize'] = (18, 10)
     mpl.rcParams['axes.grid'] = False
@@ -211,6 +211,8 @@ def main(args):
         
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process data and create output.")
+    parser.add_argument("-v", "--verbose", nargs='?', action=VAction,\
+            dest='verbose', help="Option for detailed information")
     parser.add_argument("params_file", help="Path to the configuration YAML file.")
     args = parser.parse_args()
     main(args)
