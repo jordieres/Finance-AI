@@ -1,10 +1,13 @@
-data_path: "../../Datasets/"
-output_path: "../../DataProcessed/"
-mwin: 22
-mdeep: 10
-m_ftrs: 1
-tr_tst: 0.8
-
-win: 22
-deep: 10
-n_ftrs: 1
+data:
+  data_path: "D:/Escritorio/TFG/Finance-AI/Datasets"
+  output_path: "D:/Escritorio/TFG/Finance-AI/DataProcessed"
+serialization:
+  1D:
+    win: 22
+    deep: 10
+    n_ftrs: 1
+  mD:
+    win: 22
+    deep: 10
+    n_ftrs: 1
+  tr_tst: 0.8
