@@ -88,7 +88,7 @@ def eval(nptstX, nptstY, testX, model, vdd, Y, ahead):
 
 def lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,ahead,stock,seed):
     '''
-    LSTM model
+    LSTM model 
 
     Returns the evaluation of the model with the test data
     
