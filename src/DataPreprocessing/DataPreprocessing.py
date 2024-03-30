@@ -1,3 +1,8 @@
+'''@package DataPreprocessing
+This module contains the DataProcessor class that processes the data and creates the output files. It also contains the DataManipulation class that contains methods to manipulate the data.
+'''
+
+
 import os, time, gc, sys, io
 import datetime, pickle
 import warnings, random, pdb
@@ -20,6 +25,10 @@ warnings.simplefilter('ignore')
 
 
 class DataManipulation:
+    def __init__(self):
+        pass
+
+    ''' Class to manipulate the data'''
     @staticmethod
     def compute_sentiment_scores(df, sentiment_count_col, publication_count_col):
         '''
@@ -74,30 +83,6 @@ class DataManipulation:
         mX = pd.DataFrame.from_records(lX)
         mX.set_index(idx, drop=True, inplace=True)
         return mX
-
-    @staticmethod
-    def normalize_data(mXl, avmX, mYl, dfX, idx, ahead):
-        '''
-        Returns the normalized data and the mean, min, and max values of the data
-        
-        Arguments:
-        mXl - multivariate data
-        avmX - average of the multivariate data
-        mYl - target data
-        dfX - multivariate data
-        idx - index of the data
-        ahead - ahead value
-        '''
-
-        avmXc = mXl - avmX[:, None, :]
-        pavX = pd.DataFrame(np.mean(mXl, axis=1), columns=dfX.columns)
-        pavX.set_index(idx[ahead+1:], drop=True, inplace=True)
-        mxmX = np.round(np.max(avmXc, axis=(0, 1)), 2)
-        mnmX = np.round(np.min(avmXc, axis=(0, 1)), 2)
-        mvdd = {"mean": pavX, "min": mnmX, "max": mxmX}
-        mXn = (avmXc - mnmX[None, None, :]) / (mxmX[None, None, :] - mnmX[None, None, :] + 0.00001)
-        mYn = ((mYl.to_numpy() - avmX[:, 0]) - mnmX[0]) / (mxmX[0] - mnmX[0] + 0.00001)
-        return mXn, mYn, mvdd
 
     @staticmethod
     def prepare_data_for_modeling(Xn, Yn, tr_tst, multi=False):
@@ -200,8 +185,39 @@ class DataManipulation:
             }
             return mserial_dict
         
+    def load_preprocessed_data(path, win, multi=False):
+        '''
+        Returns the preprocessed data as a list of objects
+        
+        Arguments:
+        path - path to the preprocessed data
+        win - window size
+        multi - boolean value to indicate if the data is multivariate or not
+        '''
+
+        if multi == False:
+            fdat = os.path.join(path, "{:02}/input-output.pkl".format(win))
+
+        else:
+            fdat = os.path.join(path, "{:02}/m-input-output.pkl".format(win))
+
+        with (open(fdat, "rb")) as openfile:
+            while True:
+                try:
+                    path = pickle.load(openfile)
+                    fdat = pickle.load(openfile)
+                    lahead = pickle.load(openfile)
+                    lpar = pickle.load(openfile)
+                    stock_list = pickle.load(openfile)
+                    tot_res = pickle.load(openfile)
+                    df_dict = tot_res['INP']
+                except EOFError:
+                    break
+        return path, fdat, lahead, lpar, stock_list, tot_res, df_dict
+        
 
 class DataProcessor(DataManipulation): # DataProcessor class inherits from DataManipulation class
+    ''' Class to process the data and create the output files'''
     def __init__(self, data_path, out_path):
         '''
         Arguments:
@@ -219,7 +235,8 @@ class DataProcessor(DataManipulation): # DataProcessor class inherits from DataM
         self.serial_dict = {}
         self.mserial_dict = {}
 
-    def load_data(self): # load data from the csv files
+    def load_raw_data(self):
+        '''Load data from the csv files and create a dictionary with the data for each stock.'''
         for stock in self.stock_list:
             fich = os.path.join(self.path, f"{stock} US Equity_060124.csv")
             assert os.path.exists(fich), f"El archivo {fich} no existe."
@@ -319,7 +336,7 @@ class DataProcessor(DataManipulation): # DataProcessor class inherits from DataM
                 mYl = dfY.iloc[ahead+mwin:]
                 avmX = np.mean(mXl, axis=1)
 
-                mXn, mYn, mvdd = self.normalize_data(mXl, avmX, mYl, dfX, idx, ahead)
+                mXn, mYn, mvdd = Normalizer.normalize_data(mXl, avmX, mYl, dfX, idx, ahead)
 
                 mXn = mXn.astype("float32")
                 mYn = mYn.astype("float32")
@@ -332,6 +349,51 @@ class DataProcessor(DataManipulation): # DataProcessor class inherits from DataM
                 self.mserial_dict[stock][ahead] = self.prepare_serial_dict(mXl, mYl, mXn, mYn, pmod, mvdd, mtrainX, mtrainY, mtestX, mtestY, cols, xdx)
 
             self.tot_res["INP_MSERIAL"] = self.mserial_dict
+
+
+class Normalizer: # Normalizer class inherits from DataManipulation class
+    ''' Class to normalize and denormalize the data'''
+    @staticmethod
+    def normalize_data(mXl, avmX, mYl, dfX, idx, ahead):
+        '''
+        Returns the normalized data and the mean, min, and max values of the data
+        
+        Arguments:
+        mXl - multivariate data
+        avmX - average of the multivariate data
+        mYl - target data
+        dfX - multivariate data
+        idx - index of the data
+        ahead - ahead value
+        '''
+
+        avmXc = mXl - avmX[:, None, :]
+        pavX = pd.DataFrame(np.mean(mXl, axis=1), columns=dfX.columns)
+        pavX.set_index(idx[ahead+1:], drop=True, inplace=True)
+        mxmX = np.round(np.max(avmXc, axis=(0, 1)), 2)
+        mnmX = np.round(np.min(avmXc, axis=(0, 1)), 2)
+        mvdd = {"mean": pavX, "min": mnmX, "max": mxmX}
+        mXn = (avmXc - mnmX[None, None, :]) / (mxmX[None, None, :] - mnmX[None, None, :] + 0.00001)
+        mYn = ((mYl.to_numpy() - avmX[:, 0]) - mnmX[0]) / (mxmX[0] - mnmX[0] + 0.00001)
+        return mXn, mYn, mvdd
+
+    @staticmethod
+    def denormalize_data(Yn, mvdd, idx):
+        """
+        Returns the denormalized target data.
+        
+        Arguments:
+        Yn - normalized target data
+        mvdd - dictionary containing mean, min, and max values used for normalization
+        """
+
+        mnmX = mvdd.loc[idx,"min"]
+        mxmX = mvdd.loc[idx,"max"]
+        mnx =  mvdd.loc[idx,"mean"]
+        
+        denormalized_mYl = pd.Series(Yn, index=idx) * (mxmX - mnmX) + mnmX + mnx
+        return denormalized_mYl
+
 
     
 # from https://stackoverflow.com/questions/6076690/verbose-level-with-argparse-and-multiple-v-options
@@ -358,30 +420,6 @@ class VAction(argparse.Action):
                 self.values = values.count('v')+1
         setattr(args, self.dest, self.values)
 
-def load_preprocessed_data(path, win, multi=False):
-    '''
-    Returns the preprocessed data as a list of objects
-    
-    Arguments:
-    path - path to the preprocessed data
-    win - window size
-    multi - boolean value to indicate if the data is multivariate or not
-    '''
-
-    if multi == False:
-        fdat = os.path.join(path, "{:02}/input-output.pkl".format(win))
-
-    else:
-        fdat = os.path.join(path, "{:02}/m-input-output.pkl".format(win))
-
-    objects = []
-    with (open(fdat, "rb")) as openfile:
-        while True:
-            try:
-                objects.append(pickle.load(openfile))
-            except EOFError:
-                break
-    return objects
 
 def main(args):
 
@@ -417,10 +455,7 @@ def main(args):
 
     # Create the DataProcessor object
     data_processor = DataProcessor(data_path, out_path)
-    data_processor.load_data()
-
-    # Create the DataManipulation object
-    data_manipulation = DataManipulation()
+    data_processor.load_raw_data()
 
 
 # Univariate data processing
