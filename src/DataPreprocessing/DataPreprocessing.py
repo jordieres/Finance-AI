@@ -208,6 +208,9 @@ class DataProcessor(DataManipulation): # DataProcessor class inherits from DataM
         self.lahead = [1, 7, 14, 30, 90] # list of ahead values
         self.df_dict = {}
         self.tot_res = {}
+        
+        self.serial_dict = {}
+        self.mserial_dict = {}
 
     def load_data(self): # load data from the csv files
         for stock in self.stock_list:
@@ -246,8 +249,6 @@ class DataProcessor(DataManipulation): # DataProcessor class inherits from DataM
         win - window size
         tr_tst - train-test ratio
         '''
-
-        self.serial_dict = {}
 
         for stock in self.stock_list:
             self.serial_dict[stock] = {}
@@ -288,8 +289,6 @@ class DataProcessor(DataManipulation): # DataProcessor class inherits from DataM
         m_ftrs - multivariate number of features
         tr_tst - train-test ratio
         '''
-
-        self.mserial_dict = {}
         
         for stock in self.stock_list:
             self.mserial_dict[stock] = {}
@@ -333,7 +332,7 @@ class VAction(argparse.Action):
     '''
     Custom action class to handle the verbose option
     '''
-    
+
     def __init__(self, option_strings, dest, nargs=None, const=None,
                  default=None, type=None, choices=None, required=False,
                  help=None, metavar=None):
