@@ -22,7 +22,8 @@ warnings.simplefilter('ignore')
 class DataManipulation:
     @staticmethod
     def compute_sentiment_scores(df, sentiment_count_col, publication_count_col):
-        '''Returns the sentiment scores
+        '''
+        Returns the sentiment scores
         
         Arguments:
         df - data
@@ -36,7 +37,8 @@ class DataManipulation:
 
     @staticmethod
     def compute_volatility(df): # compute volatility of the stock with the Garman and Klass model
-        '''Returns the volatility of the stock
+        '''
+        Returns the volatility of the stock
         
         Arguments:
         df - data
@@ -47,7 +49,8 @@ class DataManipulation:
 
     @staticmethod
     def check_infinite_values(df): # check for infinite values in the data
-        '''Arguments:
+        '''
+        Arguments:
         df - data
         '''
 
@@ -57,7 +60,8 @@ class DataManipulation:
 
     @staticmethod
     def windowing(dfX, win, nvar, idx):
-        '''Returns the windowed data
+        '''
+        Returns the windowed data
         
         Arguments:
         dfX - data
@@ -73,7 +77,8 @@ class DataManipulation:
 
     @staticmethod
     def normalize_data(mXl, avmX, mYl, dfX, idx, ahead):
-        '''Returns the normalized data and the mean, min, and max values of the data
+        '''
+        Returns the normalized data and the mean, min, and max values of the data
         
         Arguments:
         mXl - multivariate data
@@ -96,7 +101,8 @@ class DataManipulation:
 
     @staticmethod
     def prepare_data_for_modeling(Xn, Yn, tr_tst, multi=False):
-        '''Returns the training and testing data for modeling
+        '''
+        Returns the training and testing data for modeling
         
         Arguments:
         Xn - normalized X data
@@ -197,7 +203,8 @@ class DataManipulation:
 
 class DataProcessor(DataManipulation): # DataProcessor class inherits from DataManipulation class
     def __init__(self, data_path, out_path):
-        '''Arguments:
+        '''
+        Arguments:
         data_path - path to the data files
         out_path - path to the output files
         '''
@@ -352,7 +359,8 @@ class VAction(argparse.Action):
         setattr(args, self.dest, self.values)
 
 def load_preprocessed_data(path, win, multi=False):
-    '''Returns the preprocessed data as a list of objects
+    '''
+    Returns the preprocessed data as a list of objects
     
     Arguments:
     path - path to the preprocessed data
