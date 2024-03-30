@@ -330,6 +330,10 @@ class DataProcessor(DataManipulation): # DataProcessor class inherits from DataM
     
 # from https://stackoverflow.com/questions/6076690/verbose-level-with-argparse-and-multiple-v-options
 class VAction(argparse.Action):
+    '''
+    Custom action class to handle the verbose option
+    '''
+    
     def __init__(self, option_strings, dest, nargs=None, const=None,
                  default=None, type=None, choices=None, required=False,
                  help=None, metavar=None):
@@ -348,6 +352,29 @@ class VAction(argparse.Action):
                 self.values = values.count('v')+1
         setattr(args, self.dest, self.values)
 
+def load_preprocessed_data(path, win, multi=False):
+    '''Returns the preprocessed data as a list of objects
+    
+    Arguments:
+    path - path to the preprocessed data
+    win - window size
+    multi - boolean value to indicate if the data is multivariate or not
+    '''
+
+    if multi == False:
+        fdat = os.path.join(path, "{:02}/input-output.pkl".format(win))
+
+    else:
+        fdat = os.path.join(path, "{:02}/m-input-output.pkl".format(win))
+
+    objects = []
+    with (open(fdat, "rb")) as openfile:
+        while True:
+            try:
+                objects.append(pickle.load(openfile))
+            except EOFError:
+                break
+    return objects
 
 def main(args):
 
