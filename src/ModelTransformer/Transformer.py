@@ -3,7 +3,7 @@ from torch import nn
 from tqdm import tqdm
 
 from EncoderTransformer import TransformerEncoder as Encoder
-from DecoderTransformer import TransformerDecoder as Decoder
+from ModelTransformer.DecoderTransformer import TransformerDecoder as Decoder
 
 
 class Transformer(nn.Module):
@@ -20,14 +20,15 @@ class Transformer(nn.Module):
             mask: bool = True):
 
         super().__init__()
+
         self.encoder = Encoder (
             num_layers=num_encoder_layers,
             d_model=dim_model,
             num_heads=num_attention_heads,
             units_hidden_layer=units_hidden_layer,
             dropout=dropout,
-            activation=activation,
-            mask=mask)
+            mask=mask,
+            activation=activation)
 
         self.decoder = Decoder (
             num_layers=num_decoder_layers,
@@ -46,8 +47,8 @@ class Transformer(nn.Module):
         for src, tgt_seq in tqdm(zip(source, target), total=len(source)):
             src = torch.unsqueeze(src, dim=0)
             encoder_output = self.encoder(src)
-
             batch_output = []
+            
             for tgt_step in tgt_seq:
                 tgt_step = torch.unsqueeze(tgt_step, dim=0)
                 decoder_output = self.decoder(src=tgt_step, memory=encoder_output)

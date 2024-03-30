@@ -24,31 +24,32 @@ from keras.layers import Activation
 from keras.layers import RepeatVector
 from keras.layers import TimeDistributed
 from keras.layers import Embedding
-from tensorflow.keras.layers import Conv1D
-from tensorflow.keras.layers import MaxPooling1D
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-from tensorflow.keras.callbacks import CSVLogger, EarlyStopping
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
 from mpl_toolkits.axes_grid1 import host_subplot
 # from keras_self_attention import SeqSelfAttention
 from numpy.lib.stride_tricks import sliding_window_view
+import argparse
+import yaml
 
-from DataPreprocessing.DataPreprocessing import DataManipulation, DataProcessor, Normalizer
+sys.path.append('D:\Escritorio\TFG\Finance-AI\src\DataPreprocessing')
+
+from DataPreprocessing import DataManipulation, DataProcessor, Normalizer
 
 # tf.logging.set_verbosity(tf.logging.ERROR)
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
 
-processed_path = "D:/Escritorio/TFG/Finance-AI/DataProcessed"
+processed_path = 'D:/Escritorio/TFG/Finance-AI/DataProcessed'
 win_size = 22
 
 processed_path, fdat, lahead, lpar, stock_list, tot_res, df_dict = DataManipulation.load_preprocessed_data(processed_path, win_size)
 
 win, deep, n_ftrs,tr_tst = lpar
 
-def eval(nptstX, nptstY, testX, model, vdd, Y, shft):
+def eval(nptstX, nptstY, testX, model, vdd, Y, ahead):
     '''
     Returns the evaluation of the model with the test data
 
@@ -74,7 +75,7 @@ def eval(nptstX, nptstY, testX, model, vdd, Y, shft):
     jdx = testX.index
     Yf = Normalizer.denormalize_data(Yprd, vdd, jdx) # denormalize the forecast
     Yr  = Y.loc[jdx] # y real
-    Yy  = Y.shift(shft).loc[jdx] # Y yesterday
+    Yy  = Y.shift(ahead).loc[jdx] # Y yesterday
     DY  = pd.concat([Yr,Yf,Yy],axis=1)
     DY.columns = ['Y_real','Y_predicted','Y_yesterday']
 
@@ -85,23 +86,29 @@ def eval(nptstX, nptstY, testX, model, vdd, Y, shft):
 
 
 
-def lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,shft,stock,seed):
-    #************************************************************
-    #                            LSTM
-    #************************************************************
-    #
-    # trainX: X for training
-    # trainY: Values to be predicted moved forward by 'ahead' days
-    # testX: X for validating
-    # testY: Values really found
-    # Y    : The whole Y dataset 
-    # epoch: Number of epochs of training
-    # bsize: Bach size for feeding the model
-    # nhn:  Number of hidden neurons
-    # win: Window size (days considered to learn from == trainX.shape[1])
-    # n_ftrs: Number of expected outputs (1 in our case)
-    # seed: Seed to stabilize the repetitions.
-    #
+def lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,ahead,stock,seed):
+    '''
+    LSTM model
+
+    Returns the evaluation of the model with the test data
+    
+    Arguments:
+    trainX - normalized training data
+    trainY - normalized training labels
+    testX - normalized test data
+    testY - normalized test labels
+    Y - output PX_OPEN stock
+    vdd - validation dataframe storing the data for normalization and denormalization
+    epoch - number of epochs for training
+    bsize - batch size for feeding the model
+    nhn - number of hidden neurons
+    win - window size (days considered to learn from == trainX.shape[1])
+    n_ftrs - number of expected outputs (1 in our case)
+    stock - stock being evaluated
+    ahead - shift value for the stock
+    seed - seed to stabilize the repetitions
+    '''
+
     nptrX = trainX.to_numpy().reshape(trainX.shape[0],trainX.shape[1],n_ftrs)
     nptrY = trainY.to_numpy()
     nit  = 0
@@ -120,7 +127,7 @@ def lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,shft,sto
     # Predict
     nptstX = testX.to_numpy().reshape(testX.shape[0],testX.shape[1],n_ftrs)
     nptstY = testY.to_numpy()
-    res1   = eval(nptstX, nptstY, testX, model, vdd, Y, shft)
+    res1   = eval(nptstX, nptstY, testX, model, vdd, Y, ahead)
     df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':stock,
                  'DY':res1.get("Ys"),'ALG':'LSTM','seed':seed,'epochs':epoch,
                  'nhn':nhn,'win':win,'ndims':1, 'lossh':lloss, 'nit':nit,
@@ -128,23 +135,28 @@ def lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,shft,sto
     return(df_result)
 
 
-def stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,shft,stock,seed):
-    #************************************************************
-    #                           STACK-LSTM
-    #************************************************************
-    #
-    # trainX: X for training
-    # trainY: Values to be predicted moved forward by 'ahead' days
-    # testX: X for validating
-    # testY: Values really found
-    # Y    : The whole Y dataset 
-    # epoch: Number of epochs of training
-    # bsize: Bach size for feeding the model
-    # nhn:  Number of hidden neurons
-    # win: Window size (days considered to learn from == trainX.shape[1])
-    # n_ftrs: Number of expected outputs (1 in our case)
-    # seed: Seed to stabilize the repetitions.
-    #
+def stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,ahead,stock,seed):
+    '''
+    Stack LSTM model
+
+    Returns the evaluation of the model with the test data
+    
+    Arguments:
+    trainX - normalized training data
+    trainY - normalized training labels
+    testX - normalized test data
+    testY - normalized test labels
+    Y - output PX_OPEN stock
+    vdd - validation dataframe storing the data for normalization and denormalization
+    epoch - number of epochs for training
+    bsize - batch size for feeding the model
+    nhn - number of hidden neurons
+    win - window size (days considered to learn from == trainX.shape[1])
+    n_ftrs - number of expected outputs (1 in our case)
+    stock - stock being evaluated
+    ahead - shift value for the stock
+    seed - seed to stabilize the repetitions
+    '''
     nptrX = trainX.to_numpy().reshape(trainX.shape[0],trainX.shape[1],n_ftrs)
     nptrY = trainY.to_numpy()
     nit  = 0
@@ -164,7 +176,7 @@ def stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,shf
     # Predict
     nptstX = testX.to_numpy().reshape(testX.shape[0],testX.shape[1],n_ftrs)
     nptstY = testY.to_numpy()
-    res1   = eval(nptstX, nptstY, testX, stmodel, vdd, Y, shft)
+    res1   = eval(nptstX, nptstY, testX, stmodel, vdd, Y, ahead)
     df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':stock,
                  'DY':res1.get("Ys"),'ALG':'STACK-LSTM','seed':seed,'epochs':epoch,
                  'nhn':nhn,'win':win ,'ndims':1, 'lossh':lloss, 'nit':nit,
@@ -172,14 +184,19 @@ def stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,shf
     return(df_result)
 
 
-def main():
-    epochs= 100
-    bsize= 750
-    nhn  = 50
+def main(args):
+
+    with open(args.params_file, 'r') as f:
+        config = yaml.safe_load(f)
+    f.close()
+
+    epochs= config['LSTM']['epochs']
+    bsize= config['LSTM']['batch_size']
+    nhn  = config['LSTM']['nhn']
     res  = {}
-    tmod =  "lstm"    # lstm stcklstm, cnnlstm or attlstm
+    tmod =  config['LSTM']['model']    # lstm stcklstm, cnnlstm or attlstm
     res['MODEL'] = tmod
-    fmdls= 'D:/Escritorio/TFG/Finance-AI/Models/{}'.format(nhn)+tmod+'/'
+    fmdls = 'D:/Escritorio/TFG/Finance-AI/Models/{}'.format(nhn)+tmod+'/'
     if not os.path.exists(fmdls):
         os.makedirs(fmdls)
     #
@@ -196,8 +213,8 @@ def main():
         Y      = tot_res['INP'][stock][ahead]['y']
         vdd    = tot_res['INP'][stock][ahead]['vdd']
         tmpr = []
-        #
-        for irp in range(10):
+        
+        for irp in range(15):
             seed      = random.randint(0,1000)
             lstm_start= time.time()
             mdl_name  = '{}-{}-{:03}-{:02}.hd5'.format(tmod,stock,ahead,irp)
@@ -221,25 +238,24 @@ def main():
             sys.stdout.flush()
             tmpr.append(sol)
         res[stock][ahead] = pd.DataFrame(tmpr)
-    #
+    
     tot_res['OUT_MODEL'] = res
 
-    out_path = "D:/Escritorio/TFG/Finance-AI/DataProcessed"
-    data_path = "D:/Escritorio/TFG/Finance-AI/Datasets"
-    data_processor = DataProcessor(data_path, out_path)
+    data_path = config['data']['data_path']
     
-    fdat1 = os.path.join(out_path, '{:02}/model-'+tmod+'-output.pkl'.format(win))
+    fdat2 = 'D:/Escritorio/TFG/Finance-AI/DataProcessed/model-'+tmod+'-output.pkl'
 
-    if os.path.exists(fdat1):
-        data_processor.save_data(fdat1, lpar, stock_list, tot_res)
-    else:
-        directory = os.path.dirname(fdat1)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-            print(f"Directory {directory} created.")
-
-            data_processor.save_data(fdat1, lpar, stock_list, tot_res)                
-            print(f"File {fdat1} created and data saved.")
+    file = open(fdat2, 'wb')
+    pickle.dump(data_path, file)
+    pickle.dump(fdat2,file)
+    pickle.dump(lahead,file)
+    pickle.dump(lpar, file)
+    pickle.dump(stock_list,file)
+    pickle.dump(tot_res, file)
+    file.close()
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Process data and create output.")
+    parser.add_argument("params_file", help="Path to the configuration YAML file.")
+    args = parser.parse_args()
+    main(args)
