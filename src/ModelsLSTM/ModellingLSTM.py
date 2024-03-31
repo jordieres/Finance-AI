@@ -42,12 +42,10 @@ from DataPreprocessing import DataManipulation, DataProcessor, Normalizer
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
 
-processed_path = 'D:/Escritorio/TFG/Finance-AI/DataProcessed'
-win_size = 22
+def load_preprocessed_data(processed_path, win):
+    processed_path, fdat, lahead, lpar, stock_list, tot_res, df_dict = DataManipulation.load_preprocessed_data(processed_path, win)
 
-processed_path, fdat, lahead, lpar, stock_list, tot_res, df_dict = DataManipulation.load_preprocessed_data(processed_path, win_size)
-
-win, deep, n_ftrs,tr_tst = lpar
+    return processed_path, fdat, lahead, lpar, stock_list, tot_res, df_dict
 
 def eval(nptstX, nptstY, testX, model, vdd, Y, ahead):
         '''
@@ -184,7 +182,7 @@ class TrainLSTM:
                     'model':stmodel}
         return(df_result)
 
-    def att_lstm_fun(self,trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,ahead,stock,seed):
+    def att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,ahead,stock,seed):
         '''
         Returns the evaluation of the model with the test data
         
@@ -231,7 +229,7 @@ class TrainLSTM:
                 'SeqSelfAttention': SeqSelfAttention})
         aptstX = testX.to_numpy().reshape(testX.shape[0],win,n_ftrs)
         aptstY = testY.to_numpy()
-        res5b   = self.eval(aptstX, aptstY, testX, amodel, vdd, Y, ahead)
+        res5b   = eval(aptstX, aptstY, testX, amodel, vdd, Y, ahead)
         #
         df_result = {'MSEP': res5b.get("msep"),
                     'MSEY': res5b.get("msey"), 'Stock': stock,
@@ -247,17 +245,24 @@ def main(args):
         config = yaml.safe_load(f)
     f.close()
 
-    epochs= config['LSTM']['epochs']
-    bsize= config['LSTM']['batch_size']
-    nhn  = config['LSTM']['nhn']
-    res  = {}
-    tmod =  config['LSTM']['model']    # lstm stcklstm, cnnlstm or attlstm
+    
+    processed_path = config['data']['output_path']
+    win_size = config['LSTM']['window']
+    epochs = config['LSTM']['epochs']
+    bsize = config['LSTM']['batch_size']
+    nhn = config['LSTM']['nhn']
+    res = {}
+    tmod = config['LSTM']['model']    # lstm stcklstm, cnnlstm or attlstm
     res['MODEL'] = tmod
+
+    _, fdat, lahead, lpar, stock_list, tot_res, df_dict = load_preprocessed_data(processed_path, win_size)
+    _, deep, n_ftrs,tr_tst = lpar
+
     fmdls = 'D:/Escritorio/TFG/Finance-AI/Models/{}'.format(nhn)+tmod+'/'
     if not os.path.exists(fmdls):
         os.makedirs(fmdls)
     
-    trainlstm = TrainLSTM()
+    trainlstm = TrainLSTM
     #
     # for stock in stock_list:
         # res[stock] = {}
@@ -278,7 +283,7 @@ def main(args):
             lstm_start= time.time()
             mdl_name  = '{}-{}-{:03}-{:02}.hd5'.format(tmod,stock,ahead,irp)
             if tmod == "lstm":
-                sol   = trainlstm.lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
+                sol   = TrainLSTM.lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
             if tmod == "stcklstm":
                 sol   = trainlstm.stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
             if tmod == "attlstm":
