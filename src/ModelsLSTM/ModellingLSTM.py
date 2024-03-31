@@ -49,9 +49,7 @@ processed_path, fdat, lahead, lpar, stock_list, tot_res, df_dict = DataManipulat
 
 win, deep, n_ftrs,tr_tst = lpar
 
-class TrainEvalLSTM:
-
-    def eval(self, nptstX, nptstY, testX, model, vdd, Y, ahead):
+def eval(nptstX, nptstY, testX, model, vdd, Y, ahead):
         '''
         Returns the evaluation of the model with the test data
 
@@ -87,8 +85,9 @@ class TrainEvalLSTM:
         return({'msep':msep,'msey':msey,'Ys':DY, 'eff': eff})
 
 
+class TrainLSTM:
 
-    def lstm_fun(self, trainX, trainY, testX, testY, Y, vdd, epoch, bsize, nhn, win, n_ftrs, ahead, stock, seed):
+    def lstm_fun(trainX, trainY, testX, testY, Y, vdd, epoch, bsize, nhn, win, n_ftrs, ahead, stock, seed):
         '''
         LSTM model 
 
@@ -129,7 +128,7 @@ class TrainEvalLSTM:
         # Predict
         nptstX = testX.to_numpy().reshape(testX.shape[0],testX.shape[1],n_ftrs)
         nptstY = testY.to_numpy()
-        res1   = self.eval(nptstX, nptstY, testX, model, vdd, Y, ahead)
+        res1   = eval(nptstX, nptstY, testX, model, vdd, Y, ahead)
         df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':stock,
                     'DY':res1.get("Ys"),'ALG':'LSTM','seed':seed,'epochs':epoch,
                     'nhn':nhn,'win':win,'ndims':1, 'lossh':lloss, 'nit':nit,
@@ -137,7 +136,7 @@ class TrainEvalLSTM:
         return(df_result)
 
 
-    def stck_lstm_fun(self, trainX, trainY, testX, testY, Y, vdd, epoch, bsize, nhn, win, n_ftrs, ahead, stock, seed):
+    def stck_lstm_fun(trainX, trainY, testX, testY, Y, vdd, epoch, bsize, nhn, win, n_ftrs, ahead, stock, seed):
         '''
         Stack LSTM model
 
@@ -178,7 +177,7 @@ class TrainEvalLSTM:
         # Predict
         nptstX = testX.to_numpy().reshape(testX.shape[0],testX.shape[1],n_ftrs)
         nptstY = testY.to_numpy()
-        res1   = self.eval(nptstX, nptstY, testX, stmodel, vdd, Y, ahead)
+        res1   = eval(nptstX, nptstY, testX, stmodel, vdd, Y, ahead)
         df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':stock,
                     'DY':res1.get("Ys"),'ALG':'STACK-LSTM','seed':seed,'epochs':epoch,
                     'nhn':nhn,'win':win ,'ndims':1, 'lossh':lloss, 'nit':nit,
@@ -258,7 +257,7 @@ def main(args):
     if not os.path.exists(fmdls):
         os.makedirs(fmdls)
     
-    trainevallstm = TrainEvalLSTM()
+    trainlstm = TrainLSTM()
     #
     # for stock in stock_list:
         # res[stock] = {}
@@ -279,13 +278,11 @@ def main(args):
             lstm_start= time.time()
             mdl_name  = '{}-{}-{:03}-{:02}.hd5'.format(tmod,stock,ahead,irp)
             if tmod == "lstm":
-                sol   = trainevallstm.lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
+                sol   = trainlstm.lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
             if tmod == "stcklstm":
-                sol   = trainevallstm.stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
-            '''if tmod == "cnnlstm":
-                sol   = cnn_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)'''
+                sol   = trainlstm.stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
             if tmod == "attlstm":
-                sol   = trainevallstm.att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
+                sol   = trainlstm.att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
             lstm_end  = time.time()
             ttrain    = lstm_end - lstm_start
             sol['ttrain'] = ttrain
