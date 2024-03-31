@@ -264,8 +264,7 @@ def main(args):
         # res[stock] = {}
     stock = 'AAPL'
     res[stock] = {}
-    # for ahead in lahead:
-    for ahead in [1]:
+    for ahead in lahead:
         # print('Training ' + stock)
         trainX = tot_res['INP'][stock][ahead]['trX']
         trainY = tot_res['INP'][stock][ahead]['trY']
