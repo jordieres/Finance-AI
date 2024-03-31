@@ -29,7 +29,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
 from mpl_toolkits.axes_grid1 import host_subplot
-# from keras_self_attention import SeqSelfAttention
+from keras_self_attention import SeqSelfAttention
 from numpy.lib.stride_tricks import sliding_window_view
 import argparse
 import yaml
@@ -49,140 +49,198 @@ processed_path, fdat, lahead, lpar, stock_list, tot_res, df_dict = DataManipulat
 
 win, deep, n_ftrs,tr_tst = lpar
 
-def eval(nptstX, nptstY, testX, model, vdd, Y, ahead):
-    '''
-    Returns the evaluation of the model with the test data
+class TrainEvalLSTM:
 
-    Arguments:
-    nptstX - normalized test data
-    nptstY - normalized test labels
-    model - trained model being evaluated
-    vdd - validation dataframe storing the data for normalization and denormalization
-    Y - output PX_OPEN stock
-    '''
+    def eval(self, nptstX, nptstY, testX, model, vdd, Y, ahead):
+        '''
+        Returns the evaluation of the model with the test data
 
-    Yhat   = model.predict(nptstX,verbose=0)
-    tans   = Yhat.shape
-    if len(tans) > 2 and tans[1] == 1:
-        Yhat= np.concatenate(Yhat,axis=0)
-    if len(tans) > 2 and tans[1] > 1:
-        Yhat= [vk[0].tolist() for vk in Yhat]
-    Yprd   = np.concatenate(Yhat,axis=0).tolist()
-    mse    = mean_squared_error(Yprd , nptstY)
-    eff    = pd.DataFrame({'Yorg':nptstY,'Yfct':Yprd}) 
-    eff.set_index(testX.index,drop=True,inplace=True)
+        Arguments:
+        nptstX - normalized test data
+        nptstY - normalized test labels
+        model - trained model being evaluated
+        vdd - validation dataframe storing the data for normalization and denormalization
+        Y - output PX_OPEN stock
+        '''
 
-    jdx = testX.index
-    Yf = Normalizer.denormalize_data(Yprd, vdd, jdx) # denormalize the forecast
-    Yr  = Y.loc[jdx] # y real
-    Yy  = Y.shift(ahead).loc[jdx] # Y yesterday
-    DY  = pd.concat([Yr,Yf,Yy],axis=1)
-    DY.columns = ['Y_real','Y_predicted','Y_yesterday']
+        Yhat   = model.predict(nptstX,verbose=0)
+        tans   = Yhat.shape
+        if len(tans) > 2 and tans[1] == 1:
+            Yhat= np.concatenate(Yhat,axis=0)
+        if len(tans) > 2 and tans[1] > 1:
+            Yhat= [vk[0].tolist() for vk in Yhat]
+        Yprd   = np.concatenate(Yhat,axis=0).tolist()
+        mse    = mean_squared_error(Yprd , nptstY)
+        eff    = pd.DataFrame({'Yorg':nptstY,'Yfct':Yprd}) 
+        eff.set_index(testX.index,drop=True,inplace=True)
 
-    msep= mean_squared_error(DY.Y_predicted , DY.Y_real) # error y predicted - y real
-    msey= mean_squared_error(DY.Y_yesterday , DY.Y_real) # error y yesterday - y real
+        jdx = testX.index
+        Yf = Normalizer.denormalize_data(Yprd, vdd, jdx) # denormalize the forecast
+        Yr  = Y.loc[jdx] # y real
+        Yy  = Y.shift(ahead).loc[jdx] # Y yesterday
+        DY  = pd.concat([Yr,Yf,Yy],axis=1)
+        DY.columns = ['Y_real','Y_predicted','Y_yesterday']
 
-    return({'msep':msep,'msey':msey,'Ys':DY, 'eff': eff})
+        msep= mean_squared_error(DY.Y_predicted , DY.Y_real) # error y predicted - y real
+        msey= mean_squared_error(DY.Y_yesterday , DY.Y_real) # error y yesterday - y real
+
+        return({'msep':msep,'msey':msey,'Ys':DY, 'eff': eff})
 
 
 
-def lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,ahead,stock,seed):
-    '''
-    LSTM model 
+    def lstm_fun(self, trainX, trainY, testX, testY, Y, vdd, epoch, bsize, nhn, win, n_ftrs, ahead, stock, seed):
+        '''
+        LSTM model 
 
-    Returns the evaluation of the model with the test data
-    
-    Arguments:
-    trainX - normalized training data
-    trainY - normalized training labels
-    testX - normalized test data
-    testY - normalized test labels
-    Y - output PX_OPEN stock
-    vdd - validation dataframe storing the data for normalization and denormalization
-    epoch - number of epochs for training
-    bsize - batch size for feeding the model
-    nhn - number of hidden neurons
-    win - window size (days considered to learn from == trainX.shape[1])
-    n_ftrs - number of expected outputs (1 in our case)
-    stock - stock being evaluated
-    ahead - shift value for the stock
-    seed - seed to stabilize the repetitions
-    '''
+        Returns the evaluation of the model with the test data
+        
+        Arguments:
+        trainX - normalized training data
+        trainY - normalized training labels
+        testX - normalized test data
+        testY - normalized test labels
+        Y - output PX_OPEN stock
+        vdd - validation dataframe storing the data for normalization and denormalization
+        epoch - number of epochs for training
+        bsize - batch size for feeding the model
+        nhn - number of hidden neurons
+        win - window size (days considered to learn from == trainX.shape[1])
+        n_ftrs - number of expected outputs (1 in our case)
+        stock - stock being evaluated
+        ahead - shift value for the stock
+        seed - seed to stabilize the repetitions
+        '''
 
-    nptrX = trainX.to_numpy().reshape(trainX.shape[0],trainX.shape[1],n_ftrs)
-    nptrY = trainY.to_numpy()
-    nit  = 0
-    lloss= np.nan
-    while math.isnan(lloss) and nit < 5:
-        tf.random.set_seed(seed)
-        # create a very basic LSTM model
-        model = Sequential()
-        model.add(LSTM(nhn, activation='relu', input_shape=(win,n_ftrs))) 
-        model.add(Dense(n_ftrs)) # Output of a single value
-        model.compile(loss='mean_squared_error', optimizer='adam')
+        nptrX = trainX.to_numpy().reshape(trainX.shape[0],trainX.shape[1],n_ftrs)
+        nptrY = trainY.to_numpy()
+        nit  = 0
+        lloss= np.nan
+        while math.isnan(lloss) and nit < 5:
+            tf.random.set_seed(seed)
+            # create a very basic LSTM model
+            model = Sequential()
+            model.add(LSTM(nhn, activation='relu', input_shape=(win,n_ftrs))) 
+            model.add(Dense(n_ftrs)) # Output of a single value
+            model.compile(loss='mean_squared_error', optimizer='adam')
+            #
+            hist = model.fit(nptrX, nptrY, epochs=epoch, batch_size=bsize, verbose=0)
+            lloss= hist.history['loss'][-1]
+            nit  = nit + 1
+        # Predict
+        nptstX = testX.to_numpy().reshape(testX.shape[0],testX.shape[1],n_ftrs)
+        nptstY = testY.to_numpy()
+        res1   = self.eval(nptstX, nptstY, testX, model, vdd, Y, ahead)
+        df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':stock,
+                    'DY':res1.get("Ys"),'ALG':'LSTM','seed':seed,'epochs':epoch,
+                    'nhn':nhn,'win':win,'ndims':1, 'lossh':lloss, 'nit':nit,
+                    'model':model}
+        return(df_result)
+
+
+    def stck_lstm_fun(self, trainX, trainY, testX, testY, Y, vdd, epoch, bsize, nhn, win, n_ftrs, ahead, stock, seed):
+        '''
+        Stack LSTM model
+
+        Returns the evaluation of the model with the test data
+        
+        Arguments:
+        trainX - normalized training data
+        trainY - normalized training labels
+        testX - normalized test data
+        testY - normalized test labels
+        Y - output PX_OPEN stock
+        vdd - validation dataframe storing the data for normalization and denormalization
+        epoch - number of epochs for training
+        bsize - batch size for feeding the model
+        nhn - number of hidden neurons
+        win - window size (days considered to learn from == trainX.shape[1])
+        n_ftrs - number of expected outputs (1 in our case)
+        stock - stock being evaluated
+        ahead - shift value for the stock
+        seed - seed to stabilize the repetitions
+        '''
+        nptrX = trainX.to_numpy().reshape(trainX.shape[0],trainX.shape[1],n_ftrs)
+        nptrY = trainY.to_numpy()
+        nit  = 0
+        lloss= np.nan
+        while math.isnan(lloss) and nit < 5:
+            tf.random.set_seed(seed)
+            # create a very Stcked-LSTM model
+            stmodel = Sequential()
+            stmodel.add(LSTM(nhn, activation='relu', return_sequences=True, input_shape=(win,n_ftrs)))
+            stmodel.add(LSTM(nhn, activation='relu', return_sequences=True))
+            stmodel.add(LSTM(nhn, activation='relu'))
+            stmodel.add(Dense(n_ftrs)) # Output of a single value
+            stmodel.compile(loss='mean_squared_error', optimizer='adam')
+            hist = stmodel.fit(nptrX, nptrY, epochs=epoch, batch_size=bsize, verbose=0)
+            lloss= hist.history['loss'][-1]
+            nit  = nit + 1
+        # Predict
+        nptstX = testX.to_numpy().reshape(testX.shape[0],testX.shape[1],n_ftrs)
+        nptstY = testY.to_numpy()
+        res1   = self.eval(nptstX, nptstY, testX, stmodel, vdd, Y, ahead)
+        df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':stock,
+                    'DY':res1.get("Ys"),'ALG':'STACK-LSTM','seed':seed,'epochs':epoch,
+                    'nhn':nhn,'win':win ,'ndims':1, 'lossh':lloss, 'nit':nit,
+                    'model':stmodel}
+        return(df_result)
+
+    def att_lstm_fun(self,trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,ahead,stock,seed):
+        '''
+        Returns the evaluation of the model with the test data
+        
+        Parameters:
+        trainX - normalized training data
+        trainY - normalized training labels
+        testX - normalized test data
+        testY - normalized test labels
+        Y - output PX_OPEN stock
+        vdd - validation dataframe storing the data for normalization and denormalization
+        epoch - number of epochs for training
+        bsize - batch size for feeding the model
+        nhn - number of hidden neurons
+        win - window size (days considered to learn from == trainX.shape[1])
+        n_ftrs - number of expected outputs (1 in our case)
+        ahead - shift value for the stock
+        stock - stock being evaluated
+        seed - seed to stabilize the repetitions
+        '''
+
+        aptrX = trainX.to_numpy().reshape(trainX.shape[0], win,n_ftrs)
+        aptrY = trainY.to_numpy()
+        nit  = 0
+        lloss= np.nan
+        while math.isnan(lloss) and nit < 5:
+            amodel = Sequential()
+            amodel.add(Embedding(input_dim=win,output_dim=int(win//3),
+                            mask_zero=True))
+            amodel.add(GRU(nhn, activation='relu', \
+                    return_sequences=True,input_shape=(win,n_ftrs)))
+            amodel.add(SeqSelfAttention(attention_activation='sigmoid'))
+            amodel.add(Dense(n_ftrs))
+            amodel.compile(loss='mean_squared_error', optimizer='adam')
+            earlyStopping = EarlyStopping(monitor='val_loss', \
+                                patience=10, verbose=0, mode='min')
+            checkpoint = ModelCheckpoint('model-attention.h5', verbose=1, \
+                    monitor='val_loss',save_best_only=True, mode='auto')  
+            hist = amodel.fit(aptrX, aptrY, epochs=epoch, callbacks=[checkpoint], \
+                        validation_split=0.15,batch_size=bsize,verbose=1)
+            lloss= hist.history['val_loss'][-1]
+            nit  = nit + 1
+            # Predict
+        amodel = load_model('model-attention.h5',custom_objects={
+                'SeqSelfAttention': SeqSelfAttention})
+        aptstX = testX.to_numpy().reshape(testX.shape[0],win,n_ftrs)
+        aptstY = testY.to_numpy()
+        res5b   = self.eval(aptstX, aptstY, testX, amodel, vdd, Y, ahead)
         #
-        hist = model.fit(nptrX, nptrY, epochs=epoch, batch_size=bsize, verbose=0)
-        lloss= hist.history['loss'][-1]
-        nit  = nit + 1
-    # Predict
-    nptstX = testX.to_numpy().reshape(testX.shape[0],testX.shape[1],n_ftrs)
-    nptstY = testY.to_numpy()
-    res1   = eval(nptstX, nptstY, testX, model, vdd, Y, ahead)
-    df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':stock,
-                 'DY':res1.get("Ys"),'ALG':'LSTM','seed':seed,'epochs':epoch,
-                 'nhn':nhn,'win':win,'ndims':1, 'lossh':lloss, 'nit':nit,
-                 'model':model}
-    return(df_result)
-
-
-def stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,ahead,stock,seed):
-    '''
-    Stack LSTM model
-
-    Returns the evaluation of the model with the test data
-    
-    Arguments:
-    trainX - normalized training data
-    trainY - normalized training labels
-    testX - normalized test data
-    testY - normalized test labels
-    Y - output PX_OPEN stock
-    vdd - validation dataframe storing the data for normalization and denormalization
-    epoch - number of epochs for training
-    bsize - batch size for feeding the model
-    nhn - number of hidden neurons
-    win - window size (days considered to learn from == trainX.shape[1])
-    n_ftrs - number of expected outputs (1 in our case)
-    stock - stock being evaluated
-    ahead - shift value for the stock
-    seed - seed to stabilize the repetitions
-    '''
-    nptrX = trainX.to_numpy().reshape(trainX.shape[0],trainX.shape[1],n_ftrs)
-    nptrY = trainY.to_numpy()
-    nit  = 0
-    lloss= np.nan
-    while math.isnan(lloss) and nit < 5:
-        tf.random.set_seed(seed)
-        # create a very Stcked-LSTM model
-        stmodel = Sequential()
-        stmodel.add(LSTM(nhn, activation='relu', return_sequences=True, input_shape=(win,n_ftrs)))
-        stmodel.add(LSTM(nhn, activation='relu', return_sequences=True))
-        stmodel.add(LSTM(nhn, activation='relu'))
-        stmodel.add(Dense(n_ftrs)) # Output of a single value
-        stmodel.compile(loss='mean_squared_error', optimizer='adam')
-        hist = stmodel.fit(nptrX, nptrY, epochs=epoch, batch_size=bsize, verbose=0)
-        lloss= hist.history['loss'][-1]
-        nit  = nit + 1
-    # Predict
-    nptstX = testX.to_numpy().reshape(testX.shape[0],testX.shape[1],n_ftrs)
-    nptstY = testY.to_numpy()
-    res1   = eval(nptstX, nptstY, testX, stmodel, vdd, Y, ahead)
-    df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':stock,
-                 'DY':res1.get("Ys"),'ALG':'STACK-LSTM','seed':seed,'epochs':epoch,
-                 'nhn':nhn,'win':win ,'ndims':1, 'lossh':lloss, 'nit':nit,
-                 'model':stmodel}
-    return(df_result)
-
+        df_result = {'MSEP': res5b.get("msep"),
+                    'MSEY': res5b.get("msey"), 'Stock': stock,
+                    'DY':res5b.get("Ys"), 'ALG':'ATT_LSTM',
+                    'seed':seed,'epochs':epoch,'nhn':nhn,
+                    'win':win, 'ndims':1,'lossh':lloss, 'nit':nit,
+                    'model':amodel}
+        return(df_result)
 
 def main(args):
 
@@ -199,12 +257,15 @@ def main(args):
     fmdls = 'D:/Escritorio/TFG/Finance-AI/Models/{}'.format(nhn)+tmod+'/'
     if not os.path.exists(fmdls):
         os.makedirs(fmdls)
+    
+    trainevallstm = TrainEvalLSTM()
     #
     # for stock in stock_list:
         # res[stock] = {}
     stock = 'AAPL'
     res[stock] = {}
-    for ahead in lahead:
+    # for ahead in lahead:
+    for ahead in [1]:
         # print('Training ' + stock)
         trainX = tot_res['INP'][stock][ahead]['trX']
         trainY = tot_res['INP'][stock][ahead]['trY']
@@ -214,18 +275,18 @@ def main(args):
         vdd    = tot_res['INP'][stock][ahead]['vdd']
         tmpr = []
         
-        for irp in range(15):
+        for irp in range(10):
             seed      = random.randint(0,1000)
             lstm_start= time.time()
             mdl_name  = '{}-{}-{:03}-{:02}.hd5'.format(tmod,stock,ahead,irp)
             if tmod == "lstm":
-                sol   = lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
+                sol   = trainevallstm.lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
             if tmod == "stcklstm":
-                sol   = stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
+                sol   = trainevallstm.stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
             '''if tmod == "cnnlstm":
-                sol   = cnn_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
+                sol   = cnn_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)'''
             if tmod == "attlstm":
-                sol   = att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)'''
+                sol   = trainevallstm.att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
             lstm_end  = time.time()
             ttrain    = lstm_end - lstm_start
             sol['ttrain'] = ttrain

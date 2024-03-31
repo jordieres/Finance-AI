@@ -5,4 +5,4 @@ LSTM:
   epochs: 200
   batch_size: 32
   nhn: 50
-  model: "lstm"
+  model: "stcklstm" # lstm, attlstm, stcklstm
