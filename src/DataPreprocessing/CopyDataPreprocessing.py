@@ -82,7 +82,7 @@ class DataManipulation:
             print("Stock {} ahead: {} has nans.".format(stock, ahead))
             print(testX)
 
-    def prepare_serial_dict(self, _, x, y, Xn, Yn, pmod, vdd, trainX, trainY, testX, testY, cols=None, xdx=None):
+    def prepare_serial_dict(self, x, y, Xn, Yn, pmod, vdd, trainX, trainY, testX, testY, cols=None, xdx=None):
         if cols is None and xdx is None:
             serial_dict = {
                 "x": x, "y": y, "nx": Xn, "ny": Yn, "numt": pmod,
@@ -198,7 +198,7 @@ class DataProcessor(DataManipulation): # DataProcessor class inherits from DataM
 
                 trainX, trainY, testX, testY, pmod = self.prepare_data_for_modeling(self, cXn, cYn, tr_tst)
 
-                self._serial_dict[stock][ahead] = self.prepare_serial_dict(self, X, Y, cXn, cYn, pmod, vdd, trainX, trainY, testX, testY)
+                self._serial_dict[stock][ahead] = self.prepare_serial_dict(X, Y, cXn, cYn, pmod, vdd, trainX, trainY, testX, testY)
             
             self._tot_res["INP"] = self._serial_dict
 
@@ -242,7 +242,7 @@ class DataProcessor(DataManipulation): # DataProcessor class inherits from DataM
                 DataManipulation.check_nan_values(mtrainX, mtestX, stock, ahead)
 
                 xdx = idx[:-(ahead+1)]
-                self._mserial_dict[stock][ahead] = DataManipulation.prepare_serial_dict(mXl, mYl, mXn, mYn, pmod, mvdd, mtrainX, mtrainY, mtestX, mtestY, cols, xdx)
+                self._mserial_dict[stock][ahead] = DataManipulation.prepare_serial_dict(self, mXl, mYl, mXn, mYn, pmod, mvdd, mtrainX, mtrainY, mtestX, mtestY, cols, xdx)
 
             self._tot_res["INP_MSERIAL"] = self._mserial_dict
 
@@ -329,7 +329,6 @@ def load_raw_data(stock_list, path):
         print('{}: NaNs are about {}% in the original dataset. Size: {}'.format(stock, str(round(nans)), str(df.shape)))
         df_dict[stock] = df
     return df_dict
-        # tot_res['INP'] = df_dict
 
 def main(args):
     with open(args.params_file, 'r') as f:
