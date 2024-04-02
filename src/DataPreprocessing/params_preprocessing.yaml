@@ -1,3 +1,4 @@
+ticker: "AAPL" # "AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"
 data:
   data_path: "D:/Escritorio/TFG/Finance-AI/Datasets"
   output_path: "D:/Escritorio/TFG/Finance-AI/DataProcessed"

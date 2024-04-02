@@ -254,10 +254,10 @@ def main(args):
     tr_tst = config['serialization']['tr_tst']
     lahead = config['serialization']['lahead']
     n_ftrs = config['serialization']['n_features']
+    ticker = config['ticker']
 
-    stock_list = ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"]
+    # stock_list = ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"]
 
-    ticker = stock_list[0]
     fich = os.path.join(data_path, f"{ticker} US Equity_060124.csv")
     assert os.path.exists(fich), f"El archivo {fich} no existe."
     data = pd.read_csv(fich, sep=",", index_col=0, parse_dates=True)
@@ -268,7 +268,7 @@ def main(args):
     # Univariate data processing
 
     stock.process_univariate_data(win)
-    fdat1 = os.path.join(out_path, "{:02}/{ticker}-input-output.pkl".format(win))
+    fdat1 = os.path.join(out_path, "{:02}/{:03}-input-output.pkl".format(win, ticker))
     lpar  = [win, tr_tst]
 
     # Save univariate data
@@ -287,7 +287,7 @@ def main(args):
     mwin = config['serialization']['mD']['win']
 
     stock.process_multivariate_data(mwin, n_ftrs)
-    fdat2 = os.path.join(out_path, "{:02}/{ticker}-m-input-output.pkl".format(mwin))
+    fdat2 = os.path.join(out_path, "{:02}/{:03}-m-input-output.pkl".format(mwin, ticker))
     lpar = [mwin, n_ftrs, tr_tst]
 
     # Save multivariate data
