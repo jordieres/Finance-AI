@@ -2,12 +2,13 @@ data:
   data_path: "D:/Escritorio/TFG/Finance-AI/Datasets"
   output_path: "D:/Escritorio/TFG/Finance-AI/DataProcessed"
 serialization:
+  lahead: [1, 7, 14, 30, 90]
+  n_features: 1
+  tr_tst: 0.8
   1D:
     win: 22
     deep: 10
-    n_ftrs: 1
   mD:
     win: 22
     deep: 10
-    n_ftrs: 1
-  tr_tst: 0.8
+  
