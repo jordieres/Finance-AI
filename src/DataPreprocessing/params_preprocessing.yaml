@@ -1,15 +1,68 @@
-ticker: "AAPL" # "AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"
+tickers: ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"]
+
 data:
   data_path: "D:/Escritorio/TFG/Finance-AI/Datasets"
   output_path: "D:/Escritorio/TFG/Finance-AI/DataProcessed"
+  filename_structure: "{ticker} US Equity_{date}.csv"
+
 serialization:
-  lahead: [1, 7, 14, 30, 90]
-  n_features: 1
-  tr_tst: 0.8
-  1D:
-    win: 22
-    deep: 10
-  mD:
-    win: 22
-    deep: 10
-  
+  scenarios:
+    - name: scenario_1
+      win: 5
+      tr_tst: 0.8
+      lahead: [1, 7, 14, 30, 90]
+      n_features: 1
+      1D:
+        deep: 10
+      mD:
+        deep: 10
+
+    - name: scenario_2
+      win: 10
+      tr_tst: 0.7
+      lahead: [1, 7, 14, 30, 90]
+      n_features: 1
+      1D:
+        deep: 10
+      mD:
+        deep: 10
+
+    - name: scenario_3
+      win: 20
+      tr_tst: 0.85
+      lahead: [1, 7, 14, 30, 90]
+      n_features: 1
+      1D:
+        deep: 10
+      mD:
+        deep: 10  
+
+    - name: scenario_4
+      win: 50
+      tr_tst: 0.75
+      lahead: [1, 7, 14, 30, 90]
+      n_features: 1
+      1D:
+        deep: 10
+      mD:
+        deep: 10  
+
+    - name: scenario_5
+      win: 100
+      tr_tst: 0.9
+      lahead: [1, 7, 14, 30, 90]
+      n_features: 1
+      1D:
+        deep: 10
+      mD:
+        deep: 10  
+      
+    - name: scenario_6
+      win: 200
+      tr_tst: 0.8
+      lahead: [1, 7, 14, 30, 90]
+      n_features: 1
+      1D:
+        deep: 10
+      mD:
+        deep: 10 
