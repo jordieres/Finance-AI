@@ -79,8 +79,7 @@ class Stock:
 
             self.serial_dict[ahead] = {"x": X, "y": Y, "nx": cXn, "ny": cYn, "numt": pmod,
                                         "trainX": trainX, "trainY": trainY,
-                                        "testX": testX, "testY": testY, "vdd": vdd
-            }
+                                        "testX": testX, "testY": testY, "vdd": vdd}
 
     def process_multivariate_data(self, mwin, m_ftrs):
         '''
@@ -225,15 +224,12 @@ class Stock:
         self.df.dropna(inplace=True)
 
     def calculate_mean(self, data, axis=None):
-        # return np.mean(data, axis=axis)
         return np.mean(data, axis=axis)
 
     def calculate_min(self, data, axis=None):
-        # return np.min(data, axis=axis)
         return np.min(data, axis=axis)
 
-    def calculate_max(self, data, axis=None):
-        # return np.max(data, axis=axis)
+    def calculate_max(self, data, axis=None):      
         return np.max(data, axis=axis)
 
 
@@ -290,7 +286,7 @@ def main(args):
     tickers_list = config['tickers']
     filename_structure = config['data']['filename_structure']
 
-        # stock_list = ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"]
+    # stock_list = ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"]
     for ticker in tickers_list:
 
         filename = filename_structure.format(ticker=ticker, date=args.date)
@@ -328,7 +324,6 @@ def main(args):
             print(f"File {fdat1} created and data saved.")
 
         # Multivariate data processing
-
         stock.process_multivariate_data(win, n_ftrs)
         fdat2 = os.path.join(out_path, "{:02}/{:03}-m-input-output.pkl".format(win, ticker))
         lpar = [win, n_ftrs, tr_tst]
