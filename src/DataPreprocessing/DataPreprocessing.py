@@ -1,5 +1,5 @@
 '''@package DataPreprocessing
-This module contains the DataProcessor class that processes the data and creates the output files. It also contains the DataManipulation class that contains methods to manipulate the data.
+This module contains the Stock class that processes the data and creates the output files for each stock.
 '''
 
 
@@ -23,80 +23,184 @@ from numpy.lib.stride_tricks import sliding_window_view
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
 
+class Stock:
+    def __init__(self, ticker, file_name, lahead, tr_tst):
+        self.ticker = ticker
+        self._data = self._read_data(file_name)
+        self._lahead = lahead
+        self._tr_tst = tr_tst
+        self.df = pd.DataFrame(self._data)
+        self.serial_dict = {}
+        self.mserial_dict = {}
 
-class DataManipulation:
-    def __init__(self):
-        pass
-
-    ''' Class to manipulate the data'''
-    @staticmethod
-    def compute_sentiment_scores(df, sentiment_count_col, publication_count_col):
+    def _read_data(self, file_name):
         '''
-        Returns the sentiment scores
+        Returns the data from the data path
         
-        Arguments:
-        df - data
-        sentiment_count_col - sentiment count column
-        publication_count_col - publication count column
+        Parameters:
+        file_name - path to the data
         '''
+        return pd.read_csv(file_name, sep=",", index_col=0, parse_dates=True)
 
-        df[publication_count_col].replace(to_replace=0, value=1, inplace=True)
-        sentiment_score = df[sentiment_count_col] / df[publication_count_col]
-        return sentiment_score
-
-    @staticmethod
-    def compute_volatility(df): # compute volatility of the stock with the Garman and Klass model
+    def process_univariate_data(self, win):
         '''
-        Returns the volatility of the stock
+        Parameters:
+        - win (int): Window size.
+        - tr_tst (float): Train-test ratio.
+        '''
+        for ahead in self._lahead:
+            df = self.df
+
+            win_x = sliding_window_view(df['PX_OPEN'].to_numpy(), window_shape=win)[::1]
+            Y = df.iloc[ahead + win:]['PX_OPEN']
+            X = pd.DataFrame.from_records(win_x)
+
+            X = X.iloc[:-(ahead + 1), :]
+            X.set_index(df.index[(win - 1):-(ahead + 1)], drop=True, inplace=True)
+
+            xm = self.calculate_mean(X, axis=1)
+            cX = X.sub(xm, axis=0)
+
+            mnx = round(min(self.calculate_min(cX)))
+            mxx = round(min(self.calculate_max(cX)))
+            vdd = pd.DataFrame({'mean': xm, 'min': mnx, 'max': mxx})
+            vdd.set_index(X.index)
+
+            cXn = cX.apply(lambda x: (x - mnx) / (mxx - mnx), axis=1)
+            cYn = pd.Series([((i - j) - mnx) / (mxx - mnx) for i, j in zip(Y.tolist(), xm.tolist())], index=Y.index)
+            cXn = cXn.astype('float32')
+            cYn = cYn.astype('float32')
+
+            pmod = int(cXn.shape[0] * self._tr_tst)
+            trainX = cXn.iloc[:pmod, :]
+            trainY = cYn.iloc[:pmod]
+            testX = cXn.iloc[pmod:, :]
+            testY = cYn.iloc[pmod:]
+
+            self.serial_dict[ahead] = {"x": X, "y": Y, "nx": cXn, "ny": cYn, "numt": pmod,
+                                        "trainX": trainX, "trainY": trainY,
+                                        "testX": testX, "testY": testY, "vdd": vdd}
+
+    def process_multivariate_data(self, mwin, m_ftrs):
+        '''
+        Parameters:
+        mwin - multivariate window size
+        m_ftrs - multivariate number of features
+        tr_tst - train-test ratio
+        '''
+        self.check_infinite_values(self.df)
+
+        dfY = self.df["PX_OPEN"].copy()
+        dfX = self.df[["PX_OPEN", "PX_LAST", "RSI_14D", "PX_TREND", "PX_VTREND", "TWEET_POSTIVIE", "TWEET_NEGATIVE",
+                   "NEWS_POSITIVE", "NEWS_NEGATIVE", "VOLATILITY", "MOMENTUM"]].copy()
+        idx = dfX.index[(mwin - 1):]
+
+        mX, cols = self.prepare_multivariate_data(dfX, mwin, m_ftrs, idx)
+
+        for ahead in self._lahead:
+            mXl = mX[:-(ahead + 1), :, :]
+            mYl = dfY.iloc[ahead + mwin:]
+            avmX = self.calculate_mean(mXl, axis=1)
+
+            avmXc = mXl - avmX[:, None, :]
+            pavX = pd.DataFrame(avmX, columns=dfX.columns)
+            pavX.set_index(idx[ahead+1:], drop=True, inplace=True)
+            mxmX = np.round(self.calculate_max(avmXc, axis=(0, 1)), 2)
+            mnmX = np.round(self.calculate_min(avmXc, axis=(0, 1)), 2)
+            mvdd = {"mean": pavX, "min": mnmX, "max": mxmX}
+            mXn = (avmXc - mnmX[None, None, :]) / (mxmX[None, None, :] - mnmX[None, None, :] + 0.00001)
+            mYn = ((mYl.to_numpy() - avmX[:, 0]) - mnmX[0]) / (mxmX[0] - mnmX[0] + 0.00001)
+
+            mXn = mXn.astype("float32")
+            mYn = mYn.astype("float32")
+
+            mtrainX, mtrainY, mtestX, mtestY, pmod = self.prepare_data_for_modeling(mXn, mYn, multi=True)
+
+            self.check_nan_values(mtrainX, mtestX, ahead)
+
+            xdx = idx[:-(ahead + 1)]
+            self.mserial_dict[ahead] = {"x": mXl, "y": mYl, "nx": mXn, "ny": mYn, "numt": pmod,
+                                        "trainX": mtrainX, "trainY": mtrainY,
+                                        "testX": mtestX, "testY": mtestY, "vdd": mvdd, "cnms": cols,
+                                        "idtest": xdx[pmod:]}
+
+    def prepare_multivariate_data(self, dfX, win, n_ftrs, idx):
+        '''
+        Returns the multivariate data for modeling
         
-        Arguments:
-        df - data
+        Parameters:
+        dfX - multivariate features data
+        win - window size
+        n_ftrs - number of features
+        idx - index of the data
         '''
+        mX = []
+        cols = dfX.columns
+        for i in range(len(dfX.columns)):
+            lX = np.lib.stride_tricks.sliding_window_view(dfX.iloc[:, i].to_numpy(), window_shape=win)[::n_ftrs]
+            ss = pd.DataFrame.from_records(lX)
+            ss.set_index(idx, drop=True, inplace=True)
+            mX.append(ss.to_numpy())
+        mX = np.transpose(np.stack(mX, axis=1), (0, 2, 1))
+        return mX, cols
 
-        volatility = 1/2 * (np.log(df["PX_HIGH"]) - np.log(df["PX_LOW"]))**2 - (2 * np.log(2) - 1) * (np.log(df["PX_LAST"]) - np.log(df["PX_OPEN"]))**2
-        return volatility
-
-    @staticmethod
-    def check_infinite_values(df): # check for infinite values in the data
+    def compute_sentiment_scores(self):
         '''
-        Arguments:
-        df - data
+        Computes the sentiment scores for the data
         '''
+        self.df['TWEET_POSTIVIE'] = self.df['TWITTER_POS_SENTIMENT_COUNT'] / self.df['TWITTER_PUBLICATION_COUNT'].replace(0, 1)
+        self.df['TWEET_NEGATIVE'] = self.df['TWITTER_NEG_SENTIMENT_COUNT'] / self.df['TWITTER_PUBLICATION_COUNT'].replace(0, 1)
+        self.df['NEWS_POSITIVE'] = self.df['NEWS_POS_SENTIMENT_COUNT'] / self.df['NEWS_PUBLICATION_COUNT'].replace(0, 1)
+        self.df['NEWS_NEGATIVE'] = self.df['NEWS_NEG_SENTIMENT_COUNT'] / self.df['NEWS_PUBLICATION_COUNT'].replace(0, 1)
 
+    def compute_volatility(self):
+        '''
+        Computes the volatility for the data with the Garman and Klass model
+        '''
+        self.df['VOLATILITY'] = 1/2 * (np.log(self.df["PX_HIGH"]) - np.log(self.df["PX_LOW"]))**2 - (2 * np.log(2) - 1) * (np.log(self.df["PX_LAST"]) - np.log(self.df["PX_OPEN"]))**2
+
+    def compute_momentum(self):
+        '''
+        Computes the momentum for the data
+        '''
+        self.df['MOMENTUM'] = self.df['PX_LAST'] - self.df['PX_LAST'].shift(1)
+
+    def compute_trend(self):
+        '''
+        Computes the trend for the price and volume data
+        '''
+        self.df['PX_TREND'] = 2 * (self.df['PX_LAST'] - self.df['PX_OPEN']) / (self.df['PX_OPEN'] + self.df['PX_LAST'])
+        self.df['PX_VTREND'] = self.df['PX_TREND'] * self.df['VOLUME']
+
+    def check_nan_values(self, trainX, testX, ahead):
+        '''
+        Checks for NaN values in the data
+        '''
+        if np.isinf(trainX).any() or np.isnan(trainX).any():
+            print("Stock {} ahead: {} has nans.".format(self.ticker, ahead))
+            print(trainX)
+
+        if np.isnan(testX).any():
+            print("Stock {} ahead: {} has nans.".format(self.ticker, ahead))
+            print(testX)
+
+    def check_infinite_values(self, df):
+        '''
+        Checks for infinite values in the data
+        '''
         if np.isinf(df).values.sum() > 0:
             import pdb
             pdb.set_trace()
 
-    @staticmethod
-    def windowing(dfX, win, nvar, idx):
+    def prepare_data_for_modeling(self, Xn, Yn, multi):
         '''
-        Returns the windowed data
+        Returns the data for modeling
         
-        Arguments:
-        dfX - data
-        win - window size
-        nvar - number of variables
-        idx - index of the data
-        '''
-
-        lX = np.lib.stride_tricks.sliding_window_view(dfX.to_numpy(), window_shape=win)[::nvar]
-        mX = pd.DataFrame.from_records(lX)
-        mX.set_index(idx, drop=True, inplace=True)
-        return mX
-
-    @staticmethod
-    def prepare_data_for_modeling(Xn, Yn, tr_tst, multi=False):
-        '''
-        Returns the training and testing data for modeling
-        
-        Arguments:
-        Xn - normalized X data
-        Yn - normalized Y data
-        tr_tst - train-test ratio
-        multi - boolean value to indicate if the data is multivariate or not
-        '''
-
-        pmod = int(Xn.shape[0] * tr_tst)
+        Parameters:
+        Xn - normalized features data
+        Yn - normalized target data
+        multi - boolean value for multivariate data'''
+        pmod = int(Xn.shape[0] * self._tr_tst)
         if multi == False:  # Univariate
             trainX = Xn.iloc[:pmod,:]
             trainY = Yn.iloc[:pmod]
@@ -108,98 +212,45 @@ class DataManipulation:
             testX = Xn[pmod:, :, :]
             testY = Yn[pmod:]
         return trainX, trainY, testX, testY, pmod
-
-    @staticmethod
-    def check_nan_values(trainX, testX, stock, ahead): # check for nans in the data and print the number of nans
+    
+    def process_stocks(self):
         '''
-        Arguments:
-        trainX - training data
-        testX - testing data
-        stock - stock name
-        ahead - ahead value
+        Processes the stock data
         '''
+        self.compute_sentiment_scores()
+        self.compute_volatility()
+        self.compute_momentum()
+        self.compute_trend()
+        self.df.dropna(inplace=True)
 
-        if np.isinf(trainX).any() or np.isnan(trainX).any():
-            print("Stock {} ahead: {} has nans.".format(stock, ahead))
-            print(trainX)
-            import pdb
-            pdb.set_trace()
-        if np.isnan(testX).any():
-            print("Stock {} ahead: {} has nans.".format(stock, ahead))
-            print(testX)
+    def calculate_mean(self, data, axis=None):
+        return np.mean(data, axis=axis)
 
-    @staticmethod
-    def prepare_multivariate_data(dfX, mwin, m_ftrs, idx): # prepare multivariate data for modeling
-        '''
-        Returns the multivariate data and the columns of the data
+    def calculate_min(self, data, axis=None):
+        return np.min(data, axis=axis)
 
-        Arguments:
-        dfX - multivariate data
-        mwin - multivariate window size
-        m_ftrs - number of features
-        idx - index of the data
-        '''
+    def calculate_max(self, data, axis=None):      
+        return np.max(data, axis=axis)
 
-        mX = []
-        cols = dfX.columns
-        for i in range(len(dfX.columns)):
-            ss = DataManipulation.windowing(dfX.iloc[:, i], mwin, m_ftrs, idx)
-            mX.append(ss.to_numpy())
-        mX = np.transpose(np.stack(mX, axis=1), (0, 2, 1))
-        return mX, cols
 
-    @staticmethod
-    def prepare_serial_dict(x, y, Xn, Yn, pmod, vdd, trainX, trainY, testX, testY, cols=None, xdx=None):
-        '''
-        Returns a dictionary with the following keys: x, y, nx, ny, numt, vdd, trX, trY, tsX, tsY, cnms, idtest
-
-        Arguments:
-        x - original X data
-        y - original Y data
-        Xn - normalized X data
-        Yn - normalized Y data
-        pmod - number of training samples
-        vdd - dictionary with mean, min, and max values
-        trainX - training X data
-        trainY - training Y data
-        testX - testing X data
-        testY - testing Y data
-        cols - columns of the multivariate data
-        xdx - index of the testing data
-        '''
-
-        if cols is None and xdx is None:
-            serial_dict = {
-                "x": x, "y": y, "nx": Xn, "ny": Yn, "numt": pmod,
-                "vdd": vdd, "trX": trainX, "trY": trainY,
-                "tsX": testX, "tsY": testY
-            }
-            return serial_dict
-
-        else:
-            mserial_dict = {
-                "x": x, "y": y, "nx": Xn, "ny": Yn, "numt": pmod,
-                "vdd": vdd, "trX": trainX, "trY": trainY,
-                "tsX": testX, "tsY": testY, "cnms": cols,
-                "idtest": xdx[pmod:]
-            }
-            return mserial_dict
-        
-    def load_preprocessed_data(path, win, multi=False):
-        '''
-        Returns the preprocessed data as a list of objects
-        
-        Arguments:
-        path - path to the preprocessed data
-        win - window size
-        multi - boolean value to indicate if the data is multivariate or not
-        '''
-
+def save_data(fich, out_path, lahead, lpar, tot_res):
+    '''
+    Saves the data to a pickle file
+    '''
+    with open(fich, 'wb') as file:
+            pickle.dump(out_path, file)
+            pickle.dump(fich, file)
+            pickle.dump(lahead, file)
+            pickle.dump(lpar, file)
+            pickle.dump(tot_res, file)
+    file.close()
+    
+def load_preprocessed_data(path, win, ticker, multi=False):
         if multi == False:
-            fdat = os.path.join(path, "{:02}/input-output.pkl".format(win))
+            fdat = os.path.join(path, "{:02}/{:03}-input-output.pkl".format(win, ticker))
 
         else:
-            fdat = os.path.join(path, "{:02}/m-input-output.pkl".format(win))
+            fdat = os.path.join(path, "{:02}/{:03}-input-output.pkl".format(win, ticker))
 
         with (open(fdat, "rb")) as openfile:
             while True:
@@ -208,194 +259,30 @@ class DataManipulation:
                     fdat = pickle.load(openfile)
                     lahead = pickle.load(openfile)
                     lpar = pickle.load(openfile)
-                    stock_list = pickle.load(openfile)
                     tot_res = pickle.load(openfile)
-                    df_dict = tot_res['INP']
                 except EOFError:
                     break
-        return path, fdat, lahead, lpar, stock_list, tot_res, df_dict
-        
+        return path, fdat, lahead, lpar, tot_res
 
-class DataProcessor(DataManipulation): # DataProcessor class inherits from DataManipulation class
-    ''' Class to process the data and create the output files'''
-    def __init__(self, data_path, out_path):
-        '''
-        Arguments:
-        data_path - path to the data files
-        out_path - path to the output files
-        '''
-
-        self.path = data_path
-        self.out_path = out_path
-        self.stock_list= ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"]
-        self.lahead = [1, 7, 14, 30, 90] # list of ahead values
-        self.df_dict = {}
-        self.tot_res = {}
-        
-        self.serial_dict = {}
-        self.mserial_dict = {}
-
-    def load_raw_data(self):
-        '''Load data from the csv files and create a dictionary with the data for each stock.'''
-        for stock in self.stock_list:
-            fich = os.path.join(self.path, f"{stock} US Equity_060124.csv")
-            assert os.path.exists(fich), f"El archivo {fich} no existe."
-            df = pd.read_csv(fich, sep=",", index_col=0, parse_dates=True)
-            df['PX_TREND'] = 2 * (df['PX_LAST'] - df['PX_OPEN']) / (df['PX_OPEN'] + df['PX_LAST'])
-            df['PX_VTREND'] = df['PX_TREND'] * df['VOLUME']
-            nans = sum(df['PX_OPEN'].isna()) * 100 / df.shape[0]
-            df = df.dropna()
-            print('{}: NaNs are about {}% in the original dataset. Size: {}'.format(stock, str(round(nans)), str(df.shape)))
-            self.df_dict[stock] = df
-            self.tot_res['INP'] = self.df_dict
-
-    def save_data(self, fdat, lpar, stock_list, tot_res): # save data to a pickle file
-        '''
-        Arguments:
-        fdat - file name
-        lpar - list of parameters
-        stock_list - list of stocks
-        tot_res - total results
-        '''
-
-        with open(fdat, 'wb') as file:
-            pickle.dump(self.out_path, file)
-            pickle.dump(fdat, file)
-            pickle.dump(self.lahead, file)
-            pickle.dump(lpar, file)
-            pickle.dump(stock_list, file)
-            pickle.dump(tot_res, file)
-        file.close()
-
-    def process_univariate_data(self, win, tr_tst):
-        '''
-        Arguments:
-        win - window size
-        tr_tst - train-test ratio
-        '''
-
-        for stock in self.stock_list:
-            self.serial_dict[stock] = {}
-            for ahead in self.lahead:
-                df = self.df_dict[stock].copy()
-
-                win_x = np.lib.stride_tricks.sliding_window_view(df.PX_OPEN.to_numpy(), window_shape = win)[::1]
-
-                Y= df.iloc[ahead+win:]['PX_OPEN']
-                X = pd.DataFrame.from_records(win_x)
-
-                X = X.iloc[:-(ahead+1),:]
-                X.set_index(df.index[(win-1):-(ahead+1)],drop=True, inplace=True)
-
-                xm = X.mean(axis=1)
-                cX = X.sub(X.mean(axis=1), axis=0)
-
-                mnx= round(min(cX.min()))
-                mxx= round(max(cX.max()))
-                vdd= pd.DataFrame({'mean':xm,'min':mnx,'max':mxx})
-                vdd.set_index(X.index,drop=True,inplace=True)
-
-                cXn= cX.apply(lambda x: (x-mnx)/(mxx-mnx), axis=1)
-                cYn= pd.Series([((i-j)-mnx)/(mxx-mnx) for i,j in zip(Y.tolist(),xm.tolist())], index=Y.index)
-                cXn = cXn.astype('float32')
-                cYn = cYn.astype('float32')
-
-                trainX, trainY, testX, testY, pmod = self.prepare_data_for_modeling(cXn, cYn, tr_tst)
-
-                self.serial_dict[stock][ahead] = self.prepare_serial_dict(X, Y, cXn, cYn, pmod, vdd, trainX, trainY, testX, testY)
-            
-            self.tot_res["INP"] = self.serial_dict
-
-    def process_multivariate_data(self, mwin, m_ftrs, tr_tst):
-        '''
-        Arguments:
-        mwin - multivariate window size
-        m_ftrs - multivariate number of features
-        tr_tst - train-test ratio
-        '''
-        
-        for stock in self.stock_list:
-            self.mserial_dict[stock] = {}
-            df = self.df_dict[stock].copy()
-            mdf = df[["PX_OPEN", "PX_LAST", "RSI_14D", "PX_TREND", "PX_VTREND"]]
-            mdf.loc[:, "TWEETPR"] = self.compute_sentiment_scores(df, "TWITTER_POS_SENTIMENT_COUNT", "TWITTER_PUBLICATION_COUNT")
-            mdf.loc[:, "TWEETNR"] = self.compute_sentiment_scores(df, "TWITTER_NEG_SENTIMENT_COUNT", "TWITTER_PUBLICATION_COUNT")
-            mdf.loc[:, "NEWSPR"] = self.compute_sentiment_scores(df, "NEWS_POS_SENTIMENT_COUNT", "NEWS_PUBLICATION_COUNT")
-            mdf.loc[:, "NEWSNR"] = self.compute_sentiment_scores(df, "NEWS_NEG_SENTIMENT_COUNT", "NEWS_PUBLICATION_COUNT")
-            mdf.loc[:, "VOLATILITY"] = self.compute_volatility(df)
-            self.check_infinite_values(mdf)
-
-            dfY = mdf["PX_OPEN"].copy()
-            dfX = mdf[["PX_OPEN", "PX_LAST", "RSI_14D", "PX_TREND", "PX_VTREND", "TWEETPR", "TWEETNR", "NEWSPR", "NEWSNR", "VOLATILITY"]].copy()
-            idx = dfX.index[(mwin-1):]
-
-            mX, cols = self.prepare_multivariate_data(dfX, mwin, m_ftrs, idx)
-
-            for ahead in self.lahead:
-                mXl = mX[:-(ahead+1), :, :]
-                mYl = dfY.iloc[ahead+mwin:]
-                avmX = np.mean(mXl, axis=1)
-
-                mXn, mYn, mvdd = Normalizer.normalize_data(mXl, avmX, mYl, dfX, idx, ahead)
-
-                mXn = mXn.astype("float32")
-                mYn = mYn.astype("float32")
-
-                mtrainX, mtrainY, mtestX, mtestY, pmod = self.prepare_data_for_modeling(mXn, mYn, tr_tst, multi=True)
-
-                self.check_nan_values(mtrainX, mtestX, stock, ahead)
-
-                xdx = idx[:-(ahead+1)]
-                self.mserial_dict[stock][ahead] = self.prepare_serial_dict(mXl, mYl, mXn, mYn, pmod, mvdd, mtrainX, mtrainY, mtestX, mtestY, cols, xdx)
-
-            self.tot_res["INP_MSERIAL"] = self.mserial_dict
-
-
-class Normalizer: # Normalizer class inherits from DataManipulation class
-    ''' Class to normalize and denormalize the data'''
-    @staticmethod
-    def normalize_data(mXl, avmX, mYl, dfX, idx, ahead):
-        '''
-        Returns the normalized data and the mean, min, and max values of the data
-        
-        Arguments:
-        mXl - multivariate data
-        avmX - average of the multivariate data
-        mYl - target data
-        dfX - multivariate data
-        idx - index of the data
-        ahead - ahead value
-        '''
-
-        avmXc = mXl - avmX[:, None, :]
-        pavX = pd.DataFrame(np.mean(mXl, axis=1), columns=dfX.columns)
-        pavX.set_index(idx[ahead+1:], drop=True, inplace=True)
-        mxmX = np.round(np.max(avmXc, axis=(0, 1)), 2)
-        mnmX = np.round(np.min(avmXc, axis=(0, 1)), 2)
-        mvdd = {"mean": pavX, "min": mnmX, "max": mxmX}
-        mXn = (avmXc - mnmX[None, None, :]) / (mxmX[None, None, :] - mnmX[None, None, :] + 0.00001)
-        mYn = ((mYl.to_numpy() - avmX[:, 0]) - mnmX[0]) / (mxmX[0] - mnmX[0] + 0.00001)
-        return mXn, mYn, mvdd
-
-    @staticmethod
-    def denormalize_data(Yn, mvdd, idx):
-        """
-        Returns the denormalized target data.
-        
-        Arguments:
-        Yn - normalized target data
-        mvdd - dictionary containing mean, min, and max values used for normalization
-        """
-
-        mnmX = mvdd.loc[idx,"min"]
-        mxmX = mvdd.loc[idx,"max"]
-        mnx =  mvdd.loc[idx,"mean"]
-        
-        denormalized_mYl = pd.Series(Yn, index=idx) * (mxmX - mnmX) + mnmX + mnx
-        return denormalized_mYl
-
-
+def denormalize_data(Yn, mvdd, idx):
+    """
+    Returns the denormalized target data.
     
+    Arguments:
+    Yn - normalized target data
+    mvdd - dictionary containing mean, min, and max values used for normalization
+    idx - index of the data
+    """
+
+    mnmX = mvdd["min"]
+    mxmX = mvdd["max"]
+    mnx = mvdd["mean"]
+    
+    denormalized_mYl = pd.Series(Yn, index=idx) * (mxmX - mnmX) + mnmX + mnx
+    denormalized_mYl.dropna(inplace=True)
+    return denormalized_mYl
+
+
 # from https://stackoverflow.com/questions/6076690/verbose-level-with-argparse-and-multiple-v-options
 class VAction(argparse.Action):
     '''
@@ -418,89 +305,85 @@ class VAction(argparse.Action):
                 self.values = int(values)
             except ValueError:
                 self.values = values.count('v')+1
-        setattr(args, self.dest, self.values)
+        setattr(args, self.dest, self.values)      
 
 
 def main(args):
-
     with open(args.params_file, 'r') as f:
         config = yaml.safe_load(f)
-    f.close()
 
     if args.verbose > 0:
         print("Additional Info:")
         # Add additional information here
         print("Processing data with the configuration file:", args.params_file)
-    
-    warnings.filterwarnings('ignore')
-    mpl.rcParams['figure.figsize'] = (18, 10)
-    mpl.rcParams['axes.grid'] = False
-    sns.set_style("whitegrid")
 
     # Load configuration parameters from the YAML file
     data_path = config['data']['data_path']
     out_path = config['data']['output_path']
+    tickers_list = config['tickers']
+    filename_structure = config['data']['filename_structure']
 
-    # Multivariate data parameters
-    mwin = config['serialization']['mD']['win']
-    mdeep = config['serialization']['mD']['deep']
-    m_ftrs = config['serialization']['mD']['n_ftrs']
+    # stock_list = ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"]
+    for ticker in tickers_list:
 
-    tr_tst = config['serialization']['tr_tst']
+        filename = filename_structure.format(ticker=ticker, date=args.date)
+        file = os.path.join(data_path, filename)
+        assert os.path.exists(file), f"El archivo {file} no existe."
 
-    #Univariate data parameters
-    win = config['serialization']['1D']['win']
-    deep = config['serialization']['1D']['deep']
-    n_ftrs = config['serialization']['1D']['n_ftrs']
+        scen = args.scenario
+        for scenario in config['serialization']['scenarios']:
+            if scenario['name'] == f'scenario_{scen}':
+                win = scenario['win']
+                tr_tst = scenario['tr_tst']
+                lahead = scenario['lahead']
+                n_ftrs = scenario['n_features']
+                break
 
-    # Create the DataProcessor object
-    data_processor = DataProcessor(data_path, out_path)
-    data_processor.load_raw_data()
+        stock = Stock(ticker, file, lahead, tr_tst)
+        stock.process_stocks()
 
+        # Univariate data processing
 
-# Univariate data processing
-    
-    data_processor.process_univariate_data(win, tr_tst)
-            
-    fdat1 = os.path.join(out_path, "{:02}/input-output.pkl".format(win))
-    lpar  = [win, deep, n_ftrs, tr_tst]
+        stock.process_univariate_data(win)
+        fdat1 = os.path.join(out_path, "{:02}/{:03}-input-output.pkl".format(win, ticker))
+        lpar = [win, n_ftrs, tr_tst]
 
-    # check if the directory exists and create it if it doesn't
-    if os.path.exists(fdat1):
-        data_processor.save_data(fdat1, lpar, data_processor.stock_list, data_processor.tot_res)
-    else:
-        directory = os.path.dirname(fdat1)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-            print(f"Directory {directory} created.")
+        # Save univariate data
+        if os.path.exists(fdat1):
+            save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)
+        else:
+            directory = os.path.dirname(fdat1)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+                print(f"Directory {directory} created.")
 
-            data_processor.save_data(fdat1, lpar, data_processor.stock_list, data_processor.tot_res)                
+            save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)                
             print(f"File {fdat1} created and data saved.")
-                                                    
 
-# Multivariate data processing
-        
-    data_processor.process_multivariate_data(mwin, m_ftrs, tr_tst)
+        # Multivariate data processing
+        stock.process_multivariate_data(win, n_ftrs)
+        fdat2 = os.path.join(out_path, "{:02}/{:03}-m-input-output.pkl".format(win, ticker))
+        lpar = [win, n_ftrs, tr_tst]
 
-    fdat2 = os.path.join(out_path, "{:02}/m-input-output.pkl".format(mwin))
-    lpar = [mwin, mdeep, m_ftrs, tr_tst]
+        # Save multivariate data
+        if os.path.dirname(fdat2):
+            save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
+        else:
+            directory = os.path.dirname(fdat2)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+                print(f"Directory {directory} created.")
 
-    # check if the directory exists and create it if it doesn't
-    if os.path.dirname(fdat2): 
-        data_processor.save_data(fdat2, lpar, data_processor.stock_list, data_processor.tot_res)
-    else:
-        directory = os.path.dirname(fdat2)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-            print(f"Directory {directory} created.")
-
-            data_processor.save_data(fdat2, lpar, data_processor.stock_list, data_processor.tot_res)
+            save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
             print(f"File {fdat2} created and data saved.")
-        
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process data and create output.")
     parser.add_argument("-v", "--verbose", nargs='?', action=VAction,\
             dest='verbose', help="Option for detailed information")
     parser.add_argument("params_file", help="Path to the configuration YAML file.")
+    parser.add_argument("--date", help="Date for filename structure")
+    parser.add_argument("--scenario", help="Number of scenario to process", type=int)
     args = parser.parse_args()
     main(args)

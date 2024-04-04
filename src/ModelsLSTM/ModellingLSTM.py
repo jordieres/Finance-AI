@@ -36,16 +36,11 @@ import yaml
 
 sys.path.append('D:\Escritorio\TFG\Finance-AI\src\DataPreprocessing')
 
-from DataPreprocessing import DataManipulation, DataProcessor, Normalizer
+from DataPreprocessing import save_data, load_preprocessed_data, denormalize_data
 
 # tf.logging.set_verbosity(tf.logging.ERROR)
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
-
-def load_preprocessed_data(processed_path, win):
-    processed_path, fdat, lahead, lpar, stock_list, tot_res, df_dict = DataManipulation.load_preprocessed_data(processed_path, win)
-
-    return processed_path, fdat, lahead, lpar, stock_list, tot_res, df_dict
 
 def eval(nptstX, nptstY, testX, model, vdd, Y, ahead):
         '''
@@ -71,7 +66,7 @@ def eval(nptstX, nptstY, testX, model, vdd, Y, ahead):
         eff.set_index(testX.index,drop=True,inplace=True)
 
         jdx = testX.index
-        Yf = Normalizer.denormalize_data(Yprd, vdd, jdx) # denormalize the forecast
+        Yf = denormalize_data(Yprd, vdd, jdx) # denormalize the forecast
         Yr  = Y.loc[jdx] # y real
         Yy  = Y.shift(ahead).loc[jdx] # Y yesterday
         DY  = pd.concat([Yr,Yf,Yy],axis=1)
@@ -254,28 +249,26 @@ def main(args):
     res = {}
     tmod = config['LSTM']['model']    # lstm stcklstm, cnnlstm or attlstm
     res['MODEL'] = tmod
+    stock = args.stock
+    multi = config['multi']
 
-    _, fdat, lahead, lpar, stock_list, tot_res, df_dict = load_preprocessed_data(processed_path, win_size)
-    _, deep, n_ftrs,tr_tst = lpar
+    _, _, lahead, lpar, tot_res = load_preprocessed_data(processed_path, win_size, stock)
+    win, n_ftrs, tr_tst = lpar
 
     fmdls = 'D:/Escritorio/TFG/Finance-AI/Models/{}'.format(nhn)+tmod+'/'
     if not os.path.exists(fmdls):
         os.makedirs(fmdls)
     
     trainlstm = TrainLSTM
-    #
-    # for stock in stock_list:
-        # res[stock] = {}
-    stock = 'AAPL'
     res[stock] = {}
     for ahead in lahead:
         # print('Training ' + stock)
-        trainX = tot_res['INP'][stock][ahead]['trX']
-        trainY = tot_res['INP'][stock][ahead]['trY']
-        testX  = tot_res['INP'][stock][ahead]['tsX']    
-        testY  = tot_res['INP'][stock][ahead]['tsY']
-        Y      = tot_res['INP'][stock][ahead]['y']
-        vdd    = tot_res['INP'][stock][ahead]['vdd']
+        trainX = tot_res[ahead]['trainX']
+        trainY = tot_res[ahead]['trainY']
+        testX  = tot_res[ahead]['testX']    
+        testY  = tot_res[ahead]['testY']
+        Y      = tot_res[ahead]['y']
+        vdd    = tot_res[ahead]['vdd']
         tmpr = []
         
         for irp in range(10):
@@ -283,41 +276,39 @@ def main(args):
             lstm_start= time.time()
             mdl_name  = '{}-{}-{:03}-{:02}.hd5'.format(tmod,stock,ahead,irp)
             if tmod == "lstm":
-                sol   = TrainLSTM.lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
+                sol   = TrainLSTM.lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
             if tmod == "stcklstm":
-                sol   = trainlstm.stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
+                sol   = trainlstm.stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
             if tmod == "attlstm":
-                sol   = trainlstm.att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win_size,n_ftrs,ahead,stock,seed)
+                sol   = trainlstm.att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
             lstm_end  = time.time()
             ttrain    = lstm_end - lstm_start
             sol['ttrain'] = ttrain
             sol['epochs']  = epochs
             sol['bsize']  = bsize
             sol['nhn']    = nhn
+            sol['win']    = win
+            sol['tr_tst'] = tr_tst
             sol['model'].save(fmdls+mdl_name)
             sol['model']  = fmdls+mdl_name
             print('   Effort spent: ' + str(ttrain) +' s.')
             sys.stdout.flush()
             tmpr.append(sol)
-        res[stock][ahead] = pd.DataFrame(tmpr)
+        res[ahead] = pd.DataFrame(tmpr)
     
     tot_res['OUT_MODEL'] = res
 
     data_path = config['data']['data_path']
+    processed_path = config['data']['output_path']
     
-    fdat2 = 'D:/Escritorio/TFG/Finance-AI/DataProcessed/model-'+tmod+'-output.pkl'
+    fdat2 = 'D:/Escritorio/TFG/Finance-AI/DataProcessed/'+stock+'-model-'+tmod+'-output.pkl'
 
-    file = open(fdat2, 'wb')
-    pickle.dump(data_path, file)
-    pickle.dump(fdat2,file)
-    pickle.dump(lahead,file)
-    pickle.dump(lpar, file)
-    pickle.dump(stock_list,file)
-    pickle.dump(tot_res, file)
-    file.close()
+    save_data(fdat2, processed_path, lahead, lpar, tot_res)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process data and create output.")
     parser.add_argument("params_file", help="Path to the configuration YAML file.")
+    parser.add_argument("--stock", help="Ticker of the stock to be used.")
     args = parser.parse_args()
     main(args)

@@ -1,9 +1,10 @@
 data:
   data_path: "D:/Escritorio/TFG/Finance-AI/Datasets"
   output_path: "D:/Escritorio/TFG/Finance-AI/DataProcessed"
+multi: False
 LSTM:
-  window: 22
+  window: 20
   epochs: 200
-  batch_size: 32
+  batch_size: 750
   nhn: 50
   model: "lstm" # lstm, attlstm, stcklstm
