@@ -92,7 +92,7 @@ class Stock:
 
         dfY = self.df["PX_OPEN"].copy()
         dfX = self.df[["PX_OPEN", "PX_LAST", "RSI_14D", "PX_TREND", "PX_VTREND", "TWEET_POSTIVIE", "TWEET_NEGATIVE",
-                   "NEWS_POSITIVE", "NEWS_NEGATIVE", "VOLATILITY", "MOMENTUM"]].copy()
+                   "NEWS_POSITIVE", "NEWS_NEGATIVE", "VOLATILITY"]].copy()
         idx = dfX.index[(mwin - 1):]
 
         mX, cols = self.prepare_multivariate_data(dfX, mwin, m_ftrs, idx)
@@ -159,12 +159,6 @@ class Stock:
         '''
         self.df['VOLATILITY'] = 1/2 * (np.log(self.df["PX_HIGH"]) - np.log(self.df["PX_LOW"]))**2 - (2 * np.log(2) - 1) * (np.log(self.df["PX_LAST"]) - np.log(self.df["PX_OPEN"]))**2
 
-    def compute_momentum(self):
-        '''
-        Computes the momentum for the data
-        '''
-        self.df['MOMENTUM'] = self.df['PX_LAST'] - self.df['PX_LAST'].shift(1)
-
     def compute_trend(self):
         '''
         Computes the trend for the price and volume data
@@ -219,7 +213,6 @@ class Stock:
         '''
         self.compute_sentiment_scores()
         self.compute_volatility()
-        self.compute_momentum()
         self.compute_trend()
         self.df.dropna(inplace=True)
 
@@ -245,24 +238,24 @@ def save_data(fich, out_path, lahead, lpar, tot_res):
             pickle.dump(tot_res, file)
     file.close()
     
-def load_preprocessed_data(path, win, ticker, multi=False):
-        if multi == False:
-            fdat = os.path.join(path, "{:02}/{:03}-input-output.pkl".format(win, ticker))
+def load_preprocessed_data(path, win, tr_tst, ticker, multi):
+    if multi == True:
+        fdat = path+ f"/{win}/{tr_tst}/{ticker}-m-input-output.pkl"
+    else:
+        fdat = path+ f"/{win}/{tr_tst}/{ticker}-input-output.pkl"
 
-        else:
-            fdat = os.path.join(path, "{:02}/{:03}-input-output.pkl".format(win, ticker))
+    if os.path.exists(fdat):
+        with open(fdat, "rb") as openfile:
+            path = pickle.load(openfile)
+            fdat = pickle.load(openfile)
+            lahead = pickle.load(openfile)
+            lpar = pickle.load(openfile)
+            tot_res = pickle.load(openfile)
 
-        with (open(fdat, "rb")) as openfile:
-            while True:
-                try:
-                    path = pickle.load(openfile)
-                    fdat = pickle.load(openfile)
-                    lahead = pickle.load(openfile)
-                    lpar = pickle.load(openfile)
-                    tot_res = pickle.load(openfile)
-                except EOFError:
-                    break
         return path, fdat, lahead, lpar, tot_res
+    else:
+        raise FileNotFoundError("El archivo {} no existe.".format(fdat))
+
 
 def denormalize_data(Yn, mvdd, idx):
     """
@@ -320,10 +313,9 @@ def main(args):
     # Load configuration parameters from the YAML file
     data_path = config['data']['data_path']
     out_path = config['data']['output_path']
-    tickers_list = config['tickers']
     filename_structure = config['data']['filename_structure']
+    tickers_list = config['tickers']
 
-    # stock_list = ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "COST", "CSCO", "GOOG", "GOOGL", "META", "MSFT", "NVDA", "PEP", "TMUS", "TSLA"]
     for ticker in tickers_list:
 
         filename = filename_structure.format(ticker=ticker, date=args.date)
@@ -331,51 +323,56 @@ def main(args):
         assert os.path.exists(file), f"El archivo {file} no existe."
 
         scen = args.scenario
-        for scenario in config['serialization']['scenarios']:
+        for scenario in config['scenarios']:
             if scenario['name'] == f'scenario_{scen}':
                 win = scenario['win']
-                tr_tst = scenario['tr_tst']
                 lahead = scenario['lahead']
                 n_ftrs = scenario['n_features']
+                deep = scenario['serialization']['1D']['deep']
+                mdeep = scenario['serialization']['mD']['mdeep']
+                for tr_tst in scenario['tr_tst']:
+                    stock = Stock(ticker, file, lahead, tr_tst)
+                    stock.process_stocks()
+
+                    lpar = [win, n_ftrs, tr_tst]
+
+                    # Univariate data processing
+
+                    stock.process_univariate_data(win)
+                    fdat1 = out_path+ f"/{win}/{stock._tr_tst}/{ticker}-input-output.pkl"
+                    
+
+                    # Multivariate data processing
+                    stock.process_multivariate_data(win, n_ftrs)
+                    fdat2 = out_path+ f"/{win}/{stock._tr_tst}/{ticker}-m-input-output.pkl"
+
+                    # Save univariate data
+                    if os.path.exists(fdat1):
+                        save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)
+                    else:
+                        directory1 = os.path.dirname(fdat1)
+                        if not os.path.exists(directory1):
+                            os.makedirs(directory1)
+                            print(f"Directory {directory1} created.")
+
+                        save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)                
+                        print(f"File {fdat1} created and data saved.")
+
+
+                    # Save multivariate data
+                    if os.path.exists(fdat2):
+                        save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
+                    else:
+                        directory1 = os.path.dirname(fdat2)
+                        if not os.path.exists(directory1):
+                            os.makedirs(directory1)
+                            print(f"Directory {directory1} created.")
+
+                        save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)                
+                        print(f"File {fdat2} created and data saved.")
+
                 break
 
-        stock = Stock(ticker, file, lahead, tr_tst)
-        stock.process_stocks()
-
-        # Univariate data processing
-
-        stock.process_univariate_data(win)
-        fdat1 = os.path.join(out_path, "{:02}/{:03}-input-output.pkl".format(win, ticker))
-        lpar = [win, n_ftrs, tr_tst]
-
-        # Save univariate data
-        if os.path.exists(fdat1):
-            save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)
-        else:
-            directory = os.path.dirname(fdat1)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-                print(f"Directory {directory} created.")
-
-            save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)                
-            print(f"File {fdat1} created and data saved.")
-
-        # Multivariate data processing
-        stock.process_multivariate_data(win, n_ftrs)
-        fdat2 = os.path.join(out_path, "{:02}/{:03}-m-input-output.pkl".format(win, ticker))
-        lpar = [win, n_ftrs, tr_tst]
-
-        # Save multivariate data
-        if os.path.dirname(fdat2):
-            save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
-        else:
-            directory = os.path.dirname(fdat2)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-                print(f"Directory {directory} created.")
-
-            save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
-            print(f"File {fdat2} created and data saved.")
 
 
 if __name__ == "__main__":
@@ -385,5 +382,6 @@ if __name__ == "__main__":
     parser.add_argument("params_file", help="Path to the configuration YAML file.")
     parser.add_argument("--date", help="Date for filename structure")
     parser.add_argument("--scenario", help="Number of scenario to process", type=int)
+
     args = parser.parse_args()
     main(args)
