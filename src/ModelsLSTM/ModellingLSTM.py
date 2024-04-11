@@ -38,7 +38,6 @@ sys.path.append('D:\Escritorio\TFG\Finance-AI\src\DataPreprocessing')
 
 from DataPreprocessing import save_data, load_preprocessed_data, denormalize_data
 
-# tf.logging.set_verbosity(tf.logging.ERROR)
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
 
@@ -247,63 +246,75 @@ def main(args):
     bsize = config['LSTM']['batch_size']
     nhn = config['LSTM']['nhn']
     res = {}
-    tmod = config['LSTM']['model']    # lstm stcklstm, cnnlstm or attlstm
+    tmod = config['LSTM']['model']    # lstm stcklstm or attlstm
     res['MODEL'] = tmod
     stock = args.stock
     multi = config['multi']
+    list_tr_tst = config['tr_tst']
 
-    _, _, lahead, lpar, tot_res = load_preprocessed_data(processed_path, win_size, stock)
-    win, n_ftrs, tr_tst = lpar
+    for tr_tst in list_tr_tst:
+        _, _, lahead, lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, multi)
+        win, n_ftrs, tr_tst, deep = lpar
 
-    fmdls = 'D:/Escritorio/TFG/Finance-AI/Models/{}'.format(nhn)+tmod+'/'
-    if not os.path.exists(fmdls):
-        os.makedirs(fmdls)
-    
-    trainlstm = TrainLSTM
-    res[stock] = {}
-    for ahead in lahead:
-        # print('Training ' + stock)
-        trainX = tot_res[ahead]['trainX']
-        trainY = tot_res[ahead]['trainY']
-        testX  = tot_res[ahead]['testX']    
-        testY  = tot_res[ahead]['testY']
-        Y      = tot_res[ahead]['y']
-        vdd    = tot_res[ahead]['vdd']
-        tmpr = []
+        fmdls = f'D:/Escritorio/TFG/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
+        if not os.path.exists(fmdls):
+            os.makedirs(fmdls)
         
-        for irp in range(10):
-            seed      = random.randint(0,1000)
-            lstm_start= time.time()
-            mdl_name  = '{}-{}-{:03}-{:02}.hd5'.format(tmod,stock,ahead,irp)
-            if tmod == "lstm":
-                sol   = TrainLSTM.lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
-            if tmod == "stcklstm":
-                sol   = trainlstm.stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
-            if tmod == "attlstm":
-                sol   = trainlstm.att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
-            lstm_end  = time.time()
-            ttrain    = lstm_end - lstm_start
-            sol['ttrain'] = ttrain
-            sol['epochs']  = epochs
-            sol['bsize']  = bsize
-            sol['nhn']    = nhn
-            sol['win']    = win
-            sol['tr_tst'] = tr_tst
-            sol['model'].save(fmdls+mdl_name)
-            sol['model']  = fmdls+mdl_name
-            print('   Effort spent: ' + str(ttrain) +' s.')
-            sys.stdout.flush()
-            tmpr.append(sol)
-        res[ahead] = pd.DataFrame(tmpr)
-    
-    tot_res['OUT_MODEL'] = res
+        trainlstm = TrainLSTM
+        res[stock] = {}
+        for ahead in lahead:
+            print('Training ' + stock + ' ahead ' + str(ahead) + ' days.')
+            trainX = tot_res[ahead]['trainX']
+            trainY = tot_res[ahead]['trainY']
+            testX  = tot_res[ahead]['testX']    
+            testY  = tot_res[ahead]['testY']
+            Y      = tot_res[ahead]['y']
+            vdd    = tot_res[ahead]['vdd']
+            tmpr = []
+            
+            for irp in range(10):
+                seed      = random.randint(0,1000)
+                lstm_start= time.time()
+                mdl_name  = '{}-{}-{}-{:02}.hd5'.format(tmod,stock,ahead,irp)
+                if tmod == "lstm":
+                    sol   = TrainLSTM.lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
+                if tmod == "stcklstm":
+                    sol   = trainlstm.stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
+                if tmod == "attlstm":
+                    sol   = trainlstm.att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
+                lstm_end  = time.time()
+                ttrain    = lstm_end - lstm_start
+                sol['ttrain'] = ttrain
+                sol['epochs']  = epochs
+                sol['bsize']  = bsize
+                sol['nhn']    = nhn
+                sol['win']    = win
+                sol['tr_tst'] = tr_tst
+                sol['model'].save(fmdls+mdl_name)
+                sol['model']  = fmdls+mdl_name
+                print('   Effort spent: ' + str(ttrain) +' s.')
+                sys.stdout.flush()
+                tmpr.append(sol)
+            res[ahead] = pd.DataFrame(tmpr)
+        
+        tot_res['OUT_MODEL'] = res
 
-    data_path = config['data']['data_path']
-    processed_path = config['data']['output_path']
-    
-    fdat2 = 'D:/Escritorio/TFG/Finance-AI/DataProcessed/'+stock+'-model-'+tmod+'-output.pkl'
+        data_path = config['data']['data_path']
+        processed_path = config['data']['output_path']
+        
+        fdat = f'D:/Escritorio/TFG/Finance-AI/DataProcessed/output/{win}/{tr_tst}/{stock}-{tmod}-output.pkl'
+        if os.path.exists(fdat):
+            save_data(fdat, processed_path, lahead, lpar, tot_res)
+        else:
+            directory1 = os.path.dirname(fdat)
+            if not os.path.exists(directory1):
+                os.makedirs(directory1)
+                print(f"Directory {directory1} created.")
 
-    save_data(fdat2, processed_path, lahead, lpar, tot_res)
+            save_data(fdat, processed_path, lahead, lpar, tot_res)                
+            print(f"File {fdat} created and data saved.")
+
+    # save_data(fdat, processed_path, lahead, lpar, tot_res)
 
 
 if __name__ == "__main__":

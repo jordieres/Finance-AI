@@ -183,9 +183,8 @@ class Stock:
         Checks for infinite values in the data
         '''
         if np.isinf(df).values.sum() > 0:
-            import pdb
-            pdb.set_trace()
-
+            print("Error: Infinite values were found in the DataFrame.")
+ 
     def prepare_data_for_modeling(self, Xn, Yn, multi):
         '''
         Returns the data for modeling
@@ -324,54 +323,51 @@ def main(args):
 
         scen = args.scenario
         for scenario in config['scenarios']:
-            if scenario['name'] == f'scenario_{scen}':
-                win = scenario['win']
-                lahead = scenario['lahead']
-                n_ftrs = scenario['n_features']
-                deep = scenario['serialization']['1D']['deep']
-                mdeep = scenario['serialization']['mD']['mdeep']
-                for tr_tst in scenario['tr_tst']:
-                    stock = Stock(ticker, file, lahead, tr_tst)
-                    stock.process_stocks()
+            if scenario['name'] != f'scenario_{scen}':
+                continue
 
-                    lpar = [win, n_ftrs, tr_tst]
+            win = scenario['win']
+            lahead = scenario['lahead']
+            n_ftrs = scenario['n_features']
+            deep = scenario['serialization']['1D']['deep']
+            mdeep = scenario['serialization']['mD']['mdeep']
+            
+            for tr_tst in scenario['tr_tst']:
+                stock = Stock(ticker, file, lahead, tr_tst)
+                stock.process_stocks()
 
-                    # Univariate data processing
+                lpar = [win, n_ftrs, tr_tst, deep]
 
-                    stock.process_univariate_data(win)
-                    fdat1 = out_path+ f"/{win}/{stock._tr_tst}/{ticker}-input-output.pkl"
-                    
+                # Univariate data processing
+                stock.process_univariate_data(win)
+                fdat1 = out_path + f"/{win}/{stock._tr_tst}/{ticker}-input-output.pkl"
 
-                    # Multivariate data processing
-                    stock.process_multivariate_data(win, n_ftrs)
-                    fdat2 = out_path+ f"/{win}/{stock._tr_tst}/{ticker}-m-input-output.pkl"
+                # Multivariate data processing
+                stock.process_multivariate_data(win, n_ftrs)
+                fdat2 = out_path + f"/{win}/{stock._tr_tst}/{ticker}-m-input-output.pkl"
 
-                    # Save univariate data
-                    if os.path.exists(fdat1):
-                        save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)
-                    else:
-                        directory1 = os.path.dirname(fdat1)
-                        if not os.path.exists(directory1):
-                            os.makedirs(directory1)
-                            print(f"Directory {directory1} created.")
+                # Save univariate data
+                if not os.path.exists(fdat1):
+                    directory1 = os.path.dirname(fdat1)
+                    if not os.path.exists(directory1):
+                        os.makedirs(directory1)
+                        print(f"Directory {directory1} created.")
+                        
+                    save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)
+                    print(f"File {fdat1} created and data saved.")
 
-                        save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)                
-                        print(f"File {fdat1} created and data saved.")
+                # Save multivariate data
+                if not os.path.exists(fdat2):
+                    directory1 = os.path.dirname(fdat2)
+                    if not os.path.exists(directory1):
+                        os.makedirs(directory1)
+                        print(f"Directory {directory1} created.")
 
+                    save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
+                    print(f"File {fdat2} created and data saved.")
 
-                    # Save multivariate data
-                    if os.path.exists(fdat2):
-                        save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
-                    else:
-                        directory1 = os.path.dirname(fdat2)
-                        if not os.path.exists(directory1):
-                            os.makedirs(directory1)
-                            print(f"Directory {directory1} created.")
+            break
 
-                        save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)                
-                        print(f"File {fdat2} created and data saved.")
-
-                break
 
 
 
