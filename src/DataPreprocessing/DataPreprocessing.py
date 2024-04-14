@@ -366,10 +366,6 @@ def main(args):
                     save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
                     print(f"File {fdat2} created and data saved.")
 
-            break
-
-
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process data and create output.")
