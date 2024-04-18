@@ -19,7 +19,7 @@ import yaml
 
 sys.path.append('D:\Escritorio\TFG\Finance-AI\src')
 
-from utils import save_data, load_preprocessed_data, denormalize_data
+from utils_tfg import save_data, load_preprocessed_data, denormalize_data
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')

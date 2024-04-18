@@ -14,7 +14,7 @@ from sklearn.metrics import mean_squared_error
 
 sys.path.append('D:\Escritorio\TFG\Finance-AI\src')
 
-from utils import save_data, load_preprocessed_data, denormalize_data
+from utils_tfg import save_data, load_preprocessed_data, denormalize_data
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
@@ -56,28 +56,6 @@ class Transformer(nn.Module):
         return output
 
 def transformer_fun(transformer_parameters, trainX, trainY, testX, testY, Y, vdd, epochs, bsize, nhn, win, n_ftrs, ahead, stock, seed):
-    '''
-    Transformer model 
-
-    Returns the evaluation of the model with the test data
-
-    Arguments:
-    trainX - normalized training data
-    trainY - normalized training labels
-    testX - normalized test data
-    testY - normalized test labels
-    Y - output PX_OPEN stock
-    vdd - validation dataframe storing the data for normalization and denormalization
-    epochs - number of epochs for training
-    bsize - batch size for feeding the model
-    nhn - number of hidden neurons
-    win - window size (days considered to learn from == trainX.shape[1])
-    n_ftrs - number of expected outputs (1 in our case)
-    stock - stock being evaluated
-    ahead - shift value for the stock
-    seed - seed to stabilize the repetitions
-    '''
-
     # Convert to PyTorch tensors
     nptrX = torch.tensor(trainX.to_numpy().reshape(n_ftrs, trainX.shape[0], trainX.shape[1]), dtype=torch.float32)
     nptrY = torch.tensor(trainY.to_numpy(), dtype=torch.float32)
@@ -131,19 +109,10 @@ def transformer_fun(transformer_parameters, trainX, trainY, testX, testY, Y, vdd
     msey = mean_squared_error(DY.Y_yesterday , DY.Y_real) # error y yesterday - y real
     # Prepare the result dictionary
     df_result = {
-        'MSEP': msep,
-        'MSEY': msey,
-        'Stock': stock,
-        'DY': DY,
-        'ALG': 'Transformer',
-        'seed': seed,
-        'epochs': epoch,
-        'nhn': nhn,
-        'win': win,
-        'ndims': 1,
-        'lossh': lloss,
-        'nit': nit,
-        'model': model  # Include the trained model in the result
+        'MSEP': msep,'MSEY': msey,'Stock': stock,
+        'DY': DY,'ALG': 'Transformer','seed': seed,'epochs': epoch,
+        'nhn': nhn,'win': win,'ndims': 1,'lossh': lloss,
+        'nit': nit,'model': model
     }
 
     return df_result
