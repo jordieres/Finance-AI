@@ -13,7 +13,7 @@ import yaml
 from numpy.lib.stride_tricks import sliding_window_view
 
 sys.path.append('D:\Escritorio\TFG\Finance-AI\src')
-from utils import save_data
+from utils_tfg import save_data
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
@@ -152,7 +152,8 @@ class Stock:
         '''
         Computes the volatility for the data with the Garman and Klass model
         '''
-        self.df['VOLATILITY'] = 1/2 * (np.log(self.df["PX_HIGH"]) - np.log(self.df["PX_LOW"]))**2 - (2 * np.log(2) - 1) * (np.log(self.df["PX_LAST"]) - np.log(self.df["PX_OPEN"]))**2
+        # self.df['VOLATILITY'] = 1/2 * (np.log(self.df["PX_HIGH"]) - np.log(self.df["PX_LOW"]))**2 - (2 * np.log(2) - 1) * (np.log(self.df["PX_LAST"]) - np.log(self.df["PX_OPEN"]))**2
+        self.df['VOLATILITY'] = self.df['PX_LAST'].pct_change().rolling(window=252).std()
 
     def compute_trend(self):
         '''
@@ -298,8 +299,8 @@ def main(args):
                         os.makedirs(directory1)
                         print(f"Directory {directory1} created.")
                         
-                    save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)
-                    print(f"File {fdat1} created and data saved.")
+                save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)
+                print(f"File {fdat1} data saved.")
 
                 # Save multivariate data
                 if not os.path.exists(fdat2):
@@ -308,8 +309,8 @@ def main(args):
                         os.makedirs(directory1)
                         print(f"Directory {directory1} created.")
 
-                    save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
-                    print(f"File {fdat2} created and data saved.")
+                save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
+                print(f"File {fdat2} data saved.")
 
 
 if __name__ == "__main__":
