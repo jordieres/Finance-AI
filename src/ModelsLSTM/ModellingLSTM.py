@@ -1,42 +1,25 @@
-import os, time, gc, sys, io
-import datetime, pickle, session_info
+import os, time, sys
 import warnings, random, math
 #
 import pandas as pd
-import seaborn as sns
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-import mpl_toolkits.axisartist as AA
 #
-from scipy import stats
-from pandas import Series
-from argparse import ArgumentParser
-from tensorflow import keras
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import GRU
-from keras.layers import Bidirectional
-from keras.layers import Flatten
-from keras.layers import Activation
-from keras.layers import RepeatVector
-from keras.layers import TimeDistributed
 from keras.layers import Embedding
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.preprocessing import MinMaxScaler
-from mpl_toolkits.axes_grid1 import host_subplot
+from sklearn.metrics import mean_squared_error
 from keras_self_attention import SeqSelfAttention
-from numpy.lib.stride_tricks import sliding_window_view
 import argparse
 import yaml
 
-sys.path.append('D:\Escritorio\TFG\Finance-AI\src\DataPreprocessing')
+sys.path.append('D:\Escritorio\TFG\Finance-AI\src')
 
-from DataPreprocessing import save_data, load_preprocessed_data, denormalize_data
+from utils import save_data, load_preprocessed_data, denormalize_data
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')

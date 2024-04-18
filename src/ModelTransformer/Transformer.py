@@ -12,9 +12,9 @@ import torch.optim as optim
 import warnings
 from sklearn.metrics import mean_squared_error
 
-sys.path.append('D:\Escritorio\TFG\Finance-AI\src\DataPreprocessing')
+sys.path.append('D:\Escritorio\TFG\Finance-AI\src')
 
-from DataPreprocessing import save_data, load_preprocessed_data, denormalize_data
+from utils import save_data, load_preprocessed_data, denormalize_data
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
@@ -204,14 +204,13 @@ def main(args):
                 sol['win']    = win
                 sol['tr_tst'] = tr_tst
                 sol['transformer_parameters'] = transformer_parameters
-                # sol['model'].save(fmdls+mdl_name)
                 sol['model']  = fmdls+mdl_name
                 print('   Effort spent: ' + str(ttrain) +' s.')
                 sys.stdout.flush()
                 tmpr.append(sol)
             res[ahead] = pd.DataFrame(tmpr)
         
-        tot_res['Transformer_OUT_MODEL'] = res
+        tot_res['OUT_MODEL'] = res
 
         data_path = "D:/Escritorio/TFG/Finance-AI/Datasets"
         processed_path = "D:/Escritorio/TFG/Finance-AI/DataProcessed"

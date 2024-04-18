@@ -1,24 +1,19 @@
 '''@package DataPreprocessing
 This module contains the Stock class that processes the data and creates the output files for each stock.
 '''
-
-
-import os, time, gc, sys, io
-import datetime, pickle
-import warnings, random, pdb
+import os, sys
+import warnings
 
 import pandas as pd
-import seaborn as sns
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
-import mpl_toolkits.axisartist as AA
 import os
-import pickle
 import argparse
 import yaml
 
 from numpy.lib.stride_tricks import sliding_window_view
+
+sys.path.append('D:\Escritorio\TFG\Finance-AI\src')
+from utils import save_data
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
@@ -223,56 +218,6 @@ class Stock:
 
     def calculate_max(self, data, axis=None):      
         return np.max(data, axis=axis)
-
-
-def save_data(fich, out_path, lahead, lpar, tot_res):
-    '''
-    Saves the data to a pickle file
-    '''
-    with open(fich, 'wb') as file:
-            pickle.dump(out_path, file)
-            pickle.dump(fich, file)
-            pickle.dump(lahead, file)
-            pickle.dump(lpar, file)
-            pickle.dump(tot_res, file)
-    file.close()
-    
-def load_preprocessed_data(path, win, tr_tst, ticker, multi):
-    if multi == True:
-        fdat = path+ f"/{win}/{tr_tst}/{ticker}-m-input-output.pkl"
-    else:
-        fdat = path+ f"/{win}/{tr_tst}/{ticker}-input-output.pkl"
-
-    if os.path.exists(fdat):
-        with open(fdat, "rb") as openfile:
-            path = pickle.load(openfile)
-            fdat = pickle.load(openfile)
-            lahead = pickle.load(openfile)
-            lpar = pickle.load(openfile)
-            tot_res = pickle.load(openfile)
-
-        return path, fdat, lahead, lpar, tot_res
-    else:
-        raise FileNotFoundError("El archivo {} no existe.".format(fdat))
-
-
-def denormalize_data(Yn, mvdd, idx):
-    """
-    Returns the denormalized target data.
-    
-    Arguments:
-    Yn - normalized target data
-    mvdd - dictionary containing mean, min, and max values used for normalization
-    idx - index of the data
-    """
-
-    mnmX = mvdd["min"]
-    mxmX = mvdd["max"]
-    mnx = mvdd["mean"]
-    
-    denormalized_mYl = pd.Series(Yn, index=idx) * (mxmX - mnmX) + mnmX + mnx
-    denormalized_mYl.dropna(inplace=True)
-    return denormalized_mYl
 
 
 # from https://stackoverflow.com/questions/6076690/verbose-level-with-argparse-and-multiple-v-options
