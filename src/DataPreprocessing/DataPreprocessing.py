@@ -8,12 +8,12 @@ import pandas as pd
 import numpy as np
 import os
 import argparse
-import yaml
 
 from numpy.lib.stride_tricks import sliding_window_view
 
-sys.path.append('D:\Escritorio\TFG\Finance-AI\src')
-from utils_tfg import save_data
+sys.path.append('D:/Escritorio/TFG/Finance-AI/src')
+from utils_vv_tfg import save_data
+from config.config import get_configuration
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
@@ -27,6 +27,8 @@ class Stock:
         self.df = pd.DataFrame(self._data)
         self.serial_dict = {}
         self.mserial_dict = {}
+        self.serial_dict['INPUT_DATA'] = {}
+        self.mserial_dict['INPUT_DATA'] = {}
 
     def _read_data(self, file_name):
         '''
@@ -71,8 +73,8 @@ class Stock:
             trainY = cYn.iloc[:pmod]
             testX = cXn.iloc[pmod:, :]
             testY = cYn.iloc[pmod:]
-
-            self.serial_dict[ahead] = {"x": X, "y": Y, "nx": cXn, "ny": cYn, "numt": pmod,
+            
+            self.serial_dict['INPUT_DATA'][ahead] = {"x": X, "y": Y, "nx": cXn, "ny": cYn, "numt": pmod,
                                         "trainX": trainX, "trainY": trainY,
                                         "testX": testX, "testY": testY, "vdd": vdd}
 
@@ -114,7 +116,8 @@ class Stock:
             self.check_nan_values(mtrainX, mtestX, ahead)
 
             xdx = idx[:-(ahead + 1)]
-            self.mserial_dict[ahead] = {"x": mXl, "y": mYl, "nx": mXn, "ny": mYn, "numt": pmod,
+            
+            self.mserial_dict['INPUT_DATA'][ahead] = {"x": mXl, "y": mYl, "nx": mXn, "ny": mYn, "numt": pmod,
                                         "trainX": mtrainX, "trainY": mtrainY,
                                         "testX": mtestX, "testY": mtestY, "vdd": mvdd, "cnms": cols,
                                         "idtest": xdx[pmod:]}
@@ -247,36 +250,31 @@ class VAction(argparse.Action):
 
 
 def main(args):
-    with open(args.params_file, 'r') as f:
-        config = yaml.safe_load(f)
+
+    config, params_file = get_configuration()
 
     if args.verbose > 0:
         print("Additional Info:")
         # Add additional information here
-        print("Processing data with the configuration file:", args.params_file)
+        print("Processing data with the configuration file:", params_file)
 
-    # Load configuration parameters from the YAML file
     data_path = config['data']['data_path']
     out_path = config['data']['output_path']
     filename_structure = config['data']['filename_structure']
-    tickers_list = config['tickers']
+    date = config['data']['date']
 
-    for ticker in tickers_list:
+    for scenario in config['scenarios']:
+        win = scenario['win']
+        lahead = scenario['lahead']
+        stock_list = scenario['tickers']
+        n_ftrs = scenario['n_features']
+        deep = scenario['serialization']['1D']['deep']
+        mdeep = scenario['serialization']['mD']['mdeep']
 
-        filename = filename_structure.format(ticker=ticker, date=args.date)
-        file = os.path.join(data_path, filename)
-        assert os.path.exists(file), f"El archivo {file} no existe."
-
-        scen = args.scenario
-        for scenario in config['scenarios']:
-            if scenario['name'] != f'scenario_{scen}':
-                continue
-
-            win = scenario['win']
-            lahead = scenario['lahead']
-            n_ftrs = scenario['n_features']
-            deep = scenario['serialization']['1D']['deep']
-            mdeep = scenario['serialization']['mD']['mdeep']
+        for ticker in stock_list:
+            filename = filename_structure.format(ticker=ticker, date=date)
+            file = os.path.join(data_path, filename)
+            assert os.path.exists(file), f"El archivo {file} no existe."
             
             for tr_tst in scenario['tr_tst']:
                 stock = Stock(ticker, file, lahead, tr_tst)
@@ -317,9 +315,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process data and create output.")
     parser.add_argument("-v", "--verbose", nargs='?', action=VAction,\
             dest='verbose', help="Option for detailed information")
-    parser.add_argument("params_file", help="Path to the configuration YAML file.")
-    parser.add_argument("--date", help="Date for filename structure")
-    parser.add_argument("--scenario", help="Number of scenario to process", type=int)
 
     args = parser.parse_args()
     main(args)

@@ -12,57 +12,34 @@ from keras.layers import GRU
 from keras.layers import Embedding
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-from sklearn.metrics import mean_squared_error
 from keras_self_attention import SeqSelfAttention
 import argparse
 import yaml
 
-sys.path.append('D:\Escritorio\TFG\Finance-AI\src')
-
-from utils_tfg import save_data, load_preprocessed_data, denormalize_data
+sys.path.append('D:/Escritorio/TFG/Finance-AI/src')
+from utils_vv_tfg import save_data, load_preprocessed_data, eval_lstm
+from config.config import get_configuration
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
 
-def eval(nptstX, nptstY, testX, model, vdd, Y, ahead):
-        '''
-        Returns the evaluation of the model with the test data
-
-        Arguments:
-        nptstX - normalized test data
-        nptstY - normalized test labels
-        model - trained model being evaluated
-        vdd - validation dataframe storing the data for normalization and denormalization
-        Y - output PX_OPEN stock
-        '''
-
-        Yhat   = model.predict(nptstX,verbose=0)
-        tans   = Yhat.shape
-        if len(tans) > 2 and tans[1] == 1:
-            Yhat= np.concatenate(Yhat,axis=0)
-        if len(tans) > 2 and tans[1] > 1:
-            Yhat= [vk[0].tolist() for vk in Yhat]
-        Yprd   = np.concatenate(Yhat,axis=0).tolist()
-        mse    = mean_squared_error(Yprd , nptstY)
-        eff    = pd.DataFrame({'Yorg':nptstY,'Yfct':Yprd}) 
-        eff.set_index(testX.index,drop=True,inplace=True)
-
-        jdx = testX.index
-        Yf = denormalize_data(Yprd, vdd, jdx) # denormalize the forecast
-        Yr  = Y.loc[jdx] # y real
-        Yy  = Y.shift(ahead).loc[jdx] # Y yesterday
-        DY  = pd.concat([Yr,Yf,Yy],axis=1)
-        DY.columns = ['Y_real','Y_predicted','Y_yesterday']
-
-        msep= mean_squared_error(DY.Y_predicted , DY.Y_real) # error y predicted - y real
-        msey= mean_squared_error(DY.Y_yesterday , DY.Y_real) # error y yesterday - y real
-
-        return({'msep':msep,'msey':msey,'Ys':DY, 'eff': eff})
-
 
 class TrainLSTM:
+    def __init__(self, trainX, trainY, testX, testY, Y, vdd, epoch, bsize, nhn, win, n_ftrs, stock):
+        self.trainX = trainX
+        self.trainY = trainY
+        self.testX = testX
+        self.testY = testY
+        self.Y = Y
+        self.vdd = vdd
+        self.epoch = epoch
+        self.bsize = bsize
+        self.nhn = nhn
+        self.win = win
+        self.n_ftrs = n_ftrs
+        self.stock = stock
 
-    def lstm_fun(trainX, trainY, testX, testY, Y, vdd, epoch, bsize, nhn, win, n_ftrs, ahead, stock, seed):
+    def lstm_fun(self, ahead, seed):
         '''
         LSTM model 
 
@@ -85,33 +62,33 @@ class TrainLSTM:
         seed - seed to stabilize the repetitions
         '''
 
-        nptrX = trainX.to_numpy().reshape(trainX.shape[0],trainX.shape[1],n_ftrs)
-        nptrY = trainY.to_numpy()
+        nptrX = self.trainX.to_numpy().reshape(self.trainX.shape[0],self.trainX.shape[1],self.n_ftrs)
+        nptrY = self.trainY.to_numpy()
         nit  = 0
         lloss= np.nan
         while math.isnan(lloss) and nit < 5:
             tf.random.set_seed(seed)
             # create a very basic LSTM model
             model = Sequential()
-            model.add(LSTM(nhn, activation='relu', input_shape=(win,n_ftrs))) 
-            model.add(Dense(n_ftrs)) # Output of a single value
+            model.add(LSTM(self.nhn, activation='relu', input_shape=(self.win,self.n_ftrs))) 
+            model.add(Dense(self.n_ftrs)) # Output of a single value
             model.compile(loss='mean_squared_error', optimizer='adam')
             #
-            hist = model.fit(nptrX, nptrY, epochs=epoch, batch_size=bsize, verbose=0)
+            hist = model.fit(nptrX, nptrY, epochs=self.epoch, batch_size=self.bsize, verbose=0)
             lloss= hist.history['loss'][-1]
             nit  = nit + 1
         # Predict
-        nptstX = testX.to_numpy().reshape(testX.shape[0],testX.shape[1],n_ftrs)
-        nptstY = testY.to_numpy()
-        res1   = eval(nptstX, nptstY, testX, model, vdd, Y, ahead)
-        df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':stock,
-                    'DY':res1.get("Ys"),'ALG':'LSTM','seed':seed,'epochs':epoch,
-                    'nhn':nhn,'win':win,'ndims':1, 'lossh':lloss, 'nit':nit,
+        nptstX = self.testX.to_numpy().reshape(self.testX.shape[0],self.testX.shape[1],self.n_ftrs)
+        nptstY = self.testY.to_numpy()
+        res1   = eval_lstm(nptstX, nptstY, self.testX, model, self.vdd, self.Y, ahead)
+        df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':self.stock,
+                    'DY':res1.get("Ys"),'ALG':'LSTM','seed':seed,'epochs':self.epoch,
+                    'nhn':self.nhn,'win':self.win,'ndims':1, 'lossh':lloss, 'nit':nit,
                     'model':model}
         return(df_result)
 
 
-    def stck_lstm_fun(trainX, trainY, testX, testY, Y, vdd, epoch, bsize, nhn, win, n_ftrs, ahead, stock, seed):
+    def stck_lstm_fun(self, ahead, seed):
         '''
         Stack LSTM model
 
@@ -133,33 +110,33 @@ class TrainLSTM:
         ahead - shift value for the stock
         seed - seed to stabilize the repetitions
         '''
-        nptrX = trainX.to_numpy().reshape(trainX.shape[0],trainX.shape[1],n_ftrs)
-        nptrY = trainY.to_numpy()
+        nptrX = self.trainX.to_numpy().reshape(self.trainX.shape[0],self.trainX.shape[1],self.n_ftrs)
+        nptrY = self.trainY.to_numpy()
         nit  = 0
         lloss= np.nan
         while math.isnan(lloss) and nit < 5:
             tf.random.set_seed(seed)
             # create a very Stcked-LSTM model
             stmodel = Sequential()
-            stmodel.add(LSTM(nhn, activation='relu', return_sequences=True, input_shape=(win,n_ftrs)))
-            stmodel.add(LSTM(nhn, activation='relu', return_sequences=True))
-            stmodel.add(LSTM(nhn, activation='relu'))
-            stmodel.add(Dense(n_ftrs)) # Output of a single value
+            stmodel.add(LSTM(self.nhn, activation='relu', return_sequences=True, input_shape=(self.win,self.n_ftrs)))
+            stmodel.add(LSTM(self.nhn, activation='relu', return_sequences=True))
+            stmodel.add(LSTM(self.nhn, activation='relu'))
+            stmodel.add(Dense(self.n_ftrs)) # Output of a single value
             stmodel.compile(loss='mean_squared_error', optimizer='adam')
-            hist = stmodel.fit(nptrX, nptrY, epochs=epoch, batch_size=bsize, verbose=0)
+            hist = stmodel.fit(nptrX, nptrY, epochs=self.epoch, batch_size=self.bsize, verbose=0)
             lloss= hist.history['loss'][-1]
             nit  = nit + 1
         # Predict
-        nptstX = testX.to_numpy().reshape(testX.shape[0],testX.shape[1],n_ftrs)
-        nptstY = testY.to_numpy()
-        res1   = eval(nptstX, nptstY, testX, stmodel, vdd, Y, ahead)
-        df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':stock,
-                    'DY':res1.get("Ys"),'ALG':'STACK-LSTM','seed':seed,'epochs':epoch,
-                    'nhn':nhn,'win':win ,'ndims':1, 'lossh':lloss, 'nit':nit,
+        nptstX = self.testX.to_numpy().reshape(self.testX.shape[0],self.testX.shape[1],self.n_ftrs)
+        nptstY = self.testY.to_numpy()
+        res1   = eval_lstm(nptstX, nptstY, self.testX, stmodel, self.vdd, self.Y, ahead)
+        df_result = {'MSEP':res1.get("msep"),'MSEY': res1.get("msey"),'Stock':self.stock,
+                    'DY':res1.get("Ys"),'ALG':'STACK-LSTM','seed':seed,'epochs':self.epoch,
+                    'nhn':self.nhn,'win':self.win ,'ndims':1, 'lossh':lloss, 'nit':nit,
                     'model':stmodel}
         return(df_result)
 
-    def att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epoch,bsize,nhn,win,n_ftrs,ahead,stock,seed):
+    def att_lstm_fun(self, ahead, seed):
         '''
         Returns the evaluation of the model with the test data
         
@@ -180,129 +157,131 @@ class TrainLSTM:
         seed - seed to stabilize the repetitions
         '''
 
-        aptrX = trainX.to_numpy().reshape(trainX.shape[0], win,n_ftrs)
-        aptrY = trainY.to_numpy()
+        aptrX = self.trainX.to_numpy().reshape(self.trainX.shape[0], self.win,self.n_ftrs)
+        aptrY = self.trainY.to_numpy()
         nit  = 0
         lloss= np.nan
         while math.isnan(lloss) and nit < 5:
             amodel = Sequential()
-            amodel.add(Embedding(input_dim=win,output_dim=int(win//3),
+            amodel.add(Embedding(input_dim=self.win,output_dim=int(self.win//3),
                             mask_zero=True))
-            amodel.add(GRU(nhn, activation='relu', \
-                    return_sequences=True,input_shape=(win,n_ftrs)))
+            amodel.add(GRU(self.nhn, activation='relu', \
+                    return_sequences=True,input_shape=(self.win,self.n_ftrs)))
             amodel.add(SeqSelfAttention(attention_activation='sigmoid'))
-            amodel.add(Dense(n_ftrs))
+            amodel.add(Dense(self.n_ftrs))
             amodel.compile(loss='mean_squared_error', optimizer='adam')
             earlyStopping = EarlyStopping(monitor='val_loss', \
                                 patience=10, verbose=0, mode='min')
             checkpoint = ModelCheckpoint('model-attention.h5', verbose=1, \
                     monitor='val_loss',save_best_only=True, mode='auto')  
-            hist = amodel.fit(aptrX, aptrY, epochs=epoch, callbacks=[checkpoint], \
-                        validation_split=0.15,batch_size=bsize,verbose=1)
+            hist = amodel.fit(aptrX, aptrY, epochs=self.epoch, callbacks=[checkpoint], \
+                        validation_split=0.15,batch_size=self.bsize,verbose=1)
             lloss= hist.history['val_loss'][-1]
             nit  = nit + 1
             # Predict
         amodel = load_model('model-attention.h5',custom_objects={
                 'SeqSelfAttention': SeqSelfAttention})
-        aptstX = testX.to_numpy().reshape(testX.shape[0],win,n_ftrs)
-        aptstY = testY.to_numpy()
-        res5b   = eval(aptstX, aptstY, testX, amodel, vdd, Y, ahead)
+        aptstX = self.testX.to_numpy().reshape(self.testX.shape[0],self.win,self.n_ftrs)
+        aptstY = self.testY.to_numpy()
+        res5b   = eval_lstm(aptstX, aptstY, self.testX, amodel, self.vdd, self.Y, ahead)
         #
         df_result = {'MSEP': res5b.get("msep"),
-                    'MSEY': res5b.get("msey"), 'Stock': stock,
+                    'MSEY': res5b.get("msey"), 'Stock': self.stock,
                     'DY':res5b.get("Ys"), 'ALG':'ATT_LSTM',
-                    'seed':seed,'epochs':epoch,'nhn':nhn,
-                    'win':win, 'ndims':1,'lossh':lloss, 'nit':nit,
+                    'seed':seed,'epochs':self.epoch,'nhn':self.nhn,
+                    'win':self.win, 'ndims':1,'lossh':lloss, 'nit':nit,
                     'model':amodel}
         return(df_result)
 
-def main(args):
+def main():
 
-    with open(args.params_file, 'r') as f:
-        config = yaml.safe_load(f)
-    f.close()
-
-    
+    config, params_file = get_configuration()
     processed_path = config['data']['output_path']
-    win_size = config['LSTM']['window']
-    epochs = config['LSTM']['epochs']
-    bsize = config['LSTM']['batch_size']
-    nhn = config['LSTM']['nhn']
-    res = {}
-    tmod = config['LSTM']['model']    # lstm stcklstm or attlstm
-    res['MODEL'] = tmod
-    stock = args.stock
     multi = config['multi']
-    list_tr_tst = config['tr_tst']
-
-    for tr_tst in list_tr_tst:
-        _, _, lahead, lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, multi)
-        win, n_ftrs, tr_tst, deep = lpar
-
-        fmdls = f'D:/Escritorio/TFG/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
-        if not os.path.exists(fmdls):
-            os.makedirs(fmdls)
+    
+    lstm_configs = []
+    scenarios = []
+    for scenario in config['scenarios']:
+        win_size = scenario['win']
+        list_tr_tst = scenario['tr_tst']
+        lahead = scenario['lahead']
+        stock_list = scenario['tickers']
+        if 'LSTM' in scenario:
+            lstm_configs.append(scenario['LSTM'])
+            scenarios.append(scenario['name'])
+    res = {}
+    for i, config in enumerate(lstm_configs):
+    
+        epochs = config['epochs']
+        bsize = config['batch_size']
+        nhn = config['nhn']
+        tmod = config['model']    # lstm stcklstm or attlstm
+        scen_model = f'MODEL_{scenarios[i]}'
+        res[scen_model] = tmod
         
-        trainlstm = TrainLSTM
-        res[stock] = {}
-        for ahead in lahead:
-            print('Training ' + stock + ' ahead ' + str(ahead) + ' days.')
-            trainX = tot_res[ahead]['trainX']
-            trainY = tot_res[ahead]['trainY']
-            testX  = tot_res[ahead]['testX']    
-            testY  = tot_res[ahead]['testY']
-            Y      = tot_res[ahead]['y']
-            vdd    = tot_res[ahead]['vdd']
-            tmpr = []
-            
-            for irp in range(10):
-                seed      = random.randint(0,1000)
-                lstm_start= time.time()
-                mdl_name  = '{}-{}-{}-{:02}.hd5'.format(tmod,stock,ahead,irp)
-                if tmod == "lstm":
-                    sol   = TrainLSTM.lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
-                if tmod == "stcklstm":
-                    sol   = trainlstm.stck_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
-                if tmod == "attlstm":
-                    sol   = trainlstm.att_lstm_fun(trainX,trainY,testX,testY,Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
-                lstm_end  = time.time()
-                ttrain    = lstm_end - lstm_start
-                sol['ttrain'] = ttrain
-                sol['epochs']  = epochs
-                sol['bsize']  = bsize
-                sol['nhn']    = nhn
-                sol['win']    = win
-                sol['tr_tst'] = tr_tst
-                sol['model'].save(fmdls+mdl_name)
-                sol['model']  = fmdls+mdl_name
-                print('   Effort spent: ' + str(ttrain) +' s.')
-                sys.stdout.flush()
-                tmpr.append(sol)
-            res[ahead] = pd.DataFrame(tmpr)
-        
-        tot_res['OUT_MODEL'] = res
+        #for stock in stock_list:
+        for stock in ['AAPL']:
+            for tr_tst in list_tr_tst:
+                _, _, _, lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, multi)
+                win, n_ftrs, tr_tst, deep = lpar
 
-        data_path = config['data']['data_path']
-        processed_path = config['data']['output_path']
-        
-        fdat = f'D:/Escritorio/TFG/Finance-AI/DataProcessed/output/{win}/{tr_tst}/{stock}-{tmod}-output.pkl'
-        if os.path.exists(fdat):
-            save_data(fdat, processed_path, lahead, lpar, tot_res)
-        else:
-            directory1 = os.path.dirname(fdat)
-            if not os.path.exists(directory1):
-                os.makedirs(directory1)
-                print(f"Directory {directory1} created.")
+                fmdls = f'D:/Escritorio/TFG/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
+                if not os.path.exists(fmdls):
+                    os.makedirs(fmdls)
+                res[scenarios[i]] = {}
+                res[scenarios[i]][stock] = {}
+                print(f"Traning for {tr_tst*100}% training data")
+                for ahead in lahead:
+                    trainX = tot_res['INPUT_DATA'][ahead]['trainX']
+                    trainY = tot_res['INPUT_DATA'][ahead]['trainY']
+                    testX  = tot_res['INPUT_DATA'][ahead]['testX']    
+                    testY  = tot_res['INPUT_DATA'][ahead]['testY']
+                    Y      = tot_res['INPUT_DATA'][ahead]['y']
+                    vdd    = tot_res['INPUT_DATA'][ahead]['vdd']
+                    tmpr = []
+                    model_lstm = TrainLSTM(trainX, trainY, testX, testY, Y, vdd, epochs, bsize, nhn, win, n_ftrs, stock)
+                    print('Training ' + stock + ' ahead ' + str(ahead) + ' days.')
+                    for irp in range(10):
+                        seed      = random.randint(0,1000)
+                        lstm_start= time.time()
+                        mdl_name  = '{}-{}-{}-{:02}.hd5'.format(tmod,stock,ahead,irp)
+                        if tmod == "lstm":
+                            sol   = model_lstm.lstm_fun(ahead, seed)
+                        if tmod == "stcklstm":
+                            sol   = model_lstm.stck_lstm_fun(ahead, seed)
+                        if tmod == "attlstm":
+                            sol   = model_lstm.att_lstm_fun(ahead, seed)
+                        lstm_end  = time.time()
+                        ttrain    = lstm_end - lstm_start
+                        sol['ttrain'] = ttrain
+                        sol['epochs']  = epochs
+                        sol['bsize']  = bsize
+                        sol['nhn']    = nhn
+                        sol['win']    = win
+                        sol['tr_tst'] = tr_tst
+                        sol['model'].save(fmdls+mdl_name)
+                        sol['model']  = fmdls+mdl_name
+                        print('   Effort spent: ' + str(ttrain) +' s.')
+                        sys.stdout.flush()
+                        tmpr.append(sol)
+                    res[scenarios[i]][stock][ahead] = pd.DataFrame(tmpr)
+                
+                tot_res['OUT_MODEL'] = res
+                
+                fdat = f'D:/Escritorio/TFG/Finance-AI/DataProcessed/output/{win}/{tr_tst}/{stock}-{tmod}-output.pkl'
+                if os.path.exists(fdat):
+                    save_data(fdat, processed_path, lahead, lpar, tot_res)
+                else:
+                    directory1 = os.path.dirname(fdat)
+                    if not os.path.exists(directory1):
+                        os.makedirs(directory1)
+                        print(f"Directory {directory1} created.")
 
-            save_data(fdat, processed_path, lahead, lpar, tot_res)                
-            print(f"File {fdat} created and data saved.")
+                    save_data(fdat, processed_path, lahead, lpar, tot_res)                
+                    print(f"File {fdat} created and data saved.")
 
-    # save_data(fdat, processed_path, lahead, lpar, tot_res)
+            # save_data(fdat, processed_path, lahead, lpar, tot_res)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process data and create output.")
-    parser.add_argument("params_file", help="Path to the configuration YAML file.")
-    parser.add_argument("--stock", help="Ticker of the stock to be used.")
-    args = parser.parse_args()
-    main(args)
+    main()
