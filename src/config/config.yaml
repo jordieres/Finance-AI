@@ -1,0 +1,28 @@
+data:
+  data_path: "D:/Escritorio/TFG/Finance-AI/Datasets"
+  output_path: "D:/Escritorio/TFG/Finance-AI/DataProcessed"
+  date: '060124'
+  filename_structure: "{ticker} US Equity_{date}.csv"
+
+multi: False
+
+scenarios:
+  - name: scenario_1
+    tickers: ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA"]
+    win: 5
+    tr_tst: [0.7, 0.8]
+    lahead: [1, 7, 14, 30, 90]
+    n_features: 1
+    serialization:
+      1D:
+        deep: [10,20,50]
+      mD: 
+        mdeep: [10,20,50]
+    LSTM:
+      epochs: 200
+      batch_size: 750
+      nhn: 50
+      model: "lstm" # lstm, attlstm, stcklstm
+    Transformer:
+      num_layers: 2
+      num_heads: 10 
