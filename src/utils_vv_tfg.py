@@ -2,6 +2,8 @@ import os
 import pickle
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
+from sklearn.metrics import mean_squared_error
 
 
 def save_data(fich, out_path, lahead, lpar, tot_res):
@@ -52,6 +54,29 @@ def denormalize_data(Yn, mvdd, idx):
     denormalized_mYl = pd.Series(Yn, index=idx) * (mxmX - mnmX) + mnmX + mnx
     denormalized_mYl.dropna(inplace=True)
     return denormalized_mYl
+
+def eval_lstm(nptstX, nptstY, testX, model, vdd, Y, ahead):
+        Yhat   = model.predict(nptstX,verbose=0)
+        tans   = Yhat.shape
+        if len(tans) > 2 and tans[1] == 1:
+            Yhat= np.concatenate(Yhat,axis=0)
+        if len(tans) > 2 and tans[1] > 1:
+            Yhat= [vk[0].tolist() for vk in Yhat]
+        Yprd   = np.concatenate(Yhat,axis=0).tolist()
+        eff    = pd.DataFrame({'Yorg':nptstY,'Yfct':Yprd}) 
+        eff.set_index(testX.index,drop=True,inplace=True)
+
+        jdx = testX.index
+        Yf = denormalize_data(Yprd, vdd, jdx) # denormalize the forecast
+        Yr  = Y.loc[jdx] # y real
+        Yy  = Y.shift(ahead).loc[jdx] # Y yesterday
+        DY  = pd.concat([Yr,Yf,Yy],axis=1)
+        DY.columns = ['Y_real','Y_predicted','Y_yesterday']
+
+        msep= mean_squared_error(DY.Y_predicted , DY.Y_real) # error y predicted - y real
+        msey= mean_squared_error(DY.Y_yesterday , DY.Y_real) # error y yesterday - y real
+
+        return({'msep':msep,'msey':msey,'Ys':DY, 'eff': eff})
 
 def load_output_preprocessed_data(path, win, tr_tst, stock, multi=False):
     all_results = {}
@@ -110,7 +135,7 @@ def plot_res(ax, DY, msep, msey, stck, mdl, itr, ahead, tr_tst, num_heads=None, 
     ax.text(.01, .05, 'MSE Historical=' + str(round(msey,3)), transform=ax.transAxes, fontsize=16, ha='left', va='bottom', color='green')
 
 
-def plot_results_comparison(model_results, model_list,stck, itr, ahead, tr_tst, save_path=None):
+def plot_results_comparison(model_results, model_list, stck, itr, ahead, tr_tst, save_path=None):
 
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
     
