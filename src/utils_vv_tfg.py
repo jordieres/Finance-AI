@@ -135,28 +135,29 @@ def plot_res(ax, DY, msep, msey, stck, mdl, itr, ahead, tr_tst, num_heads=None, 
     ax.text(.01, .05, 'MSE Historical=' + str(round(msey,3)), transform=ax.transAxes, fontsize=16, ha='left', va='bottom', color='green')
 
 
-def plot_results_comparison(model_results, model_list, scen_name, stck, itr, ahead, tr_tst, save_path=None):
-
-    fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+def plot_results_comparison(model_results, lahead, model_list, scen_name, stck, itr, tr_tst, save_path=None, wdth=10, hght=30):
+    num_models = len(model_list)
+    fig, axs = plt.subplots(len(lahead), len(model_list), figsize=[wdth*num_models, hght])
     
-    for i, model in enumerate(model_list):
-        col = i % 3
-        res = model_results[model]['tot_res']['OUT_MODEL']['scenario_1'][stck][ahead]
-        DYs = res['DY']
-        DY = DYs.loc[itr]
-        msep = res['MSEP'][itr]
-        msey = res['MSEY'][itr]
-        
-        if model != 'transformer':
-            plot_res(axs[col], DY, msep, msey, stck, model, itr, ahead, tr_tst)
-        else:
-            num_heads = res['transformer_parameters'][0]['num_heads']
-            num_layers = res['transformer_parameters'][0]['num_layers']
-            plot_res(axs[col], DY, msep, msey, stck, model, itr, ahead, tr_tst, num_heads, num_layers)
-        
-        # Ajustar los límites del eje X y Y
-        axs[col].set_xlim(DY.index.min(), DY.index.max())  # Ajustar los límites del eje X
-        axs[col].set_ylim(120, 200)
+    for j, ahead in enumerate(lahead):
+        for i, model in enumerate(model_list):
+            col = i
+            res = model_results[model]['tot_res']['OUT_MODEL'][scen_name][stck][ahead]
+            DYs = res['DY']
+            DY = DYs.loc[itr]
+            msep = res['MSEP'][itr]
+            msey = res['MSEY'][itr]
+            
+            if model != 'transformer':
+                plot_res(axs[j, col], DY, msep, msey, stck, model, itr, ahead, tr_tst)
+            else:
+                num_heads = res['transformer_parameters'][0]['num_heads']
+                num_layers = res['transformer_parameters'][0]['num_layers']
+                plot_res(axs[j, col], DY, msep, msey, stck, model, itr, ahead, tr_tst, num_heads, num_layers)
+                
+            # Ajustar los límites del eje X y Y
+            axs[j, col].set_xlim(DY.index.min(), DY.index.max())  # Ajustar los límites del eje X
+            axs[j, col].set_ylim(120, 200)
     
     if save_path:
         if not os.path.exists(save_path):
@@ -165,5 +166,36 @@ def plot_results_comparison(model_results, model_list, scen_name, stck, itr, ahe
         figfich = os.path.join(save_path, f'{stck}-{itr}-{num_heads}-{num_layers}.png')
         plt.savefig(figfich)
     else:
+        plt.tight_layout()
+        plt.show()
+
+def plot_ahead_perf_sameStock(model_results, lahead, model_list, stock_list, list_tr_tst, scen_name, wdth=8, hght=9):
+    num_models = len(model_list)
+    fig, axes = plt.subplots(len(list_tr_tst), num_models, figsize=[wdth*num_models, hght])
+
+    for stock in stock_list:
+        for i, tr_tst in enumerate(list_tr_tst):
+            for j, model in enumerate(model_list):
+                res = model_results[model]['tot_res']['OUT_MODEL'][scen_name][stock]
+                lstd = {}
+                yval = {}
+                for ahead in lahead:
+                    lstd[ahead] = res[ahead]['MSEP']
+                    yval[ahead] = res[ahead]['MSEY'][0]
+
+                h = list(range(len(lstd)))
+                bp = np.array(list(lstd.values()))
+
+                ax = axes[i, j]  # Acceder al eje en la posición i, j
+                ax.boxplot(bp.T, positions=h, showmeans=True, manage_ticks=False)
+                ax.plot(h, yval.values(), '--ko', c='red', label='Yesterday')
+                ax.set_xticks(h)
+                ax.set_xticklabels(list(lstd.keys()), rotation='vertical')
+                ax.set_xlabel('Stocks')
+                ax.set_ylabel('MSE of the 10 simulations')
+                ax.set_yscale('log')
+                ax.set_title(f'{model.upper()} for {stock} and {tr_tst*100}% train')
+                ax.legend()
+
         plt.tight_layout()
         plt.show()

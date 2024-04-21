@@ -141,7 +141,7 @@ def main():
             scenarios.append(scenario['name'])
     res = {}
     for i, config in enumerate(transformer_configs):
-        tmod = config['model']    # lstm stcklstm or attlstm
+        tmod = config['model']
         scen_model = f'MODEL_{scenarios[i]}'
         res[scen_model] = tmod
         num_layers = config['num_layers']
