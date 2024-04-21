@@ -19,16 +19,19 @@ warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
 
 class Stock:
-    def __init__(self, ticker, file_name, lahead, tr_tst):
+    def __init__(self, ticker, file_name, lahead, tr_tst, scen_name):
         self.ticker = ticker
         self._data = self._read_data(file_name)
         self._lahead = lahead
         self._tr_tst = tr_tst
         self.df = pd.DataFrame(self._data)
+        self.scen_name = scen_name
         self.serial_dict = {}
         self.mserial_dict = {}
         self.serial_dict['INPUT_DATA'] = {}
         self.mserial_dict['INPUT_DATA'] = {}
+        self.serial_dict['INPUT_DATA'][self.scen_name] = {}
+        self.mserial_dict['INPUT_DATA'][self.scen_name] = {}
 
     def _read_data(self, file_name):
         '''
@@ -73,8 +76,7 @@ class Stock:
             trainY = cYn.iloc[:pmod]
             testX = cXn.iloc[pmod:, :]
             testY = cYn.iloc[pmod:]
-            
-            self.serial_dict['INPUT_DATA'][ahead] = {"x": X, "y": Y, "nx": cXn, "ny": cYn, "numt": pmod,
+            self.serial_dict['INPUT_DATA'][self.scen_name][ahead] = {"x": X, "y": Y, "nx": cXn, "ny": cYn, "numt": pmod,
                                         "trainX": trainX, "trainY": trainY,
                                         "testX": testX, "testY": testY, "vdd": vdd}
 
@@ -116,8 +118,7 @@ class Stock:
             self.check_nan_values(mtrainX, mtestX, ahead)
 
             xdx = idx[:-(ahead + 1)]
-            
-            self.mserial_dict['INPUT_DATA'][ahead] = {"x": mXl, "y": mYl, "nx": mXn, "ny": mYn, "numt": pmod,
+            self.mserial_dict['INPUT_DATA'][self.scen_name][ahead] = {"x": mXl, "y": mYl, "nx": mXn, "ny": mYn, "numt": pmod,
                                         "trainX": mtrainX, "trainY": mtrainY,
                                         "testX": mtestX, "testY": mtestY, "vdd": mvdd, "cnms": cols,
                                         "idtest": xdx[pmod:]}
@@ -277,11 +278,11 @@ def main(args):
             assert os.path.exists(file), f"El archivo {file} no existe."
             
             for tr_tst in scenario['tr_tst']:
-                stock = Stock(ticker, file, lahead, tr_tst)
+                scen_name = scenario['name']
+                stock = Stock(ticker, file, lahead, tr_tst, scen_name)
                 stock.process_stocks()
 
                 lpar = [win, n_ftrs, tr_tst, deep]
-
                 # Univariate data processing
                 stock.process_univariate_data(win)
                 fdat1 = out_path + f"/{win}/{stock._tr_tst}/{ticker}-input-output.pkl"

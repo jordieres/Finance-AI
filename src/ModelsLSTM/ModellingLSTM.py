@@ -40,28 +40,6 @@ class TrainLSTM:
         self.stock = stock
 
     def lstm_fun(self, ahead, seed):
-        '''
-        LSTM model 
-
-        Returns the evaluation of the model with the test data
-        
-        Arguments:
-        trainX - normalized training data
-        trainY - normalized training labels
-        testX - normalized test data
-        testY - normalized test labels
-        Y - output PX_OPEN stock
-        vdd - validation dataframe storing the data for normalization and denormalization
-        epoch - number of epochs for training
-        bsize - batch size for feeding the model
-        nhn - number of hidden neurons
-        win - window size (days considered to learn from == trainX.shape[1])
-        n_ftrs - number of expected outputs (1 in our case)
-        stock - stock being evaluated
-        ahead - shift value for the stock
-        seed - seed to stabilize the repetitions
-        '''
-
         nptrX = self.trainX.to_numpy().reshape(self.trainX.shape[0],self.trainX.shape[1],self.n_ftrs)
         nptrY = self.trainY.to_numpy()
         nit  = 0
@@ -89,27 +67,6 @@ class TrainLSTM:
 
 
     def stck_lstm_fun(self, ahead, seed):
-        '''
-        Stack LSTM model
-
-        Returns the evaluation of the model with the test data
-        
-        Arguments:
-        trainX - normalized training data
-        trainY - normalized training labels
-        testX - normalized test data
-        testY - normalized test labels
-        Y - output PX_OPEN stock
-        vdd - validation dataframe storing the data for normalization and denormalization
-        epoch - number of epochs for training
-        bsize - batch size for feeding the model
-        nhn - number of hidden neurons
-        win - window size (days considered to learn from == trainX.shape[1])
-        n_ftrs - number of expected outputs (1 in our case)
-        stock - stock being evaluated
-        ahead - shift value for the stock
-        seed - seed to stabilize the repetitions
-        '''
         nptrX = self.trainX.to_numpy().reshape(self.trainX.shape[0],self.trainX.shape[1],self.n_ftrs)
         nptrY = self.trainY.to_numpy()
         nit  = 0
@@ -137,26 +94,6 @@ class TrainLSTM:
         return(df_result)
 
     def att_lstm_fun(self, ahead, seed):
-        '''
-        Returns the evaluation of the model with the test data
-        
-        Parameters:
-        trainX - normalized training data
-        trainY - normalized training labels
-        testX - normalized test data
-        testY - normalized test labels
-        Y - output PX_OPEN stock
-        vdd - validation dataframe storing the data for normalization and denormalization
-        epoch - number of epochs for training
-        bsize - batch size for feeding the model
-        nhn - number of hidden neurons
-        win - window size (days considered to learn from == trainX.shape[1])
-        n_ftrs - number of expected outputs (1 in our case)
-        ahead - shift value for the stock
-        stock - stock being evaluated
-        seed - seed to stabilize the repetitions
-        '''
-
         aptrX = self.trainX.to_numpy().reshape(self.trainX.shape[0], self.win,self.n_ftrs)
         aptrY = self.trainY.to_numpy()
         nit  = 0
@@ -194,8 +131,7 @@ class TrainLSTM:
         return(df_result)
 
 def main():
-
-    config, params_file = get_configuration()
+    config, _ = get_configuration()
     processed_path = config['data']['output_path']
     multi = config['multi']
     
@@ -206,15 +142,15 @@ def main():
         list_tr_tst = scenario['tr_tst']
         lahead = scenario['lahead']
         stock_list = scenario['tickers']
+        epochs = scenario['epochs']
+        n_itr = scenario['n_itr']
+        bsize = scenario['batch_size']
+        nhn = scenario['nhn']
         if 'LSTM' in scenario:
             lstm_configs.append(scenario['LSTM'])
             scenarios.append(scenario['name'])
     res = {}
     for i, config in enumerate(lstm_configs):
-    
-        epochs = config['epochs']
-        bsize = config['batch_size']
-        nhn = config['nhn']
         tmod = config['model']    # lstm stcklstm or attlstm
         scen_model = f'MODEL_{scenarios[i]}'
         res[scen_model] = tmod
@@ -232,16 +168,17 @@ def main():
                 res[scenarios[i]][stock] = {}
                 print(f"Traning for {tr_tst*100}% training data")
                 for ahead in lahead:
-                    trainX = tot_res['INPUT_DATA'][ahead]['trainX']
-                    trainY = tot_res['INPUT_DATA'][ahead]['trainY']
-                    testX  = tot_res['INPUT_DATA'][ahead]['testX']    
-                    testY  = tot_res['INPUT_DATA'][ahead]['testY']
-                    Y      = tot_res['INPUT_DATA'][ahead]['y']
-                    vdd    = tot_res['INPUT_DATA'][ahead]['vdd']
+                    print('######################################################')
+                    print('Training ' + stock + ' ahead ' + str(ahead) + ' days.')
+                    trainX = tot_res['INPUT_DATA'][scenarios[i]][ahead]['trainX']
+                    trainY = tot_res['INPUT_DATA'][scenarios[i]][ahead]['trainY']
+                    testX  = tot_res['INPUT_DATA'][scenarios[i]][ahead]['testX']    
+                    testY  = tot_res['INPUT_DATA'][scenarios[i]][ahead]['testY']
+                    Y      = tot_res['INPUT_DATA'][scenarios[i]][ahead]['y']
+                    vdd    = tot_res['INPUT_DATA'][scenarios[i]][ahead]['vdd']
                     tmpr = []
                     model_lstm = TrainLSTM(trainX, trainY, testX, testY, Y, vdd, epochs, bsize, nhn, win, n_ftrs, stock)
-                    print('Training ' + stock + ' ahead ' + str(ahead) + ' days.')
-                    for irp in range(10):
+                    for irp in range(n_itr):
                         seed      = random.randint(0,1000)
                         lstm_start= time.time()
                         mdl_name  = '{}-{}-{}-{:02}.hd5'.format(tmod,stock,ahead,irp)
@@ -279,8 +216,6 @@ def main():
 
                     save_data(fdat, processed_path, lahead, lpar, tot_res)                
                     print(f"File {fdat} created and data saved.")
-
-            # save_data(fdat, processed_path, lahead, lpar, tot_res)
 
 
 if __name__ == "__main__":

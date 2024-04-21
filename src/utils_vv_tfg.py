@@ -78,7 +78,7 @@ def eval_lstm(nptstX, nptstY, testX, model, vdd, Y, ahead):
 
         return({'msep':msep,'msey':msey,'Ys':DY, 'eff': eff})
 
-def load_output_preprocessed_data(path, win, tr_tst, stock, multi=False):
+def load_output_preprocessed_data(win, tr_tst, multi=False):
     all_results = {}
 
     # Directory containing the results files
@@ -103,13 +103,13 @@ def load_output_preprocessed_data(path, win, tr_tst, stock, multi=False):
             results = {}
             while True:
                 try:
-                    path      = pickle.load(openfile)
-                    fdat      = pickle.load(openfile)
+                    directory1      = pickle.load(openfile)
+                    fdat1      = pickle.load(openfile)
                     lahead    = pickle.load(openfile)
                     lpar      = pickle.load(openfile)
                     tot_res   = pickle.load(openfile)
-                    results['path'] = path
-                    results['fdat'] = fdat
+                    results['path'] = directory1
+                    results['fdat'] = fdat1
                     results['lahead'] = lahead
                     results['lpar'] = lpar
                     results['tot_res'] = tot_res
@@ -135,13 +135,13 @@ def plot_res(ax, DY, msep, msey, stck, mdl, itr, ahead, tr_tst, num_heads=None, 
     ax.text(.01, .05, 'MSE Historical=' + str(round(msey,3)), transform=ax.transAxes, fontsize=16, ha='left', va='bottom', color='green')
 
 
-def plot_results_comparison(model_results, model_list, stck, itr, ahead, tr_tst, save_path=None):
+def plot_results_comparison(model_results, model_list, scen_name, stck, itr, ahead, tr_tst, save_path=None):
 
     fig, axs = plt.subplots(1, 3, figsize=(15, 5))
     
     for i, model in enumerate(model_list):
         col = i % 3
-        res = model_results[model]['tot_res']['OUT_MODEL'][ahead]
+        res = model_results[model]['tot_res']['OUT_MODEL']['scenario_1'][stck][ahead]
         DYs = res['DY']
         DY = DYs.loc[itr]
         msep = res['MSEP'][itr]

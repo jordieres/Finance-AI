@@ -12,9 +12,9 @@ import torch.optim as optim
 import warnings
 from sklearn.metrics import mean_squared_error
 
-sys.path.append('D:\Escritorio\TFG\Finance-AI\src')
-
-from utils_tfg import save_data, load_preprocessed_data, denormalize_data
+sys.path.append('D:/Escritorio/TFG/Finance-AI/src')
+from utils_vv_tfg import save_data, load_preprocessed_data, denormalize_data
+from config.config import get_configuration
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
@@ -120,87 +120,95 @@ def transformer_fun(transformer_parameters, trainX, trainY, testX, testY, Y, vdd
 
 
 
-def main(args):
-
-    processed_path = "D:/Escritorio/TFG/Finance-AI/DataProcessed"
-    win_size = 5
-    epochs = 500
-    bsize = 128
-    nhn = 50
+def main():
+    config, _ = get_configuration()
+    processed_path = config['data']['output_path']
+    multi = config['multi']
+    
+    transformer_configs = []
+    scenarios = []
+    for scenario in config['scenarios']:
+        win_size = scenario['win']
+        list_tr_tst = scenario['tr_tst']
+        lahead = scenario['lahead']
+        epochs = scenario['epochs']
+        bsize = scenario['batch_size']
+        nhn = scenario['nhn']
+        n_itr = scenario['n_itr']
+        stock_list = scenario['tickers']
+        if 'Transformer' in scenario:
+            transformer_configs.append(scenario['Transformer'])
+            scenarios.append(scenario['name'])
     res = {}
-    tmod = 'transformer'
-    res['MODEL'] = tmod
-    stock = args.stock
-    multi = False
-    list_tr_tst = [0.7, 0.8]
-    transformer_parameters = {
-        'num_layers': 2,
-        'num_heads': 10
-    }
+    for i, config in enumerate(transformer_configs):
+        tmod = config['model']    # lstm stcklstm or attlstm
+        scen_model = f'MODEL_{scenarios[i]}'
+        res[scen_model] = tmod
+        num_layers = config['num_layers']
+        num_heads = config['num_heads']
+        transformer_parameters = {
+            'num_layers': num_layers,
+            'num_heads': num_heads
+        }
 
-    for tr_tst in list_tr_tst:
-        _, _, lahead, lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, multi)
-        win, n_ftrs, tr_tst, deep = lpar
+        #for stock in stock_list:
+        for stock in ['AAPL']:
+            for tr_tst in list_tr_tst:
+                _, _, lahead, lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, multi)
+                win, n_ftrs, tr_tst, deep = lpar
 
-        fmdls = f'D:/Escritorio/TFG/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
-        if not os.path.exists(fmdls):
-            os.makedirs(fmdls)
+                fmdls = f'D:/Escritorio/TFG/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
+                if not os.path.exists(fmdls):
+                    os.makedirs(fmdls)
+                res[scenarios[i]] = {}
+                res[scenarios[i]][stock] = {}
+                print(f"Traning for {tr_tst*100}% training data")
+                for ahead in lahead:
+                    print('######################################################')
+                    print('Training ' + stock + ' ahead ' + str(ahead) + ' days.')
+                    trainX = tot_res['INPUT_DATA'][scenarios[i]][ahead]['trainX']
+                    trainY = tot_res['INPUT_DATA'][scenarios[i]][ahead]['trainY']
+                    testX  = tot_res['INPUT_DATA'][scenarios[i]][ahead]['testX']    
+                    testY  = tot_res['INPUT_DATA'][scenarios[i]][ahead]['testY']
+                    Y      = tot_res['INPUT_DATA'][scenarios[i]][ahead]['y']
+                    vdd    = tot_res['INPUT_DATA'][scenarios[i]][ahead]['vdd']
+                    tmpr = []
+                    
+                    for irp in range(n_itr):
+                        seed      = random.randint(0,1000)
+                        transformer_start= time.time()
+                        mdl_name  = '{}-{}-{}-{:02}.hd5'.format(tmod,stock,ahead,irp)
+                        if tmod == "transformer":
+                            sol   = transformer_fun(transformer_parameters,trainX,trainY,testX,testY,Y,vdd,testY.shape[0],bsize,nhn,win,n_ftrs,ahead,stock,seed)
+                        transformer_end  = time.time()
+                        ttrain    = transformer_end - transformer_start
+                        sol['ttrain'] = ttrain
+                        sol['epochs']  = epochs
+                        sol['bsize']  = bsize
+                        sol['nhn']    = nhn
+                        sol['win']    = win
+                        sol['tr_tst'] = tr_tst
+                        sol['transformer_parameters'] = transformer_parameters
+                        sol['model']  = fmdls+mdl_name
+                        print('   Effort spent: ' + str(ttrain) +' s.')
+                        sys.stdout.flush()
+                        tmpr.append(sol)
+                    res[scenarios[i]][stock][ahead] = pd.DataFrame(tmpr)
+                
+                tot_res['OUT_MODEL'] = res
+                
+                fdat = f'D:/Escritorio/TFG/Finance-AI/DataProcessed/output/{win}/{tr_tst}/{stock}-{tmod}-{num_layers}-{num_heads}-output.pkl'
+                if os.path.exists(fdat):
+                    save_data(fdat, processed_path, lahead, lpar, tot_res)
+                else:
+                    directory1 = os.path.dirname(fdat)
+                    if not os.path.exists(directory1):
+                        os.makedirs(directory1)
+                        print(f"Directory {directory1} created.")
 
-        res[stock] = {}
-        for ahead in lahead:
-            print('######################################################')
-            print('Training ' + stock + ' ahead ' + str(ahead) + ' days.')
-            trainX = tot_res[ahead]['trainX']
-            trainY = tot_res[ahead]['trainY']
-            testX  = tot_res[ahead]['testX']    
-            testY  = tot_res[ahead]['testY']
-            Y      = tot_res[ahead]['y']
-            vdd    = tot_res[ahead]['vdd']
-            tmpr = []
-            
-            for irp in range(10):
-                seed      = random.randint(0,1000)
-                transformer_start= time.time()
-                mdl_name  = '{}-{}-{}-{:02}.hd5'.format(tmod,stock,ahead,irp)
-                if tmod == "transformer":
-                    sol   = transformer_fun(transformer_parameters,trainX,trainY,testX,testY,Y,vdd,testY.shape[0],bsize,nhn,win,n_ftrs,ahead,stock,seed)
-                transformer_end  = time.time()
-                ttrain    = transformer_end - transformer_start
-                sol['ttrain'] = ttrain
-                sol['epochs']  = epochs
-                sol['bsize']  = bsize
-                sol['nhn']    = nhn
-                sol['win']    = win
-                sol['tr_tst'] = tr_tst
-                sol['transformer_parameters'] = transformer_parameters
-                sol['model']  = fmdls+mdl_name
-                print('   Effort spent: ' + str(ttrain) +' s.')
-                sys.stdout.flush()
-                tmpr.append(sol)
-            res[ahead] = pd.DataFrame(tmpr)
-        
-        tot_res['OUT_MODEL'] = res
-
-        data_path = "D:/Escritorio/TFG/Finance-AI/Datasets"
-        processed_path = "D:/Escritorio/TFG/Finance-AI/DataProcessed"
-        
-        fdat = f'D:/Escritorio/TFG/Finance-AI/DataProcessed/output/{win}/{tr_tst}/{stock}-{tmod}-output.pkl'
-        if os.path.exists(fdat):
-            save_data(fdat, processed_path, lahead, lpar, tot_res)
-        else:
-            directory1 = os.path.dirname(fdat)
-            if not os.path.exists(directory1):
-                os.makedirs(directory1)
-                print(f"Directory {directory1} created.")
-
-            save_data(fdat, processed_path, lahead, lpar, tot_res)                
-            print(f"File {fdat} created and data saved.")
-
-    # save_data(fdat, processed_path, lahead, lpar, tot_res)
+                    save_data(fdat, processed_path, lahead, lpar, tot_res)                
+                    print(f"File {fdat} created and data saved.")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process data and create output.")
-    parser.add_argument("--stock", help="Ticker of the stock to be used.")
-    args = parser.parse_args()
-    main(args)
+    main()
