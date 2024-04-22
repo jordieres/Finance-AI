@@ -5,6 +5,7 @@ data:
   filename_structure: "{ticker} US Equity_{date}.csv"
 
 multi: False
+selected_scenario: 'scenario_2'
 
 scenarios:
   - name: scenario_1
@@ -13,16 +14,41 @@ scenarios:
     tr_tst: [0.7, 0.8]
     lahead: [1, 7, 14, 30, 90]
     n_features: 1
+    n_itr: 10
     serialization:
       1D:
         deep: [10,20,50]
       mD: 
         mdeep: [10,20,50]
+    epochs: 200
+    batch_size: 128
+    nhn: 50
     LSTM:
-      epochs: 200
-      batch_size: 750
-      nhn: 50
       model: "lstm" # lstm, attlstm, stcklstm
     Transformer:
+      model: "transformer"
       num_layers: 2
-      num_heads: 10 
+      num_heads: 10
+
+  - name: scenario_2
+    tickers: ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA"]
+    win: 20
+    tr_tst: [0.75, 0.8]
+    lahead: [1, 7, 14, 30, 90]
+    n_features: 1
+    n_itr: 10
+    serialization:
+      1D:
+        deep: [10,20,50]
+      mD: 
+        mdeep: [10,20,50]
+    epochs: 350
+    batch_size: 256
+    nhn: 100
+    LSTM:
+      model: "lstm" # lstm, attlstm, stcklstm
+    Transformer:
+      model: "transformer"
+      num_layers: 4
+      num_heads: 5
+
