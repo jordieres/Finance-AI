@@ -1,0 +1,10 @@
+keras==3.0.0
+keras_self_attention==0.51.0
+matplotlib==3.5.2
+numpy==1.24.4
+pandas==1.4.3
+PyYAML==5.4.1
+scikit_learn==1.0.2
+tensorflow==2.16.1
+tensorflow_gpu==2.11.0
+torch==2.0.1

@@ -11,7 +11,7 @@ import argparse
 
 from numpy.lib.stride_tricks import sliding_window_view
 
-sys.path.append('D:/Escritorio/TFG/Finance-AI/src')
+sys.path.append('/home/vvallejo/Finance-AI/src')
 from utils_vv_tfg import save_data
 from config.config import get_configuration
 
@@ -19,11 +19,64 @@ warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
 
 class Stock:
+    '''
+    Class that create the Stock, processes the stock data and creates the output files for each stock.
+    ...
+    Attributes:
+    -----------
+    ticker : str
+        the stock ticker
+    _data : DataFrame
+        the stock data
+    _lahead : list
+        list of the number of days ahead
+    tr_tst : float
+        train-test ratio
+    df : DataFrame
+        the stock data
+    scen_name : str
+        the scenario name
+    serial_dict : dict
+        the dictionary with the univariate data
+    mserial_dict : dict
+        the dictionary with the multivariate data
+
+    Methods:
+    --------
+    _read_data(file_name)
+        Returns the data from the data path
+    process_univariate_data(win)
+        Processes the univariate data
+    process_multivariate_data(mwin, m_ftrs)
+        Processes the multivariate data
+    process_stocks()
+        Processes the stock data
+    calculate_mean(data, axis=None)
+        Returns the mean of the data
+    calculate_min(data, axis=None)
+        Returns the minimum of the data
+    calculate_max(data, axis=None)
+        Returns the maximum of the data
+    check_nan_values(trainX, testX, ahead)
+        Checks for NaN values in the data
+    check_infinite_values(df)
+        Checks for infinite values in the data
+    prepare_data_for_modeling(Xn, Yn, multi)
+        Returns the data for modeling
+    prepare_multivariate_data(df_x, win, n_ftrs, idx)
+        Returns the multivariate data for modeling
+    compute_sentiment_scores()
+        Computes the sentiment scores for the data
+    compute_volatility()
+        Computes the volatility for the data with the Garman and Klass model
+    compute_trend()
+        Computes the trend for the price and volume data
+    '''
     def __init__(self, ticker, file_name, lahead, tr_tst, scen_name):
         self.ticker = ticker
         self._data = self._read_data(file_name)
         self._lahead = lahead
-        self._tr_tst = tr_tst
+        self.tr_tst = tr_tst
         self.df = pd.DataFrame(self._data)
         self.scen_name = scen_name
         self.serial_dict = {}
@@ -58,27 +111,31 @@ class Stock:
             X = X.iloc[:-(ahead + 1), :]
             X.set_index(df.index[(win - 1):-(ahead + 1)], drop=True, inplace=True)
 
-            xm = self.calculate_mean(X, axis=1)
-            cX = X.sub(xm, axis=0)
+            x_mean = self.calculate_mean(X, axis=1)
+            center_x = X.sub(x_mean, axis=0)
 
-            mnx = round(min(self.calculate_min(cX)))
-            mxx = round(min(self.calculate_max(cX)))
-            vdd = pd.DataFrame({'mean': xm, 'min': mnx, 'max': mxx})
+            min_x = round(min(self.calculate_min(center_x)))
+            max_x = round(min(self.calculate_max(center_x)))
+            vdd = pd.DataFrame({'mean': x_mean, 'min': min_x, 'max': max_x})
             vdd.set_index(X.index)
 
-            cXn = cX.apply(lambda x: (x - mnx) / (mxx - mnx), axis=1)
-            cYn = pd.Series([((i - j) - mnx) / (mxx - mnx) for i, j in zip(Y.tolist(), xm.tolist())], index=Y.index)
-            cXn = cXn.astype('float32')
-            cYn = cYn.astype('float32')
+            center_x_norm = center_x.apply(lambda x: (x - min_x) / (max_x - min_x), axis=1)
+            center_y_norm = pd.Series([((i - j) - min_x) / (max_x - min_x)
+                                        for i, j in zip(Y.tolist(), x_mean.tolist())], index=Y.index)
+            center_x_norm = center_x_norm.astype('float32')
+            center_y_norm = center_y_norm.astype('float32')
 
-            pmod = int(cXn.shape[0] * self._tr_tst)
-            trainX = cXn.iloc[:pmod, :]
-            trainY = cYn.iloc[:pmod]
-            testX = cXn.iloc[pmod:, :]
-            testY = cYn.iloc[pmod:]
-            self.serial_dict['INPUT_DATA'][self.scen_name][ahead] = {"x": X, "y": Y, "nx": cXn, "ny": cYn, "numt": pmod,
-                                        "trainX": trainX, "trainY": trainY,
-                                        "testX": testX, "testY": testY, "vdd": vdd}
+            pmod = int(center_x_norm.shape[0] * self.tr_tst)
+            train_x = center_x_norm.iloc[:pmod, :]
+            train_y = center_y_norm.iloc[:pmod]
+            test_x = center_x_norm.iloc[pmod:, :]
+            test_y = center_y_norm.iloc[pmod:]
+            self.serial_dict['INPUT_DATA'][self.scen_name][ahead] = {
+                                        "x": X, "y": Y, "nx": center_x_norm,
+                                        "ny": center_y_norm, "numt": pmod,
+                                        "trainX": train_x, "trainY": train_y,
+                                        "testX": test_x, "testY": test_y, "vdd": vdd
+                                        }
 
     def process_multivariate_data(self, mwin, m_ftrs):
         '''
@@ -89,59 +146,69 @@ class Stock:
         '''
         self.check_infinite_values(self.df)
 
-        dfY = self.df["PX_OPEN"].copy()
-        dfX = self.df[["PX_OPEN", "PX_LAST", "RSI_14D", "PX_TREND", "PX_VTREND", "TWEET_POSTIVIE", "TWEET_NEGATIVE",
-                   "NEWS_POSITIVE", "NEWS_NEGATIVE", "VOLATILITY"]].copy()
-        idx = dfX.index[(mwin - 1):]
+        df_y = self.df["PX_OPEN"].copy()
+        df_x = self.df[["PX_OPEN", "PX_LAST", "RSI_14D", "PX_TREND", 
+                        "PX_VTREND", "TWEET_POSTIVIE", "TWEET_NEGATIVE",
+                        "NEWS_POSITIVE", "NEWS_NEGATIVE", "VOLATILITY"]].copy()
+        idx = df_x.index[(mwin - 1):]
 
-        mX, cols = self.prepare_multivariate_data(dfX, mwin, m_ftrs, idx)
+        multi_x, cols = self.prepare_multivariate_data(df_x, mwin, m_ftrs, idx)
 
         for ahead in self._lahead:
-            mXl = mX[:-(ahead + 1), :, :]
-            mYl = dfY.iloc[ahead + mwin:]
-            avmX = self.calculate_mean(mXl, axis=1)
+            multi_x_list = multi_x[:-(ahead + 1), :, :]
+            multi_y_list = df_y.iloc[ahead + mwin:]
+            mean_multi_x = self.calculate_mean(multi_x_list, axis=1)
 
-            avmXc = mXl - avmX[:, None, :]
-            pavX = pd.DataFrame(avmX, columns=dfX.columns)
+            mean_multi_x_c = multi_x_list - mean_multi_x[:, None, :]
+            pavX = pd.DataFrame(mean_multi_x, columns=df_x.columns)
             pavX.set_index(idx[ahead+1:], drop=True, inplace=True)
-            mxmX = np.round(self.calculate_max(avmXc, axis=(0, 1)), 2)
-            mnmX = np.round(self.calculate_min(avmXc, axis=(0, 1)), 2)
-            mvdd = {"mean": pavX, "min": mnmX, "max": mxmX}
-            mXn = (avmXc - mnmX[None, None, :]) / (mxmX[None, None, :] - mnmX[None, None, :] + 0.00001)
-            mYn = ((mYl.to_numpy() - avmX[:, 0]) - mnmX[0]) / (mxmX[0] - mnmX[0] + 0.00001)
+            max_mult_x = np.round(self.calculate_max(mean_multi_x_c, axis=(0, 1)), 2)
+            min_mult_x = np.round(self.calculate_min(mean_multi_x_c, axis=(0, 1)), 2)
+            mvdd = {"mean": pavX, "min": min_mult_x, "max": max_mult_x}
+            multi_x_norm = (mean_multi_x_c - min_mult_x[None, None, :]) / (max_mult_x[None, None, :] - min_mult_x[None, None, :] + 0.00001)
+            multi_y_norm = ((multi_y_list.to_numpy() - mean_multi_x[:, 0]) - min_mult_x[0]) / (max_mult_x[0] - min_mult_x[0] + 0.00001)
 
-            mXn = mXn.astype("float32")
-            mYn = mYn.astype("float32")
+            multi_x_norm = multi_x_norm.astype("float32")
+            multi_y_norm = multi_y_norm.astype("float32")
 
-            mtrainX, mtrainY, mtestX, mtestY, pmod = self.prepare_data_for_modeling(mXn, mYn, multi=True)
+            multi_train_x, multi_train_y, multi_test_x, multi_test_y, pmod = self.prepare_data_for_modeling(multi_x_norm, multi_y_norm, multi=True)
 
-            self.check_nan_values(mtrainX, mtestX, ahead)
+            self.check_nan_values(multi_train_x, multi_test_x, ahead)
 
             xdx = idx[:-(ahead + 1)]
-            self.mserial_dict['INPUT_DATA'][self.scen_name][ahead] = {"x": mXl, "y": mYl, "nx": mXn, "ny": mYn, "numt": pmod,
-                                        "trainX": mtrainX, "trainY": mtrainY,
-                                        "testX": mtestX, "testY": mtestY, "vdd": mvdd, "cnms": cols,
+            self.mserial_dict['INPUT_DATA'][self.scen_name][ahead] = {"x": multi_x_list, "y": multi_y_list, "nx": multi_x_norm, "ny": multi_y_norm, "numt": pmod,
+                                        "trainX": multi_train_x, "trainY": multi_train_y,
+                                        "testX": multi_test_x, "testY": multi_test_y, "vdd": mvdd, "cnms": cols,
                                         "idtest": xdx[pmod:]}
 
-    def prepare_multivariate_data(self, dfX, win, n_ftrs, idx):
+    def prepare_multivariate_data(self, df_x, win, n_ftrs, idx):
         '''
-        Returns the multivariate data for modeling
-        
+        Prepares the multivariate data for modeling
+        ...
         Parameters:
-        dfX - multivariate features data
-        win - window size
-        n_ftrs - number of features
-        idx - index of the data
-        '''
-        mX = []
-        cols = dfX.columns
-        for i in range(len(dfX.columns)):
-            lX = np.lib.stride_tricks.sliding_window_view(dfX.iloc[:, i].to_numpy(), window_shape=win)[::n_ftrs]
+        df_x : DataFrame
+            the features
+        win : int
+            the window size
+        n_ftrs : int
+            the number of features
+        idx : list
+            the index
+
+        Returns:
+        multi_x : array
+            the multivariate data
+        cols : list
+            the columns'''
+        multi_x = []
+        cols = df_x.columns
+        for i in range(len(df_x.columns)):
+            lX = np.lib.stride_tricks.sliding_window_view(df_x.iloc[:, i].to_numpy(), window_shape=win)[::n_ftrs]
             ss = pd.DataFrame.from_records(lX)
             ss.set_index(idx, drop=True, inplace=True)
-            mX.append(ss.to_numpy())
-        mX = np.transpose(np.stack(mX, axis=1), (0, 2, 1))
-        return mX, cols
+            multi_x.append(ss.to_numpy())
+        multi_x = np.transpose(np.stack(multi_x, axis=1), (0, 2, 1))
+        return multi_x, cols
 
     def compute_sentiment_scores(self):
         '''
@@ -154,7 +221,7 @@ class Stock:
 
     def compute_volatility(self):
         '''
-        Computes the volatility for the data with the Garman and Klass model
+        Computes the daily volatility for each row in the data
         '''
         # self.df['VOLATILITY'] = 1/2 * (np.log(self.df["PX_HIGH"]) - np.log(self.df["PX_LOW"]))**2 - (2 * np.log(2) - 1) * (np.log(self.df["PX_LAST"]) - np.log(self.df["PX_OPEN"]))**2
         self.df['VOLATILITY'] = self.df['PX_LAST'].pct_change().rolling(window=252).std()
@@ -166,62 +233,110 @@ class Stock:
         self.df['PX_TREND'] = 2 * (self.df['PX_LAST'] - self.df['PX_OPEN']) / (self.df['PX_OPEN'] + self.df['PX_LAST'])
         self.df['PX_VTREND'] = self.df['PX_TREND'] * self.df['VOLUME']
 
-    def check_nan_values(self, trainX, testX, ahead):
+    def check_nan_values(self, train_x, test_x, ahead):
         '''
         Checks for NaN values in the data
-        '''
-        if np.isinf(trainX).any() or np.isnan(trainX).any():
-            print("Stock {} ahead: {} has nans.".format(self.ticker, ahead))
-            print(trainX)
+        ...
+        Parameters:
+        train_x : DataFrame
+            the training data
+        test_x : DataFrame
+            the testing data
+        ahead : int
+            the number of days ahead
+            
+        Returns:
+        Error message if NaN values are found'''
+        if np.isinf(train_x).any() or np.isnan(train_x).any():
+            print(f"Stock {self.ticker} ahead: {ahead} has nans.")
+            print(train_x)
 
-        if np.isnan(testX).any():
-            print("Stock {} ahead: {} has nans.".format(self.ticker, ahead))
-            print(testX)
+        if np.isnan(test_x).any():
+            print(f"Stock {self.ticker} ahead: {ahead} has nans.")
+            print(test_x)
 
     def check_infinite_values(self, df):
         '''
         Checks for infinite values in the data
-        '''
+        ...
+        Parameters:
+        df - the DataFrame
+        
+        Returns:
+        Error message if infinite values are found'''
         if np.isinf(df).values.sum() > 0:
             print("Error: Infinite values were found in the DataFrame.")
  
-    def prepare_data_for_modeling(self, Xn, Yn, multi):
+    def prepare_data_for_modeling(self, x_norm, y_norm, multi):
         '''
         Returns the data for modeling
-        
+        ...
         Parameters:
-        Xn - normalized features data
-        Yn - normalized target data
-        multi - boolean value for multivariate data'''
-        pmod = int(Xn.shape[0] * self._tr_tst)
-        if multi == False:  # Univariate
-            trainX = Xn.iloc[:pmod,:]
-            trainY = Yn.iloc[:pmod]
-            testX  = Xn.iloc[pmod:,:]
-            testY  = Yn.iloc[pmod:]
+        x_norm - the features
+        y_norm - the target
+        multi - if the data is multivariate
+
+        Returns:
+        Train_x - data for training
+        Train_y - target for training
+        Test_x - data for testing
+        Test_y - target for testing
+        '''
+        pmod = int(x_norm.shape[0] * self.tr_tst)
+        if multi is False:  # Univariate
+            train_x = x_norm.iloc[:pmod,:]
+            train_y = y_norm.iloc[:pmod]
+            test_x  = x_norm.iloc[pmod:,:]
+            test_y  = y_norm.iloc[pmod:]
         else:  # Multivariate
-            trainX = Xn[:pmod, :, :]
-            trainY = Yn[:pmod]
-            testX = Xn[pmod:, :, :]
-            testY = Yn[pmod:]
-        return trainX, trainY, testX, testY, pmod
+            train_x = x_norm[:pmod, :, :]
+            train_y = y_norm[:pmod]
+            test_x = x_norm[pmod:, :, :]
+            test_y = y_norm[pmod:]
+        return train_x, train_y, test_x, test_y, pmod
     
     def process_stocks(self):
         '''
-        Processes the stock data
-        '''
+        Processes the stock data'''
         self.compute_sentiment_scores()
         self.compute_volatility()
         self.compute_trend()
         self.df.dropna(inplace=True)
 
     def calculate_mean(self, data, axis=None):
+        '''
+        Returns the mean of the data
+        ...
+        Parameters:
+        data - the data
+        axis - the axis
+        
+        Returns:
+        The mean of the data'''
         return np.mean(data, axis=axis)
 
     def calculate_min(self, data, axis=None):
+        '''
+        Returns the minimum of the data
+        ...
+        Parameters:
+        data - the data
+        axis - the axis
+        
+        Returns:
+        The minimum of the data'''
         return np.min(data, axis=axis)
 
-    def calculate_max(self, data, axis=None):      
+    def calculate_max(self, data, axis=None):
+        '''
+        Returns the maximum of the data
+        ...
+        Parameters:
+        data - the data
+        axis - the axis
+        
+        Returns:
+        The maximum of the data'''
         return np.max(data, axis=axis)
 
 
@@ -251,7 +366,8 @@ class VAction(argparse.Action):
 
 
 def main(args):
-
+    '''
+    Main function that processes the data and creates the output files for each stock'''
     config, params_file = get_configuration()
 
     if args.verbose > 0:
@@ -269,8 +385,6 @@ def main(args):
         lahead = scenario['lahead']
         stock_list = scenario['tickers']
         n_ftrs = scenario['n_features']
-        deep = scenario['serialization']['1D']['deep']
-        mdeep = scenario['serialization']['mD']['mdeep']
 
         for ticker in stock_list:
             filename = filename_structure.format(ticker=ticker, date=date)
@@ -282,14 +396,14 @@ def main(args):
                 stock = Stock(ticker, file, lahead, tr_tst, scen_name)
                 stock.process_stocks()
 
-                lpar = [win, n_ftrs, tr_tst, deep]
+                lpar = [win, n_ftrs, tr_tst]
                 # Univariate data processing
                 stock.process_univariate_data(win)
-                fdat1 = out_path + f"/{win}/{stock._tr_tst}/{ticker}-input-output.pkl"
+                fdat1 = out_path + f"/{win}/{stock.tr_tst}/{ticker}-input-output.pkl"
 
                 # Multivariate data processing
                 stock.process_multivariate_data(win, n_ftrs)
-                fdat2 = out_path + f"/{win}/{stock._tr_tst}/{ticker}-m-input-output.pkl"
+                fdat2 = out_path + f"/{win}/{stock.tr_tst}/{ticker}-m-input-output.pkl"
 
                 # Save univariate data
                 if not os.path.exists(fdat1):
@@ -316,6 +430,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process data and create output.")
     parser.add_argument("-v", "--verbose", nargs='?', action=VAction,\
             dest='verbose', help="Option for detailed information")
-
     args = parser.parse_args()
     main(args)

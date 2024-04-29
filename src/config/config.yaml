@@ -1,11 +1,10 @@
 data:
-  data_path: "D:/Escritorio/TFG/Finance-AI/Datasets"
-  output_path: "D:/Escritorio/TFG/Finance-AI/DataProcessed"
+  data_path: "/home/vvallejo/Finance-AI/Datasets"
+  output_path: "/home/vvallejo/Finance-AI/DataProcessed"
   date: '060124'
   filename_structure: "{ticker} US Equity_{date}.csv"
 
-multi: False
-selected_scenario: 'scenario_2'
+selected_scenario: ['scenario_1', 'scenario_2']
 
 scenarios:
   - name: scenario_1
@@ -15,40 +14,52 @@ scenarios:
     lahead: [1, 7, 14, 30, 90]
     n_features: 1
     n_itr: 10
-    serialization:
-      1D:
-        deep: [10,20,50]
-      mD: 
-        mdeep: [10,20,50]
-    epochs: 200
-    batch_size: 128
-    nhn: 50
-    LSTM:
-      model: "lstm" # lstm, attlstm, stcklstm
-    Transformer:
-      model: "transformer"
-      num_layers: 2
-      num_heads: 10
-
-  - name: scenario_2
-    tickers: ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA"]
-    win: 20
-    tr_tst: [0.75, 0.8]
-    lahead: [1, 7, 14, 30, 90]
-    n_features: 1
-    n_itr: 10
-    serialization:
-      1D:
-        deep: [10,20,50]
-      mD: 
-        mdeep: [10,20,50]
-    epochs: 350
-    batch_size: 256
-    nhn: 100
+    epochs: 256
+    batch_size: 32
+    nhn: 64
     LSTM:
       model: "lstm" # lstm, attlstm, stcklstm
     Transformer:
       model: "transformer"
       num_layers: 4
-      num_heads: 5
+      num_heads: 8
+      num_variables: [2, 4, 6, 8]
+
+  - name: scenario_2
+    tickers: ["AMZN", "GOOGL", "MSFT", "NVDA", "TSLA"]
+    win: 50
+    tr_tst: [0.75, 0.85]
+    lahead: [1, 7, 14, 30, 90]
+    n_features: 1
+    n_itr: 10
+    epochs: 256
+    batch_size: 32
+    nhn: 64
+    LSTM:
+      model: "stcklstm" # lstm, attlstm, stcklstm
+    Transformer:
+      model: "transformer"
+      num_layers: 2
+      num_heads: 4
+      num_variables: [3, 5, 7, 10]
+
+  - name: scenario_3
+    tickers: ["AMZN", "PEP", "TMUS", "CSCO"]
+    win: 2
+    tr_tst: [0.75, 0.8]
+    lahead: [1, 7, 14, 30, 90]
+    n_features: 1
+    n_itr: 10
+    epochs: 256
+    batch_size: 32
+    nhn: 64
+    LSTM:
+      model: "attlstm" # lstm, attlstm, stcklstm
+    Transformer:
+      model: "transformer"
+      num_layers: 2
+      num_heads: 8
+      num_variables: [2, 3, 9, 10]
+
+
 

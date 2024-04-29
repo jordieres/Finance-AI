@@ -1,5 +1,0 @@
-data:
-  data_path: "D:/Escritorio/TFG/Finance-AI/Datasets"
-  output_path: "D:/Escritorio/TFG/Finance-AI/DataProcessed"
-
-window: 20
