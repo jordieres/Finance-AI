@@ -161,7 +161,7 @@ def eval_lstm(np_test_X, np_test_y, test_X, model, vdd, Y, ahead):
 
     return({'msep':msep,'msey':msey,'Ys':DY, 'eff': eff})
 
-def load_output_preprocessed_data(win, tr_tst, multi=False):
+def load_output_preprocessed_data(win, tr_tst, multi):
     '''Loads the preprocessed data from the output files
     ...
     Parameters
@@ -181,7 +181,7 @@ def load_output_preprocessed_data(win, tr_tst, multi=False):
     all_results = {}
 
     # Directory containing the results files
-    directory = f'home/vvallejo/Finance-AI/DataProcessed/output/{win}/{tr_tst}/'
+    directory = f'home/vvallejo/Finance-AI/dataprocessed/output/{win}/{tr_tst}/'
 
     # Get list of files in directory
     files = os.listdir(directory) 

@@ -1,10 +1,8 @@
 data:
-  data_path: "/home/vvallejo/Finance-AI/Datasets"
-  output_path: "/home/vvallejo/Finance-AI/DataProcessed"
+  data_path: "/home/vvallejo/Finance-AI/datasets"
+  output_path: "/home/vvallejo/Finance-AI/dataprocessed"
   date: '060124'
   filename_structure: "{ticker} US Equity_{date}.csv"
-
-selected_scenario: ['scenario_1', 'scenario_2']
 
 scenarios:
   - name: scenario_1
@@ -41,7 +39,7 @@ scenarios:
       model: "transformer"
       num_layers: 2
       num_heads: 4
-      num_variables: [3, 5, 7, 10]
+      num_variables: [5, 7, 10]
 
   - name: scenario_3
     tickers: ["AMZN", "PEP", "TMUS", "CSCO"]

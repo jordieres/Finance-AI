@@ -45,7 +45,7 @@ def graphical_results(select_scen):
 def run_dataprocessing_script():
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        data_script_path = os.path.join(current_dir, "DataPreprocessing", "DataPreprocessing.py")
+        data_script_path = os.path.join(current_dir, "dataprocessed", "DataPreprocessing.py")
 
         subprocess.run(["python3", data_script_path, "-v", "1"], check=True)
     except Exception as e:
@@ -54,7 +54,7 @@ def run_dataprocessing_script():
 def run_lstm_script():
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        lstm_script_path = os.path.join(current_dir, "ModelsLSTM", "ModellingLSTM.py")
+        lstm_script_path = os.path.join(current_dir, "modelslstm", "ModellingLSTM.py")
 
         subprocess.run(["python3", lstm_script_path], check=True)
     except Exception as e:
@@ -63,7 +63,7 @@ def run_lstm_script():
 def run_unidimensional_transformer_script():
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        transformer_script_path = os.path.join(current_dir, "ModelTransformer", "UniDimTransformer.py")
+        transformer_script_path = os.path.join(current_dir, "modeltransformer", "UniDimTransformer.py")
 
         subprocess.run(["python3", transformer_script_path], check=True)
     except Exception as e:
@@ -72,7 +72,7 @@ def run_unidimensional_transformer_script():
 def run_multidimensional_transformer_script():
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        multi_transformer_script_path = os.path.join(current_dir, "ModelTransformer", "MultiDimTransformer.py")
+        multi_transformer_script_path = os.path.join(current_dir, "modeltransformer", "MultiDimTransformer.py")
 
         subprocess.run(["python3", multi_transformer_script_path], check=True)
     except Exception as e:
