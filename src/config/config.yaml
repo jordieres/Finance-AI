@@ -20,8 +20,8 @@ scenarios:
     Transformer:
       model: "transformer"
       num_layers: 4
-      num_heads: 8
-      num_variables: [2, 4, 6, 8]
+      num_heads: 16
+      features: ["PX_LAST", "RSI_14D", "PX_TREND", "PX_VTREND"]
 
   - name: scenario_2
     tickers: ["AMZN", "GOOGL", "MSFT", "NVDA", "TSLA"]
@@ -39,7 +39,7 @@ scenarios:
       model: "transformer"
       num_layers: 2
       num_heads: 4
-      num_variables: [5, 7, 10]
+      features: ["TWEET_POSTIVIE", "TWEET_NEGATIVE", "NEWS_POSITIVE", "NEWS_NEGATIVE"]
 
   - name: scenario_3
     tickers: ["AMZN", "PEP", "TMUS", "CSCO"]
@@ -57,7 +57,7 @@ scenarios:
       model: "transformer"
       num_layers: 2
       num_heads: 8
-      num_variables: [2, 3, 9, 10]
+      features: ["PX_LAST", "PX_TREND", "VOLATILITY"]
 
 
 
