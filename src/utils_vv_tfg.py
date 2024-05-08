@@ -75,7 +75,12 @@ def load_preprocessed_data(path, win, tr_tst, ticker, multi):
     else:
         raise FileNotFoundError(f"El archivo {fdat} no existe.")
     
-
+def select_features(features, selected_features):
+    features_index = []
+    for i, feature in enumerate(features):
+        if feature in selected_features:
+            features_index.append(i)
+    return features_index
 
 def denormalize_data(Yn, mvdd, idx, multi):
     """
@@ -108,7 +113,7 @@ def denormalize_data(Yn, mvdd, idx, multi):
         min_x = mvdd["min"][1]
         max_x = mvdd["max"][1]
         mean_x = mvdd["mean"]['PX_LAST']
-        denormalized_Yn = pd.Series(Yn[:,0,0], index=idx) * (max_x - min_x) + min_x + mean_x
+        denormalized_Yn = pd.Series(Yn, index=idx) * (max_x - min_x) + min_x + mean_x
     
     return denormalized_Yn
 
