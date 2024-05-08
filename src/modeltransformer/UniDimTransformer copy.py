@@ -229,16 +229,15 @@ def main():
 
         for tr_tst in list_tr_tst:
             out_model = {}
-            for stock in stock_list:
+            for stock in ['AAPL']:
                 lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, multi)
                 win, n_ftrs, tr_tst = lpar
                 fmdls = f'/home/vvallejo/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
                 if not os.path.exists(fmdls):
                     os.makedirs(fmdls)
-                res[scenario['name']] = {}
-                res[scenario['name']][stock] = {}
+                res[stock] = {}
                 print(f"Traning for {tr_tst*100}% training data")
-                for ahead in lahead:
+                for ahead in [1]:
                     tot = tot_res['INPUT_DATA'][scenario['name']][ahead]
                     train_X = tot['trainX']
                     train_y = tot['trainY']
@@ -269,14 +268,12 @@ def main():
                         print('   Effort spent: ' + str(ttrain) +' s.')
                         sys.stdout.flush()
                         tmpr.append(sol)
-                    res[scenario['name']][stock][ahead] = pd.DataFrame(tmpr)
+                    res[stock][ahead] = pd.DataFrame(tmpr)
 
-                if scenario['name'] not in out_model:
-                    out_model[scenario['name']] = {}
-                out_model[scenario['name']][stock] = res[scenario['name']][stock]
+                out_model[stock] = res[stock]
                 
             tot_res['OUT_MODEL'] = out_model              
-            fdat = f'/home/vvallejo/Finance-AI/dataprocessed/output/{win}/{tr_tst}/prueba-{tmod}-output.pkl'
+            fdat = '/home/vvallejo/Finance-AI/dataprocessed/output/{}/{}/{}-{}-output.pkl'.format(win,tr_tst,scenario['name'],tmod)
             if os.path.exists(fdat):
                 save_data(fdat, processed_path, lahead, lpar, tot_res)
             else:

@@ -9,11 +9,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn.metrics import mean_squared_error
-from sklearn.feature_selection import SelectKBest
 
 
 sys.path.append('/home/vvallejo/Finance-AI/src')
-from utils_vv_tfg import save_data, load_preprocessed_data, denormalize_data
+from utils_vv_tfg import save_data, load_preprocessed_data, denormalize_data, select_features
 from config.config import get_configuration
 
 warnings.filterwarnings('ignore')
@@ -22,23 +21,6 @@ warnings.simplefilter('ignore')
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, max_len=5000):
-        super(PositionalEncoding, self).__init__()
-        self.dropout = nn.Dropout(p=0.1)
-        
-        pe = torch.zeros(max_len, d_model)
-        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-torch.log(torch.tensor(10000.0)) / d_model))
-        pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0).transpose(0, 1)
-        self.register_buffer('pe', pe)
-
-    def forward(self, x):
-        x = x + self.pe[:x.size(0), :]
-        return self.dropout(x)
 
 class Transformer(nn.Module):
     def __init__(self, input_dim, embed_dim, num_layers, num_heads, dropout, output_dim):
@@ -49,9 +31,7 @@ class Transformer(nn.Module):
         self.num_heads = num_heads
         self.dropout = dropout 
         
-        self.embedding = nn.Linear(self.input_dim, self.embed_dim)
-        self.positional_encoding = PositionalEncoding(self.embed_dim)
-        
+        self.embedding = nn.Linear(self.input_dim, self.embed_dim)        
         self.encoder_layers = nn.ModuleList([nn.TransformerEncoderLayer(self.embed_dim, self.num_heads, dropout=self.dropout) 
                                             for _ in range(self.num_layers)])
         self.attentions = nn.ModuleList([nn.MultiheadAttention(
@@ -68,7 +48,6 @@ class Transformer(nn.Module):
 
     def forward(self, src):
         src_embedded = self.embedding(src)
-        src_embedded = self.positional_encoding(src_embedded)
         src_embedded = src_embedded.permute(1, 0, 2)
 
         for attention, feedforward, encoder in zip(self.attentions, self.feedforwards, self.encoder_layers):
@@ -141,13 +120,13 @@ def transformer_fun(transformer_parameters, train_X, train_y, test_X, test_y,
     nit = 0
     lloss = float('nan')
     model = Transformer(input_dim=k, embed_dim=nhn, 
-                        num_layers=transformer_parameters['num_layers'], num_heads=transformer_parameters['num_heads'], dropout=0.1, output_dim=1)
+                        num_layers=transformer_parameters['num_layers'], num_heads=transformer_parameters['num_heads'], dropout=0.001, output_dim=1)
     # Define the loss function and optimizer
     model.to(device)
     while torch.isnan(torch.Tensor([lloss])) and nit < 5:
         torch.manual_seed(seed)
         criterion = nn.MSELoss()
-        optimizer = optim.AdamW(model.parameters(), lr=0.001)       
+        optimizer = optim.AdamW(model.parameters(), lr=0.0001)       
         outputs = []
         # Train the model
         print("Training the model...")
@@ -167,13 +146,14 @@ def transformer_fun(transformer_parameters, train_X, train_y, test_X, test_y,
             #Evaluate the model
             with torch.no_grad():
                 y_hat  = model(np_test_X)
-                absolute_difference = np.abs(y_hat[:,0,0].cpu().detach().numpy() - np_test_y.cpu().detach().numpy())
+                y_hat_mean = np.mean(y_hat[:,:,0].cpu().detach().numpy(), axis=1)
+                absolute_difference = np.abs(y_hat_mean - np_test_y.cpu().detach().numpy())
                 correct = np.count_nonzero(absolute_difference <= 0.1)
                 acc = round((correct / len(np_test_y)) *100, 3)
                 #outputs.append(y_hat.detach().numpy())
             if epoch % 10 == 0:
                 print(f'Accuracy: {acc}%')
-        outputs.append(y_hat.cpu().detach().numpy())
+        outputs.append(y_hat_mean)
 
         lloss = loss.item()
         nit += 1
@@ -188,10 +168,6 @@ def transformer_fun(transformer_parameters, train_X, train_y, test_X, test_y,
     
     msep = mean_squared_error(DY.Y_real, DY.Y_predicted) # error y predicted - y real
     msey = mean_squared_error(DY.Y_real, DY.Y_yesterday) # error y yesterday - y real
-    
-    '''Yn = outputs[0]
-    yf = pd.Series(Yn[0,:,0], index=test_X_idx)
-    msep = mean_squared_error(test_y, yf).real'''
 
     # Prepare the result dictionary
     df_result = {
@@ -230,78 +206,64 @@ def main():
             res[scen_model] = tmod
             num_layers = config['num_layers']
             num_heads = config['num_heads']
-            k_variables = config['num_variables']
+            scenario_features = config['features']
+            k_variables = len(scenario_features)
             transformer_parameters = {
                 'num_layers': num_layers,
                 'num_heads': num_heads
             }
 
         for tr_tst in list_tr_tst:
-            out_model_k = {}
-            for k in [2]:
-                transformer_parameters['num_variables'] = k
-                out_model_stock = {}
-                for stock in ['AAPL']:               
-                    lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, multi)
-                    win, n_ftrs, tr_tst = lpar
+            transformer_parameters['num_variables'] = k_variables
+            for stock in ['AAPL']:               
+                lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, multi)
+                win, n_ftrs, tr_tst = lpar
 
-                    fmdls = f'/home/vvallejo/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
-                    if not os.path.exists(fmdls):
-                        os.makedirs(fmdls)
-                    res[scenario['name']] = {}
-                    res[scenario['name']][stock] = {}
-                    print(f"Traning for {tr_tst*100}% training data")
-                    for ahead in [1]:
-                        tot = tot_res['INPUT_DATA'][scenario['name']][ahead]
-                        train_X = tot['trainX']
-                        train_y = tot['trainY']
-                        test_X  = tot['testX']    
-                        test_y  = tot['testY']
-                        Y      = tot['y']
-                        vdd    = tot['vdd']
-                        test_X_idx = tot['idtest']
-                        X_train_reshaped = train_X[:, 0, :]
-                        selector = SelectKBest(k=k)
-                        selector.fit_transform(X_train_reshaped, train_y)
-                        selected_features = list(selector.get_support(indices=True))
-                        train_X = train_X[:,:,selected_features]
-                        test_X = test_X[:,:,selected_features]
-                        tmpr = []                  
-                        for irp in range(n_itr):
-                            seed      = random.randint(0,1000)
-                            print('######################################################')
-                            print(f'{irp} Training {stock} {ahead} days ahead. K={k}')
-                            transformer_start= time.time()
-                            mdl_name  = f'{tmod}-{stock}-{ahead}-{irp}_{k}.hd5'
-                            if tmod == "transformer":
-                                sol   = transformer_fun(transformer_parameters,train_X,train_y,test_X,test_y,
-                                                        Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,test_X_idx,k,seed)
-                            transformer_end  = time.time()
-                            ttrain    = transformer_end - transformer_start
-                            sol['ttrain'] = ttrain
-                            sol['epochs']  = epochs
-                            sol['bsize']  = bsize
-                            sol['nhn']    = nhn
-                            sol['win']    = win
-                            sol['tr_tst'] = tr_tst
-                            sol['transformer_parameters'] = transformer_parameters
-                            sol['model']  = fmdls+mdl_name
-                            print('   Effort spent: ' + str(ttrain) +' s.')
-                            sys.stdout.flush()
-                            tmpr.append(sol)
-                        res[scenario['name']][stock][ahead] = pd.DataFrame(tmpr)
-
-                    if scenario['name'] not in out_model_stock:
-                        out_model_stock[scenario['name']] = {}
-                    out_model_stock[scenario['name']][stock] = res[scenario['name']][stock]
-                if scenario['name'] not in out_model_k:
-                    out_model_k[scenario['name']] = {}
-                '''if k not in out_model_k[scenario['name']].keys():
-                    out_model_k[scenario['name']][k] = {}'''
-                out_model_k[scenario['name']][k] = out_model_stock[scenario['name']]
-
-            tot_res['OUT_MODEL'] = out_model_k     
-            fdat = f'/home/vvallejo/Finance-AI/dataprocessed/output/{win}/{tr_tst}/prueba-{tmod}-m-output.pkl'
+                fmdls = f'/home/vvallejo/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
+                if not os.path.exists(fmdls):
+                    os.makedirs(fmdls)
+                res[stock] = {}
+                print(f"Traning for {tr_tst*100}% training data")
+                for ahead in [90]:
+                    tot = tot_res['INPUT_DATA'][scenario['name']][ahead]
+                    train_X = tot['trainX']
+                    train_y = tot['trainY']
+                    test_X  = tot['testX']    
+                    test_y  = tot['testY']
+                    Y      = tot['y']
+                    vdd    = tot['vdd']
+                    test_X_idx = tot['idtest']
+                    features = tot['cnms']
+                    selected_features = select_features(features, scenario_features)
+                    train_X = train_X[:,:,selected_features]
+                    test_X = test_X[:,:,selected_features]
+                    tmpr = []                  
+                    for irp in range(n_itr):
+                        seed      = random.randint(0,1000)
+                        print('######################################################')
+                        print(f'{irp} Training {stock} {ahead} days ahead')
+                        transformer_start= time.time()
+                        name = scenario['name']
+                        mdl_name  = f'{name}-{tmod}-{stock}-{ahead}-{irp}.hd5'
+                        if tmod == "transformer":
+                            sol   = transformer_fun(transformer_parameters,train_X,train_y,test_X,test_y,
+                                                    Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,test_X_idx,k_variables,seed)
+                        transformer_end  = time.time()
+                        ttrain    = transformer_end - transformer_start
+                        sol['ttrain'] = ttrain
+                        sol['epochs']  = epochs
+                        sol['bsize']  = bsize
+                        sol['nhn']    = nhn
+                        sol['win']    = win
+                        sol['tr_tst'] = tr_tst
+                        sol['transformer_parameters'] = transformer_parameters
+                        sol['model']  = fmdls+mdl_name
+                        print('   Effort spent: ' + str(ttrain) +' s.')
+                        sys.stdout.flush()
+                        tmpr.append(sol)
+                    res[stock][ahead] = pd.DataFrame(tmpr)
+            tot_res['OUT_MODEL'] = res[stock]    
+            fdat = '/home/vvallejo/Finance-AI/dataprocessed/output/{}/{}/{}-{}-m-output.pkl'.format(win,tr_tst,scenario['name'],tmod)
             if os.path.exists(fdat):
                 save_data(fdat, processed_path, lahead, lpar, tot_res)
             else:

@@ -296,7 +296,7 @@ def main():
                 out_model_k[scenario['name']][k] = out_model_stock[scenario['name']]
 
             tot_res['OUT_MODEL'] = out_model_k     
-            fdat = f'/home/vvallejo/Finance-AI/dataprocessed/output/{win}/{tr_tst}/{tmod}-m-output.pkl'
+            fdat = f'/home/vvallejo/Finance-AI/dataprocessed/output/{win}/{tr_tst}/{scenario['name']}-{tmod}-m-output.pkl'
             if os.path.exists(fdat):
                 save_data(fdat, processed_path, lahead, lpar, tot_res)
             else:
