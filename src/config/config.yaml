@@ -16,7 +16,7 @@ scenarios:
     batch_size: 32
     nhn: 64
     LSTM:
-      model: "lstm" # lstm, attlstm, stcklstm
+      model: "lstm" #lstm, attlstm, stcklstm
     Transformer:
       model: "transformer"
       num_layers: 4
@@ -25,11 +25,11 @@ scenarios:
 
   - name: scenario_2
     tickers: ["AMZN", "GOOGL", "MSFT", "NVDA", "TSLA"]
-    win: 50
+    win: 20
     tr_tst: [0.75, 0.85]
     lahead: [1, 7, 14, 30, 90]
     n_features: 1
-    n_itr: 10
+    n_itr: 2
     epochs: 256
     batch_size: 32
     nhn: 64
@@ -47,7 +47,7 @@ scenarios:
     tr_tst: [0.75, 0.8]
     lahead: [1, 7, 14, 30, 90]
     n_features: 1
-    n_itr: 10
+    n_itr: 5
     epochs: 256
     batch_size: 32
     nhn: 64
