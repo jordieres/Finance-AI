@@ -83,8 +83,6 @@ class Stock:
         self.mserial_dict = {}
         self.serial_dict['INPUT_DATA'] = {}
         self.mserial_dict['INPUT_DATA'] = {}
-        self.serial_dict['INPUT_DATA'][self.scen_name] = {}
-        self.mserial_dict['INPUT_DATA'][self.scen_name] = {}
 
     def _read_data(self, file_name):
         '''
@@ -114,8 +112,8 @@ class Stock:
             x_mean = self.calculate_mean(X, axis=1)
             center_x = X.sub(x_mean, axis=0)
 
-            min_x = round(min(self.calculate_min(center_x)))
-            max_x = round(min(self.calculate_max(center_x)))
+            min_x = min(self.calculate_min(center_x))
+            max_x = max(self.calculate_max(center_x))
             vdd = pd.DataFrame({'mean': x_mean, 'min': min_x, 'max': max_x})
             vdd.set_index(X.index)
 
@@ -130,7 +128,7 @@ class Stock:
             train_y = center_y_norm.iloc[:pmod]
             test_x = center_x_norm.iloc[pmod:, :]
             test_y = center_y_norm.iloc[pmod:]
-            self.serial_dict['INPUT_DATA'][self.scen_name][ahead] = {
+            self.serial_dict['INPUT_DATA'][ahead] = {
                                         "x": X, "y": Y, "nx": center_x_norm,
                                         "ny": center_y_norm, "numt": pmod,
                                         "trainX": train_x, "trainY": train_y,
@@ -147,7 +145,7 @@ class Stock:
         self.check_infinite_values(self.df)
 
         df_y = self.df["PX_LAST"].copy()
-        df_x = self.df[["PX_LAST", "RSI_14D", "PX_TREND", 
+        df_x = self.df[["PX_LAST", "PX_OPEN", "RSI_14D", "PX_TREND", 
                         "PX_VTREND", "TWEET_POSTIVIE", "TWEET_NEGATIVE",
                         "NEWS_POSITIVE", "NEWS_NEGATIVE", "VOLATILITY"]].copy()
         idx = df_x.index[(mwin - 1):]
@@ -162,8 +160,8 @@ class Stock:
             mean_multi_x_c = multi_x_list - mean_multi_x[:, None, :]
             pavX = pd.DataFrame(mean_multi_x, columns=df_x.columns)
             pavX.set_index(idx[ahead+1:], drop=True, inplace=True)
-            max_mult_x = np.round(self.calculate_max(mean_multi_x_c, axis=(0, 1)))
-            min_mult_x = np.round(self.calculate_min(mean_multi_x_c, axis=(0, 1)))
+            max_mult_x = self.calculate_max(mean_multi_x_c, axis=(0, 1))
+            min_mult_x = self.calculate_min(mean_multi_x_c, axis=(0, 1))
             mvdd = {"mean": pavX, "min": min_mult_x, "max": max_mult_x}
             multi_x_norm = (mean_multi_x_c - min_mult_x[None, None, :]) / (max_mult_x[None, None, :] - min_mult_x[None, None, :] + 0.00001)
             multi_y_norm = ((multi_y_list.to_numpy() - mean_multi_x[:, 0]) - min_mult_x[0]) / (max_mult_x[0] - min_mult_x[0] + 0.00001)
@@ -176,7 +174,7 @@ class Stock:
             self.check_nan_values(multi_train_x, multi_test_x, ahead)
 
             xdx = idx[:-(ahead + 1)]
-            self.mserial_dict['INPUT_DATA'][self.scen_name][ahead] = {"x": multi_x_list, "y": multi_y_list, "nx": multi_x_norm, "ny": multi_y_norm, "numt": pmod,
+            self.mserial_dict['INPUT_DATA'][ahead] = {"x": multi_x_list, "y": multi_y_list, "nx": multi_x_norm, "ny": multi_y_norm, "numt": pmod,
                                         "trainX": multi_train_x, "trainY": multi_train_y,
                                         "testX": multi_test_x, "testY": multi_test_y, "vdd": mvdd, "cnms": cols,
                                         "idtest": xdx[pmod:]}
@@ -223,7 +221,6 @@ class Stock:
         '''
         Computes the daily volatility for each row in the data
         '''
-        # self.df['VOLATILITY'] = 1/2 * (np.log(self.df["PX_HIGH"]) - np.log(self.df["PX_LOW"]))**2 - (2 * np.log(2) - 1) * (np.log(self.df["PX_LAST"]) - np.log(self.df["PX_OPEN"]))**2
         self.df['VOLATILITY'] = self.df['PX_LAST'].pct_change().rolling(window=252).std()
 
     def compute_trend(self):
@@ -325,7 +322,7 @@ class Stock:
         
         Returns:
         The minimum of the data'''
-        return np.min(data, axis=axis)
+        return data.min(axis=axis)
 
     def calculate_max(self, data, axis=None):
         '''
@@ -337,7 +334,7 @@ class Stock:
         
         Returns:
         The maximum of the data'''
-        return np.max(data, axis=axis)
+        return data.max(axis=axis)
 
 
 # from https://stackoverflow.com/questions/6076690/verbose-level-with-argparse-and-multiple-v-options
@@ -399,11 +396,11 @@ def main(args):
                 lpar = [win, n_ftrs, tr_tst]
                 # Univariate data processing
                 stock.process_univariate_data(win)
-                fdat1 = out_path + f"/{win}/{stock.tr_tst}/{ticker}-input-output.pkl"
+                fdat1 = out_path + "/input/{}/{}/{}-{}-input.pkl".format(win,stock.tr_tst,stock.scen_name,ticker)
 
                 # Multivariate data processing
                 stock.process_multivariate_data(win, n_ftrs)
-                fdat2 = out_path + f"/{win}/{stock.tr_tst}/{ticker}-m-input-output.pkl"
+                fdat2 = out_path + "/input/{}/{}/{}-{}-m-input.pkl".format(win,stock.tr_tst,stock.scen_name,ticker)
 
                 # Save univariate data
                 if not os.path.exists(fdat1):

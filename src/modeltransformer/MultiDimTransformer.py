@@ -8,86 +8,62 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.metrics import mean_squared_error
-from sklearn.feature_selection import SelectKBest
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 
 sys.path.append('/home/vvallejo/Finance-AI/src')
-from utils_vv_tfg import save_data, load_preprocessed_data, denormalize_data
+from utils_vv_tfg import save_data, load_preprocessed_data, denormalize_data, select_features
 from config.config import get_configuration
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
 
-class Transformer(nn.Module):
-    '''Class to build a transformer model for time series forecasting 
-    ...
-    Attributes
-    ----------
-    input_dim : int
-        input dimension
-    embed_dim : int
-        embedding dimension
-    num_layers : int
-        number of layers
-    num_heads : int
-        number of heads
-    dropout : float
-        dropout rate
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
-    Methods
-    -------
-    forward(src)
-        Forward pass of the Transformer model   
-        '''
+class Transformer(nn.Module):
     def __init__(self, input_dim, embed_dim, num_layers, num_heads, dropout):
-        '''Initializes the Transformer model'''
         super(Transformer, self).__init__()
         self.input_dim = input_dim
         self.embed_dim = embed_dim
         self.num_layers = num_layers
         self.num_heads = num_heads
-        self.dropout = dropout    
-        self.embedding = nn.Linear(self.input_dim, self.embed_dim)
+        self.dropout = dropout
+        
+        self.embedding = nn.Linear(self.input_dim, self.embed_dim)        
+        self.encoder_layers = nn.ModuleList([nn.TransformerEncoderLayer(self.embed_dim, self.num_heads, dropout=self.dropout) 
+                                            for _ in range(self.num_layers)])
         self.attentions = nn.ModuleList([nn.MultiheadAttention(
                                         self.embed_dim, self.num_heads) for _ in range(self.num_layers)])
-        self.dropout = nn.Dropout(dropout)
         self.feedforwards = nn.ModuleList([nn.Sequential(
-                                            nn.Linear(self.embed_dim, 4 * self.embed_dim),
+                                            nn.Linear(self.embed_dim, 4*self.embed_dim),
                                             nn.ReLU(),
-                                            nn.Linear(4 * self.embed_dim, self.embed_dim)
+                                            nn.Linear(4*self.embed_dim, self.embed_dim)
                                             ) for _ in range(self.num_layers)])
         self.layer_norm1 = nn.LayerNorm(self.embed_dim)
         self.layer_norm2 = nn.LayerNorm(self.embed_dim)
-        self.output_layer = nn.Linear(self.embed_dim, 1)  # Output is a single value
-    
+        self.output_layer = nn.Linear(self.embed_dim, 1)
+
     def forward(self, src):
-        '''Forward pass of the Transformer model
-        ...
-        Parameters
-        ----------
-        src : torch.Tensor
-            input tensor
-
-        Returns
-        -------
-        torch.Tensor
-            output tensor'''
         src_embedded = self.embedding(src)
-        src_embedded = src_embedded.permute(1, 0, 2)  # Permute to match Transformer input format: (seq_len, win_size, embed_dim)
+        src_embedded = src_embedded.permute(1, 0, 2)
 
-        for attention, feedforward in zip(self.attentions, self.feedforwards):
+        for attention, feedforward, encoder in zip(self.attentions, self.feedforwards, self.encoder_layers):
+            src_embedded = self.layer_norm1(src_embedded)
+            src_embedded = encoder(src_embedded)
+            src_embedded = self.layer_norm2(src_embedded)
             attention_output, _ = attention(src_embedded, src_embedded, src_embedded)
             attention_output = self.layer_norm1(src_embedded)
             src_embedded = feedforward(attention_output)
             attention_output = self.layer_norm2(src_embedded)
             src_embedded = feedforward(attention_output)
+
         output = self.output_layer(src_embedded)
-        output = self.dropout(output)
         return output
 
 def transformer_fun(transformer_parameters, train_X, train_y, test_X, test_y, 
-                    Y, vdd, epochs, bsize, nhn, win, n_ftrs, ahead, stock, test_X_idx, seed):
+                    Y, vdd, epochs, bsize, nhn, win, n_ftrs, ahead, stock, test_X_idx, k, seed):
     '''Trains a Transformer model for time series forecasting
     ...
     Parameters
@@ -130,24 +106,23 @@ def transformer_fun(transformer_parameters, train_X, train_y, test_X, test_y,
     '''
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     # Convert to PyTorch tensors
-    np_train_X = torch.tensor(train_X.reshape(n_ftrs, train_X.shape[0], train_X.shape[1]), 
+    np_train_X = torch.tensor(train_X.reshape(train_X.shape[1], train_X.shape[0], k), 
                               dtype=torch.float32).to(device)
     np_train_y = torch.tensor(train_y, dtype=torch.float32).to(device)
-    np_test_X = torch.tensor(test_X.reshape(n_ftrs, test_X.shape[0], test_X.shape[1]), 
+    np_test_X = torch.tensor(test_X.reshape(test_X.shape[1], test_X.shape[0], k), 
                              dtype=torch.float32).to(device)
     np_test_y = torch.tensor(test_y, dtype=torch.float32).to(device)
 
     nit = 0
     lloss = float('nan')
-    model = Transformer(input_dim=(np_train_X.shape[1]), embed_dim=nhn, 
-                        num_layers=transformer_parameters['num_layers'], num_heads=transformer_parameters['num_heads'], dropout=0.1)
+    model = Transformer(input_dim=k, embed_dim=nhn, 
+                        num_layers=transformer_parameters['num_layers'], num_heads=transformer_parameters['num_heads'], dropout=0.001)
     # Define the loss function and optimizer
     model.to(device)
     while torch.isnan(torch.Tensor([lloss])) and nit < 5:
         torch.manual_seed(seed)
-        
         criterion = nn.MSELoss()
-        optimizer = optim.Adam(model.parameters(), lr=0.001)       
+        optimizer = optim.AdamW(model.parameters(), lr=0.0001)       
         outputs = []
         # Train the model
         print("Training the model...")
@@ -155,45 +130,48 @@ def transformer_fun(transformer_parameters, train_X, train_y, test_X, test_y,
             optimizer.zero_grad()
             #Train the model
             for i in range(0, len(np_train_X), bsize):
-                batch_np_train_X = np_train_X[i:i+bsize, :].to(device)
+                batch_np_train_X = np_train_X[:, i:i+bsize, :].to(device)
                 batch_np_train_y = np_train_y[i:i+bsize].to(device)
                 output = model(batch_np_train_X)
-                loss = criterion(output, batch_np_train_y.unsqueeze(1))  # Unsqueeze to match output shape
+                loss = criterion(output, batch_np_train_y)
                 loss.backward()
                 optimizer.step()
-                #outputs.append(output.detach().numpy())
             if epoch % 10 == 0:
                 print(f"Epoch [{epoch+1}/{epochs}]: Loss: {loss.item()}")
             #Evaluate the model
             with torch.no_grad():
                 y_hat  = model(np_test_X)
-                absolute_difference = np.abs(y_hat[:,0,0].cpu().detach().numpy() - np_test_y.cpu().detach().numpy())
+                y_hat_mean = np.mean(y_hat[:,:,0].cpu().detach().numpy(), axis=1)
+                absolute_difference = np.abs(y_hat_mean - np_test_y.cpu().detach().numpy())
                 correct = np.count_nonzero(absolute_difference <= 0.1)
                 acc = round((correct / len(np_test_y)) *100, 3)
                 #outputs.append(y_hat.detach().numpy())
             if epoch % 10 == 0:
                 print(f'Accuracy: {acc}%')
-        outputs.append(y_hat.cpu().detach().numpy())
+        outputs.append(y_hat_mean)
 
         lloss = loss.item()
         nit += 1
         
-    #y_forecast = denormalize_data(outputs[-len(test_X_idx):], vdd, test_X_idx, True) # denormalize the forecast
     y_forecast = denormalize_data(outputs[0], vdd, test_X_idx, True)
     y_forecast = y_forecast.apply(lambda x: x) # get the value
     y_real  = Y.loc[test_X_idx] # y real
     y_yesterday  = Y.shift(ahead).loc[test_X_idx] # Y yesterday
     DY  = pd.concat([y_real,y_forecast,y_yesterday],axis=1)
     DY.columns = ['Y_real','Y_predicted','Y_yesterday']
-    DY.dropna(inplace=True)
     
-    msep = mean_squared_error(DY.Y_predicted , DY.Y_real) # error y predicted - y real
-    msey = mean_squared_error(DY.Y_yesterday , DY.Y_real) # error y yesterday - y real
+    msep = mean_squared_error(DY.Y_real, DY.Y_predicted) # error y predicted - y real
+    msey = mean_squared_error(DY.Y_real, DY.Y_yesterday) # error y yesterday - y real
+    maep = mean_absolute_error(DY.Y_predicted , DY.Y_real) # error y predicted - y real
+    maey = mean_absolute_error(DY.Y_yesterday , DY.Y_real) # error y yesterday - y real
     # Prepare the result dictionary
     df_result = {
-        'MSEP': msep,'MSEY': msey,'Stock': stock,
-        'DY': DY,'ALG': 'Transformer','seed': seed,'epochs': epoch,
-        'nhn': nhn,'win': win,'ndims': 1,'lossh': lloss,
+        'MSEP': msep,'MSEY': msey,
+        'MAEP': maep, 'MAEY': maey, 
+        'Stock': stock,'DY': DY,
+        'ALG': 'Transformer','seed': seed,
+        'epochs': epoch,'nhn': nhn,'win': win,
+        'ndims': 1,'lossh': lloss,
         'nit': nit,'model': model
     }
 
@@ -226,77 +204,67 @@ def main():
             res[scen_model] = tmod
             num_layers = config['num_layers']
             num_heads = config['num_heads']
-            k_variables = config['num_variables']
+            scenario_features = config['features']
+            k_variables = len(scenario_features)
             transformer_parameters = {
                 'num_layers': num_layers,
                 'num_heads': num_heads
             }
 
         for tr_tst in list_tr_tst:
-            out_model_k = {}
-            for k in k_variables:
-                transformer_parameters['num_variables'] = k
-                out_model_stock = {}
-                for stock in stock_list:               
-                    lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, multi)
-                    win, n_ftrs, tr_tst = lpar
+            out_model = {}
+            transformer_parameters['num_variables'] = k_variables
+            for stock in ['AAPL']:               
+                lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, scenario['name'], multi)
+                win, n_ftrs, tr_tst = lpar
 
-                    fmdls = f'/home/vvallejo/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
-                    if not os.path.exists(fmdls):
-                        os.makedirs(fmdls)
-                    res[scenario['name']] = {}
-                    res[scenario['name']][stock] = {}
-                    print(f"Traning for {tr_tst*100}% training data")
-                    for ahead in lahead:
-                        tot = tot_res['INPUT_DATA'][scenario['name']][ahead]
-                        train_X = tot['trainX']
-                        train_y = tot['trainY']
-                        test_X  = tot['testX']    
-                        test_y  = tot['testY']
-                        Y      = tot['y']
-                        vdd    = tot['vdd']
-                        test_X_idx = tot['idtest']
-                        X_train_reshaped = train_X[:, 0, :]
-                        X_test_reshaped = test_X[:, 0, :]
-                        selector = SelectKBest(k=k)
-                        train_X = selector.fit_transform(X_train_reshaped, train_y)
-                        test_X = selector.transform(X_test_reshaped)
-                        tmpr = []                  
-                        for irp in range(n_itr):
-                            seed      = random.randint(0,1000)
-                            print('######################################################')
-                            print(f'{irp} Training {stock} {ahead} days ahead. K={k}')
-                            transformer_start= time.time()
-                            mdl_name  = f'{tmod}-{stock}-{ahead}-{irp}_{k}.hd5'
-                            if tmod == "transformer":
-                                sol   = transformer_fun(transformer_parameters,train_X,train_y,test_X,test_y,
-                                                        Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,test_X_idx,seed)
-                            transformer_end  = time.time()
-                            ttrain    = transformer_end - transformer_start
-                            sol['ttrain'] = ttrain
-                            sol['epochs']  = epochs
-                            sol['bsize']  = bsize
-                            sol['nhn']    = nhn
-                            sol['win']    = win
-                            sol['tr_tst'] = tr_tst
-                            sol['transformer_parameters'] = transformer_parameters
-                            sol['model']  = fmdls+mdl_name
-                            print('   Effort spent: ' + str(ttrain) +' s.')
-                            sys.stdout.flush()
-                            tmpr.append(sol)
-                        res[scenario['name']][stock][ahead] = pd.DataFrame(tmpr)
+                fmdls = f'/home/vvallejo/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
+                if not os.path.exists(fmdls):
+                    os.makedirs(fmdls)
+                res[stock] = {}
+                print(f"Traning for {tr_tst*100}% training data")
+                for ahead in [90]:
+                    tot = tot_res['INPUT_DATA'][ahead]
+                    train_X = tot['trainX']
+                    train_y = tot['trainY']
+                    test_X  = tot['testX']    
+                    test_y  = tot['testY']
+                    Y      = tot['y']
+                    vdd    = tot['vdd']
+                    test_X_idx = tot['idtest']
+                    features = tot['cnms']
+                    selected_features = select_features(features, scenario_features)
+                    train_X = train_X[:,:,selected_features]
+                    test_X = test_X[:,:,selected_features]
+                    tmpr = []                  
+                    for irp in range(n_itr):
+                        seed      = random.randint(0,1000)
+                        print('######################################################')
+                        print(f'{irp} Training {stock} {ahead} days ahead')
+                        transformer_start= time.time()
+                        name = scenario['name']
+                        mdl_name  = f'{name}-{tmod}-{stock}-{ahead}-{irp}.hd5'
+                        if tmod == "transformer":
+                            sol   = transformer_fun(transformer_parameters,train_X,train_y,test_X,test_y,
+                                                    Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,test_X_idx,k_variables,seed)
+                        transformer_end  = time.time()
+                        ttrain    = transformer_end - transformer_start
+                        sol['ttrain'] = ttrain
+                        sol['epochs']  = epochs
+                        sol['bsize']  = bsize
+                        sol['nhn']    = nhn
+                        sol['win']    = win
+                        sol['tr_tst'] = tr_tst
+                        sol['transformer_parameters'] = transformer_parameters
+                        sol['model']  = fmdls+mdl_name
+                        print('   Effort spent: ' + str(ttrain) +' s.')
+                        sys.stdout.flush()
+                        tmpr.append(sol)
+                    res[stock][ahead] = pd.DataFrame(tmpr)
+                out_model[stock] = res[stock]
 
-                    if scenario['name'] not in out_model_stock:
-                        out_model_stock[scenario['name']] = {}
-                    out_model_stock[scenario['name']][stock] = res[scenario['name']][stock]
-                if scenario['name'] not in out_model_k:
-                    out_model_k[scenario['name']] = {}
-                '''if k not in out_model_k[scenario['name']].keys():
-                    out_model_k[scenario['name']][k] = {}'''
-                out_model_k[scenario['name']][k] = out_model_stock[scenario['name']]
-
-            tot_res['OUT_MODEL'] = out_model_k     
-            fdat = f'/home/vvallejo/Finance-AI/dataprocessed/output/{win}/{tr_tst}/{scenario['name']}-{tmod}-m-output.pkl'
+            tot_res['OUT_MODEL'] = out_model    
+            fdat = '/home/vvallejo/Finance-AI/dataprocessed/output/{}/{}/{}-{}-m-output.pkl'.format(win,tr_tst,scenario['name'],tmod)
             if os.path.exists(fdat):
                 save_data(fdat, processed_path, lahead, lpar, tot_res)
             else:
