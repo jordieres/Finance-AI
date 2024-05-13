@@ -30,7 +30,7 @@ def save_data(fich, out_path, lahead, lpar, tot_res):
         pickle.dump(tot_res, file)
     file.close()
     
-def load_preprocessed_data(path, win, tr_tst, ticker, multi):
+def load_preprocessed_data(path, win, tr_tst, ticker, scen_name, multi):
     '''Loads the preprocessed data from a pickle file
     ...
     Parameters
@@ -60,9 +60,9 @@ def load_preprocessed_data(path, win, tr_tst, ticker, multi):
         Dictionary containing the results of the model
         '''
     if multi is True:
-        fdat = path+ f"/{win}/{tr_tst}/{ticker}-m-input-output.pkl"
+        fdat = path+ f"/input/{win}/{tr_tst}/{scen_name}-{ticker}-m-input.pkl"
     else:
-        fdat = path+ f"/{win}/{tr_tst}/{ticker}-input-output.pkl"
+        fdat = path+ f"/input/{win}/{tr_tst}/{scen_name}-{ticker}-input.pkl"
 
     if os.path.exists(fdat):
         with open(fdat, "rb") as openfile:
@@ -82,7 +82,7 @@ def select_features(features, selected_features):
             features_index.append(i)
     return features_index
 
-def denormalize_data(Yn, mvdd, idx, multi):
+def denormalize_data(Yn, mvdd, idx, multi, lstm=False):
     """
     Returns the denormalized target data.
     ...
@@ -102,18 +102,26 @@ def denormalize_data(Yn, mvdd, idx, multi):
     denormalized_Yn : pd.Series
         Denormalized target data    
     """
-    
-    if multi is False:
+    if lstm is True:    
         min_x = mvdd["min"]
         max_x = mvdd["max"]
         mean_x = mvdd["mean"]
-        denormalized_Yn = pd.Series(Yn[:,0,0], index=idx) * (max_x - min_x) + min_x + mean_x
-        denormalized_Yn.dropna(inplace=True)
-    else:
-        min_x = mvdd["min"][1]
-        max_x = mvdd["max"][1]
-        mean_x = mvdd["mean"]['PX_LAST']
         denormalized_Yn = pd.Series(Yn, index=idx) * (max_x - min_x) + min_x + mean_x
+        denormalized_Yn.dropna(inplace=True)
+    
+    else:
+        if multi is False:
+            min_x = mvdd["min"]
+            max_x = mvdd["max"]
+            mean_x = mvdd["mean"]
+            denormalized_Yn = pd.Series(Yn[:,0,0], index=idx) * (max_x - min_x) + min_x + mean_x
+            denormalized_Yn.dropna(inplace=True)
+        else:
+            min_x = mvdd["min"][1]
+            max_x = mvdd["max"][1]
+            mean_x = mvdd["mean"]['PX_LAST']
+            denormalized_Yn = pd.Series(Yn, index=idx) * (max_x - min_x) + min_x + mean_x
+            denormalized_Yn.dropna(inplace=True)
     
     return denormalized_Yn
 
@@ -152,10 +160,12 @@ def eval_lstm(np_test_X, np_test_y, test_X, model, vdd, Y, ahead):
     y_pred   = np.concatenate(y_hat,axis=0).tolist()
     eff    = pd.DataFrame({'Yorg':np_test_y,'Yfct':y_pred}) 
     eff.set_index(test_X.index,drop=True,inplace=True)
-    accuracy = accuracy_score(np_test_y, y_pred)
+    absolute_difference = np.abs(y_pred - np_test_y)
+    correct = np.count_nonzero(absolute_difference <= 0.1)
+    accuracy = round((correct / len(np_test_y)) *100, 3)
     print(f"Accuracy: {accuracy*100}%")
     jdx = test_X.index
-    y_forecast = denormalize_data(y_pred, vdd, jdx, multi=False) # denormalize the forecast
+    y_forecast = denormalize_data(y_pred, vdd, jdx, multi=False, lstm=True) # denormalize the forecast
     y_real  = Y.loc[jdx] # y real
     y_yesterday  = Y.shift(ahead).loc[jdx] # Y yesterday
     DY  = pd.concat([y_real,y_forecast,y_yesterday],axis=1)

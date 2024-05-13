@@ -1,0 +1,18 @@
+digraph "packages" {
+rankdir=BT
+charset="utf-8"
+"src" [color="black", label=<src>, shape="box", style="solid"];
+"src.config" [color="black", label=<src.config>, shape="box", style="solid"];
+"src.config.config" [color="black", label=<src.config.config>, shape="box", style="solid"];
+"src.datapreprocessing" [color="black", label=<src.datapreprocessing>, shape="box", style="solid"];
+"src.datapreprocessing.DataPreprocessing" [color="black", label=<src.datapreprocessing.DataPreprocessing>, shape="box", style="solid"];
+"src.main" [color="black", label=<src.main>, shape="box", style="solid"];
+"src.modelslstm" [color="black", label=<src.modelslstm>, shape="box", style="solid"];
+"src.modelslstm.ModellingLSTM" [color="black", label=<src.modelslstm.ModellingLSTM>, shape="box", style="solid"];
+"src.modeltransformer" [color="black", label=<src.modeltransformer>, shape="box", style="solid"];
+"src.modeltransformer.MultiDimTransformer" [color="black", label=<src.modeltransformer.MultiDimTransformer>, shape="box", style="solid"];
+"src.modeltransformer.UniDimTransformer" [color="black", label=<src.modeltransformer.UniDimTransformer>, shape="box", style="solid"];
+"src.utils_vv_tfg" [color="black", label=<src.utils_vv_tfg>, shape="box", style="solid"];
+"src.main" -> "src.config.config" [arrowhead="open", arrowtail="none"];
+"src.main" -> "src.utils_vv_tfg" [arrowhead="open", arrowtail="none"];
+}

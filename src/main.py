@@ -5,8 +5,6 @@ import random
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
-sys.path.append('/home/vvallejo/Finance-AI/src')
-
 from utils_vv_tfg import load_output_preprocessed_data, plot_results_comparison, plot_ahead_perf_sameStock
 from config.config import get_configuration
 
@@ -45,7 +43,7 @@ def graphical_results(select_scen):
 def run_dataprocessing_script():
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        data_script_path = os.path.join(current_dir, "dataprocessed", "DataPreprocessing.py")
+        data_script_path = os.path.join(current_dir, "datapreprocessing", "DataPreprocessing.py")
 
         subprocess.run(["python3", data_script_path, "-v", "1"], check=True)
     except Exception as e:
@@ -79,7 +77,8 @@ def run_multidimensional_transformer_script():
         print("An error occurred while running Transformer.py:", e)
 
 def main():
-    run_dataprocessing_script()
+    print('ok')
+    #run_dataprocessing_script()
     #run_lstm_script()
     #run_unidimensional_transformer_script()
     #run_multidimensional_transformer_script()
