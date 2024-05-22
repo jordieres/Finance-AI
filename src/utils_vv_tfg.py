@@ -117,10 +117,10 @@ def denormalize_data(Yn, mvdd, idx, multi, lstm=False):
             denormalized_Yn = pd.Series(Yn[:,0,0], index=idx) * (max_x - min_x) + min_x + mean_x
             denormalized_Yn.dropna(inplace=True)
         else:
-            min_x = mvdd["min"][1]
-            max_x = mvdd["max"][1]
+            min_x = mvdd["min"][0]
+            max_x = mvdd["max"][0]
             mean_x = mvdd["mean"]['PX_LAST']
-            denormalized_Yn = pd.Series(Yn, index=idx) * (max_x - min_x) + min_x + mean_x
+            denormalized_Yn = pd.Series(Yn[:,0,0], index=idx) * (max_x - min_x) + min_x + mean_x
             denormalized_Yn.dropna(inplace=True)
     
     return denormalized_Yn

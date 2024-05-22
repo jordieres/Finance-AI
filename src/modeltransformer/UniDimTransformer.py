@@ -29,39 +29,21 @@ class Transformer(nn.Module):
         self.embed_dim = embed_dim
         self.num_layers = num_layers
         self.num_heads = num_heads
-        self.dropout = dropout 
+        self.dropout = dropout
         
-        self.embedding = nn.Linear(self.input_dim, self.embed_dim)
-        
-        self.encoder_layers = nn.ModuleList([nn.TransformerEncoderLayer(self.embed_dim, self.num_heads, dropout=self.dropout) 
-                                            for _ in range(self.num_layers)])
-        self.attentions = nn.ModuleList([nn.MultiheadAttention(
-                                        self.embed_dim, self.num_heads) for _ in range(self.num_layers)])
-        self.feedforwards = nn.ModuleList([nn.Sequential(
-                                            nn.Linear(self.embed_dim, 4 * self.embed_dim),
-                                            nn.ReLU(),
-                                            nn.Linear(4 * self.embed_dim, self.embed_dim)
-                                            ) for _ in range(self.num_layers)])
-        self.layer_norm1 = nn.LayerNorm(self.embed_dim)
-        self.layer_norm2 = nn.LayerNorm(self.embed_dim)
+        self.embedding = nn.Linear(self.input_dim, self.embed_dim)        
+        self.encoder_layers = nn.ModuleList([nn.TransformerEncoderLayer(self.embed_dim, self.num_heads, dim_feedforward=4*self.embed_dim, dropout=self.dropout)
+                                             for _ in range(self.num_layers)])
         self.output_layer = nn.Linear(self.embed_dim, 1)
 
     def forward(self, src):
         src_embedded = self.embedding(src)
         src_embedded = src_embedded.permute(1, 0, 2)
-        
-        for layer in self.encoder_layers:
-            src_embedded = self.layer_norm1(src_embedded)
-            src_embedded = layer(src_embedded)
-            src_embedded = self.layer_norm2(src_embedded)
 
-        for attention, feedforward in zip(self.attentions, self.feedforwards):
-            attention_output, _ = attention(src_embedded, src_embedded, src_embedded)
-            attention_output = self.layer_norm1(src_embedded)
-            src_embedded = feedforward(attention_output)
-            attention_output = self.layer_norm2(src_embedded)
-            src_embedded = feedforward(attention_output)
+        for encoder in self.encoder_layers:
+            src_embedded = encoder(src_embedded)
 
+        #src_embedded = src_embedded.permute(1, 0, 2)  # Volvemos a la forma original (batch, seq, embed)
         output = self.output_layer(src_embedded)
         return output
 
@@ -137,27 +119,25 @@ def transformer_fun(transformer_parameters, train_X, train_y, test_X, test_y,
                 batch_np_train_X = np_train_X[:, i:i+bsize, :].to(device)
                 batch_np_train_y = np_train_y[i:i+bsize].to(device)
                 output = model(batch_np_train_X)
-                loss = criterion(output.squeeze(), batch_np_train_y.unsqueeze(1))  # Unsqueeze to match output shape
-                
+                loss = criterion(output, batch_np_train_y)  # Unsqueeze to match output shape
                 loss.backward()
                 optimizer.step()
-                #outputs.append(output.detach().numpy())
             if epoch % 10 == 0:
-                print(f"Epoch [{epoch+1}/{epochs}]: Loss: {loss.item()}")
+                print(f"Epoch [{epoch+1}/{epochs}]:")
+                print(f"Train Loss: {loss.item()}")
+            #Evaluate the model
             with torch.no_grad():
-                y_hat = model(np_test_X)
-                absolute_difference = np.abs(y_hat[:,0,0].cpu().detach().numpy() - np_test_y.cpu().detach().numpy())
-                correct = np.count_nonzero(absolute_difference <= 0.1)
-                acc = round((correct / len(np_test_y)) *100, 3)
+                y_hat  = model(np_test_X)
+                test_loss = criterion(y_hat, np_test_y)
             if epoch % 10 == 0:
-                print(f'Accuracy: {acc}%')
+                print(f"Test Loss: {test_loss.item()}")
+                print('-----------------------------------')
         outputs.append(y_hat.cpu().detach().numpy())
         lloss = loss.item()
         nit += 1
 
     jdx = test_X.index
     y_forecast = denormalize_data(outputs[0], vdd, jdx, False) # denormalize the forecast
-    y_forecast = y_forecast.apply(lambda x: x) # get the value
     y_real  = Y.loc[jdx] # y real
     y_yesterday  = Y.shift(ahead).loc[jdx] # Y yesterday
     DY  = pd.concat([y_real,y_forecast,y_yesterday],axis=1)
@@ -248,6 +228,7 @@ def main():
                         sol['win']    = win
                         sol['tr_tst'] = tr_tst
                         sol['transformer_parameters'] = transformer_parameters
+                        torch.save(sol['model'], fmdls+mdl_name)
                         sol['model']  = fmdls+mdl_name
                         print('   Effort spent: ' + str(ttrain) +' s.')
                         sys.stdout.flush()

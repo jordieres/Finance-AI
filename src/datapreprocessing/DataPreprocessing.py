@@ -10,7 +10,6 @@ import os
 import argparse
 
 from numpy.lib.stride_tricks import sliding_window_view
-
 sys.path.append('/home/vvallejo/Finance-AI/src')
 from utils_vv_tfg import save_data
 from config.config import get_configuration
@@ -159,7 +158,7 @@ class Stock:
 
             mean_multi_x_c = multi_x_list - mean_multi_x[:, None, :]
             pavX = pd.DataFrame(mean_multi_x, columns=df_x.columns)
-            pavX.set_index(idx[ahead+1:], drop=True, inplace=True)
+            pavX.set_index(df_x.index[(mwin - 1):-(ahead + 1)], drop=True, inplace=True)
             max_mult_x = self.calculate_max(mean_multi_x_c, axis=(0, 1))
             min_mult_x = self.calculate_min(mean_multi_x_c, axis=(0, 1))
             mvdd = {"mean": pavX, "min": min_mult_x, "max": max_mult_x}
@@ -367,10 +366,10 @@ def main(args):
     Main function that processes the data and creates the output files for each stock'''
     config, params_file = get_configuration()
 
-    if args.verbose > 0:
+    '''if args.verbose > 0:
         print("Additional Info:")
         # Add additional information here
-        print("Processing data with the configuration file:", params_file)
+        print("Processing data with the configuration file:", params_file)'''
 
     data_path = config['data']['data_path']
     out_path = config['data']['output_path']

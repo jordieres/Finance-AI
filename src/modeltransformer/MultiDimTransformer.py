@@ -32,33 +32,18 @@ class Transformer(nn.Module):
         self.dropout = dropout
         
         self.embedding = nn.Linear(self.input_dim, self.embed_dim)        
-        self.encoder_layers = nn.ModuleList([nn.TransformerEncoderLayer(self.embed_dim, self.num_heads, dropout=self.dropout) 
-                                            for _ in range(self.num_layers)])
-        self.attentions = nn.ModuleList([nn.MultiheadAttention(
-                                        self.embed_dim, self.num_heads) for _ in range(self.num_layers)])
-        self.feedforwards = nn.ModuleList([nn.Sequential(
-                                            nn.Linear(self.embed_dim, 4*self.embed_dim),
-                                            nn.ReLU(),
-                                            nn.Linear(4*self.embed_dim, self.embed_dim)
-                                            ) for _ in range(self.num_layers)])
-        self.layer_norm1 = nn.LayerNorm(self.embed_dim)
-        self.layer_norm2 = nn.LayerNorm(self.embed_dim)
+        self.encoder_layers = nn.ModuleList([nn.TransformerEncoderLayer(self.embed_dim, self.num_heads, dim_feedforward=4*self.embed_dim, dropout=self.dropout)
+                                             for _ in range(self.num_layers)])
         self.output_layer = nn.Linear(self.embed_dim, 1)
 
     def forward(self, src):
         src_embedded = self.embedding(src)
         src_embedded = src_embedded.permute(1, 0, 2)
 
-        for attention, feedforward, encoder in zip(self.attentions, self.feedforwards, self.encoder_layers):
-            src_embedded = self.layer_norm1(src_embedded)
+        for encoder in self.encoder_layers:
             src_embedded = encoder(src_embedded)
-            src_embedded = self.layer_norm2(src_embedded)
-            attention_output, _ = attention(src_embedded, src_embedded, src_embedded)
-            attention_output = self.layer_norm1(src_embedded)
-            src_embedded = feedforward(attention_output)
-            attention_output = self.layer_norm2(src_embedded)
-            src_embedded = feedforward(attention_output)
 
+        #src_embedded = src_embedded.permute(1, 0, 2)  # Volvemos a la forma original (batch, seq, embed)
         output = self.output_layer(src_embedded)
         return output
 
@@ -104,7 +89,7 @@ def transformer_fun(transformer_parameters, train_X, train_y, test_X, test_y,
     df_result
         dictionary containing the results of the Transformer model training
     '''
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # Convert to PyTorch tensors
     np_train_X = torch.tensor(train_X.reshape(train_X.shape[1], train_X.shape[0], k), 
                               dtype=torch.float32).to(device)
@@ -116,7 +101,7 @@ def transformer_fun(transformer_parameters, train_X, train_y, test_X, test_y,
     nit = 0
     lloss = float('nan')
     model = Transformer(input_dim=k, embed_dim=nhn, 
-                        num_layers=transformer_parameters['num_layers'], num_heads=transformer_parameters['num_heads'], dropout=0.001)
+                        num_layers=transformer_parameters['num_layers'], num_heads=transformer_parameters['num_heads'], dropout=0.01)
     # Define the loss function and optimizer
     model.to(device)
     while torch.isnan(torch.Tensor([lloss])) and nit < 5:
@@ -128,40 +113,36 @@ def transformer_fun(transformer_parameters, train_X, train_y, test_X, test_y,
         print("Training the model...")
         for epoch in range(epochs):
             optimizer.zero_grad()
-            #Train the model
             for i in range(0, len(np_train_X), bsize):
-                batch_np_train_X = np_train_X[:, i:i+bsize, :].to(device)
+                batch_np_train_X = np_train_X[:, i:i+bsize, :].to(device) # (window size, batch size, number of features)
                 batch_np_train_y = np_train_y[i:i+bsize].to(device)
                 output = model(batch_np_train_X)
                 loss = criterion(output, batch_np_train_y)
                 loss.backward()
                 optimizer.step()
             if epoch % 10 == 0:
-                print(f"Epoch [{epoch+1}/{epochs}]: Loss: {loss.item()}")
+                print(f"Epoch [{epoch+1}/{epochs}]:")
+                print(f"Train Loss: {loss.item()}")
             #Evaluate the model
             with torch.no_grad():
                 y_hat  = model(np_test_X)
-                y_hat_mean = np.mean(y_hat[:,:,0].cpu().detach().numpy(), axis=1)
-                absolute_difference = np.abs(y_hat_mean - np_test_y.cpu().detach().numpy())
-                correct = np.count_nonzero(absolute_difference <= 0.1)
-                acc = round((correct / len(np_test_y)) *100, 3)
-                #outputs.append(y_hat.detach().numpy())
+                test_loss = criterion(y_hat, np_test_y)
             if epoch % 10 == 0:
-                print(f'Accuracy: {acc}%')
-        outputs.append(y_hat_mean)
-
+                print(f"Test Loss: {test_loss.item()}")
+                print('-----------------------------------')
+        outputs.append(y_hat.cpu().detach().numpy())
         lloss = loss.item()
         nit += 1
         
     y_forecast = denormalize_data(outputs[0], vdd, test_X_idx, True)
-    y_forecast = y_forecast.apply(lambda x: x) # get the value
+    #y_forecast = y_forecast.apply(lambda x: x) # get the value
     y_real  = Y.loc[test_X_idx] # y real
     y_yesterday  = Y.shift(ahead).loc[test_X_idx] # Y yesterday
     DY  = pd.concat([y_real,y_forecast,y_yesterday],axis=1)
     DY.columns = ['Y_real','Y_predicted','Y_yesterday']
     
-    msep = mean_squared_error(DY.Y_real, DY.Y_predicted) # error y predicted - y real
-    msey = mean_squared_error(DY.Y_real, DY.Y_yesterday) # error y yesterday - y real
+    msep = mean_squared_error(DY.Y_predicted, DY.Y_real) # error y predicted - y real
+    msey = mean_squared_error(DY.Y_yesterday, DY.Y_real) # error y yesterday - y real
     maep = mean_absolute_error(DY.Y_predicted , DY.Y_real) # error y predicted - y real
     maey = mean_absolute_error(DY.Y_yesterday , DY.Y_real) # error y yesterday - y real
     # Prepare the result dictionary
@@ -214,16 +195,15 @@ def main():
         for tr_tst in list_tr_tst:
             out_model = {}
             transformer_parameters['num_variables'] = k_variables
-            for stock in ['AAPL']:               
+            for stock in stock_list:               
                 lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, scenario['name'], multi)
                 win, n_ftrs, tr_tst = lpar
-
                 fmdls = f'/home/vvallejo/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
                 if not os.path.exists(fmdls):
                     os.makedirs(fmdls)
                 res[stock] = {}
                 print(f"Traning for {tr_tst*100}% training data")
-                for ahead in [90]:
+                for ahead in lahead:
                     tot = tot_res['INPUT_DATA'][ahead]
                     train_X = tot['trainX']
                     train_y = tot['trainY']
