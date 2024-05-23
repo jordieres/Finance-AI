@@ -3,7 +3,7 @@ import pickle
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from sklearn.metrics import mean_squared_error, accuracy_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 
 def save_data(fich, out_path, lahead, lpar, tot_res):
@@ -163,7 +163,7 @@ def eval_lstm(np_test_X, np_test_y, test_X, model, vdd, Y, ahead):
     absolute_difference = np.abs(y_pred - np_test_y)
     correct = np.count_nonzero(absolute_difference <= 0.1)
     accuracy = round((correct / len(np_test_y)) *100, 3)
-    print(f"Accuracy: {accuracy*100}%")
+    print(f"Accuracy: {accuracy}%")
     jdx = test_X.index
     y_forecast = denormalize_data(y_pred, vdd, jdx, multi=False, lstm=True) # denormalize the forecast
     y_real  = Y.loc[jdx] # y real
@@ -173,8 +173,10 @@ def eval_lstm(np_test_X, np_test_y, test_X, model, vdd, Y, ahead):
 
     msep= mean_squared_error(DY.Y_predicted , DY.Y_real) # error y predicted - y real
     msey= mean_squared_error(DY.Y_yesterday , DY.Y_real) # error y yesterday - y real
+    maep = mean_absolute_error(DY.Y_predicted , DY.Y_real) # error y predicted - y real
+    maey = mean_absolute_error(DY.Y_yesterday , DY.Y_real) # error y yesterday - y real
 
-    return({'msep':msep,'msey':msey,'Ys':DY, 'eff': eff})
+    return({'msep':msep,'msey':msey, 'maep':maep, 'maey':maey, 'Ys':DY, 'eff': eff})
 
 def load_output_preprocessed_data(win, tr_tst, multi):
     '''Loads the preprocessed data from the output files

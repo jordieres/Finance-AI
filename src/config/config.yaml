@@ -4,6 +4,12 @@ data:
   date: '060124'
   filename_structure: "{ticker} US Equity_{date}.csv"
 
+visualization:
+  plot_path: "/home/vvallejo/Finance-AI/figures"
+  plot_format: "png"
+  scenario: "scenario_1"
+  metric: "mse" # mse, mae
+
 scenarios:
   - name: scenario_1
     tickers: ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA"]
@@ -44,7 +50,7 @@ scenarios:
   - name: scenario_3
     tickers: ["AMZN", "PEP", "TMUS", "CSCO"]
     win: 2
-    tr_tst: [0.75, 0.8]
+    tr_tst: [0.8, 0.875]
     lahead: [1, 7, 14, 30, 90]
     n_features: 1
     n_itr: 5
