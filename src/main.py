@@ -2,82 +2,89 @@ import warnings
 import os, sys
 import subprocess
 import random
+import argparse
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
-from utils_vv_tfg import load_output_preprocessed_data, plot_results_comparison, plot_ahead_perf_sameStock
+from utils_vv_tfg import *
 from config.config import get_configuration
 
-def graphical_results(select_scen):
-    config, _ = get_configuration()
-    processed_path = config['data']['output_path']
+def graphical_results(params_file):
+    config, _ = get_configuration(params_file)
+    selected_scenario = config['visualization']['scenario']
+    metric = config['visualization']['metric']
+    plot_path = config['visualization']['plot_path']
+    plot_format = config['visualization']['plot_format']
 
-    for scenario in config['scenarios']:
-        if scenario['name'] != select_scen:
-            continue
-        else:
-            win_size = scenario['win']
-            list_tr_tst = scenario['tr_tst']
-            lahead = scenario['lahead']
-            stock_list = scenario['tickers']
-            epochs = scenario['epochs']
-            bsize = scenario['batch_size']
-            nhn = scenario['nhn']
-            n_itr = scenario['n_itr']
-            scen_name = scenario['name']
+    for scen in config['scenarios']:
+        if selected_scenario == scen['name']:
+            stock_list = scen['tickers']
+            list_tr_tst = scen['tr_tst']
+            list_win_size = scen['win']
+            lahead = scen['lahead']
+            scen_name = scen['name']
+    for win in list_win_size:
+        all_results = {}
+        for tr_tst in list_tr_tst:
+            all_results[tr_tst] = load_output_preprocessed_data(win, tr_tst, selected_scenario)
         
-            for stock in stock_list:
-                for tr_tst in list_tr_tst:
-                    all_res_uni = load_output_preprocessed_data(win_size, tr_tst, False)
-                    all_res_multi = load_output_preprocessed_data(win_size, tr_tst, True)
-                    model_list_uni = list(all_res_uni.keys())
-                    model_results_uni = all_res_uni
-                    model_list_multi = list(all_res_multi.keys())
-                    model_results_multi = all_res_multi
-                    itr = random.randint(0, n_itr-1)
-                    plot_results_comparison(model_results_uni, lahead, model_list_uni, scen_name, stock, itr, tr_tst)
-                    plot_results_comparison(model_results_multi, lahead, model_list_multi, scen_name, stock, itr, tr_tst)
-            plot_ahead_perf_sameStock(model_results_uni, lahead, model_list_uni, stock_list, list_tr_tst, scen_name)
-            plot_ahead_perf_sameStock(model_results_multi, lahead, model_list_multi, stock_list, list_tr_tst, scen_name)
+        run_plot_res(list_tr_tst, all_results, stock_list, lahead, selected_scenario, metric, scen_name, plot_path, plot_format)
+
+        for selected_model in all_results[tr_tst].keys():
+            plot_metric_boxplots(selected_model, list_tr_tst, all_results, stock_list, lahead, metric, scen_name, plot_path, plot_format)
+            plot_metric_boxplots_with_yesterday(selected_model, list_tr_tst, all_results, stock_list, lahead, metric, scen_name, plot_path, plot_format)
 
 def run_dataprocessing_script():
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        data_script_path = os.path.join(current_dir, "datapreprocessing", "DataPreprocessing.py")
+        data_script_path = os.path.join(current_dir, "DataPreprocessing.py")
 
-        subprocess.run(["python3", data_script_path, "-v", "1"], check=True)
+        subprocess.run(["python3", data_script_path, "-v", "1", "-c", "/home/vvallejo/Finance-AI/src/config/config.yaml"], check=True)
     except Exception as e:
         print("An error occurred while running DataPreprocessing.py:", e)
 
 def run_lstm_script():
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        lstm_script_path = os.path.join(current_dir, "modelslstm", "ModellingLSTM.py")
+        lstm_script_path = os.path.join(current_dir, "ModellingLSTM.py")
 
-        subprocess.run(["python3", lstm_script_path], check=True)
+        subprocess.run(["python3", lstm_script_path, "-c", "/home/vvallejo/Finance-AI/src/config/config.yaml"], check=True)
     except Exception as e:
         print("An error occurred while running ModellingLSTM.py:", e)
 
 def run_unidimensional_transformer_script():
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        transformer_script_path = os.path.join(current_dir, "modeltransformer", "UniDimTransformer.py")
+        transformer_script_path = os.path.join(current_dir, "UniDimTransformer.py")
 
-        subprocess.run(["python3", transformer_script_path], check=True)
+        subprocess.run(["python3", transformer_script_path, "-c", "/home/vvallejo/Finance-AI/src/config/config.yaml"], check=True)
     except Exception as e:
         print("An error occurred while running Transformer.py:", e)
 
 def run_multidimensional_transformer_script():
     try:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        multi_transformer_script_path = os.path.join(current_dir, "modeltransformer", "MultiDimTransformer.py")
+        multi_transformer_script_path = os.path.join(current_dir, "MultiDimTransformer.py")
 
-        subprocess.run(["python3", multi_transformer_script_path], check=True)
+        subprocess.run(["python3", multi_transformer_script_path, "-c", "/home/vvallejo/Finance-AI/src/config/config.yaml"], check=True)
     except Exception as e:
         print("An error occurred while running Transformer.py:", e)
 
-def main():
-    print('ok')
+def main(args):
+    user_option = input("Do you want to run the complete system (y/n)? ")
+
+    if user_option.lower() == "y":
+        print("Running complete system")
+        '''run_dataprocessing_script()
+        run_lstm_script()
+        run_unidimensional_transformer_script()
+        run_multidimensional_transformer_script()'''
+    elif user_option.lower() == "n":
+        print("Running graphical results")
+        graphical_results(args.params_file)
+    else:
+        print("Invalid option. Please try again.")
+        main()
     #run_dataprocessing_script()
     #run_lstm_script()
     #run_unidimensional_transformer_script()
@@ -85,4 +92,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="LSTM training, testing and results saving.")
+    parser.add_argument("-c", "--params_file", nargs='?', action='store', help="Configuration file path")
+    args = parser.parse_args()
+    main(args)

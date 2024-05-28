@@ -6,63 +6,18 @@ import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 
-def save_data(fich, out_path, lahead, lpar, tot_res):
-    '''Saves the data to a pickle file
-    ...
-    Parameters
-    ----------
-    fich : str
-        Path to the file where the data will be saved
-    out_path : str
-        Path to the output file
-    lahead : list
-        List of the number of days ahead to forecast
-    lpar : list
-        List of the parameters used in the model
-    tot_res : dict
-        Dictionary containing the results of the model
-    '''
+def save_data(fich: str, out_path: str, lahead: list, lpar: list, tot_res: dict) -> None:
+    """Saves the data to a pickle file"""
     with open(fich, 'wb') as file:
         pickle.dump(out_path, file)
         pickle.dump(fich, file)
         pickle.dump(lahead, file)
         pickle.dump(lpar, file)
         pickle.dump(tot_res, file)
-    file.close()
     
-def load_preprocessed_data(path, win, tr_tst, ticker, scen_name, multi):
-    '''Loads the preprocessed data from a pickle file
-    ...
-    Parameters
-    ----------
-    path : str
-        Path to the file where the data is saved
-    win : int
-        Number of days to consider in the window
-    tr_tst : float
-        Percentage of the data to use for training
-    ticker : str
-        Ticker of the stock
-    multi : bool
-        True if the model is a multi-input model, False otherwise
-    
-    Returns
-    -------
-    path : str
-        Path to the file where the data is saved
-    fdat : str
-        Path to the data file
-    lahead : list
-        List of the number of days ahead to forecast
-    lpar : list
-        List of the parameters used in the model
-    tot_res : dict
-        Dictionary containing the results of the model
-        '''
-    if multi is True:
-        fdat = path+ f"/input/{win}/{tr_tst}/{scen_name}-{ticker}-m-input.pkl"
-    else:
-        fdat = path+ f"/input/{win}/{tr_tst}/{scen_name}-{ticker}-input.pkl"
+def load_preprocessed_data(path: str, win: int, tr_tst: float, ticker: str, scen_name: str, multi: bool) -> tuple:
+    """Loads the preprocessed data from a pickle file"""
+    fdat = f"{path}/input/{win}/{tr_tst}/{scen_name}-{ticker}-{'m-' if multi else ''}input.pkl"
 
     if os.path.exists(fdat):
         with open(fdat, "rb") as openfile:
@@ -75,82 +30,29 @@ def load_preprocessed_data(path, win, tr_tst, ticker, scen_name, multi):
     else:
         raise FileNotFoundError(f"El archivo {fdat} no existe.")
     
-def select_features(features, selected_features):
-    features_index = []
-    for i, feature in enumerate(features):
-        if feature in selected_features:
-            features_index.append(i)
-    return features_index
+def select_features(features: list, selected_features: list) -> list:
+    """Selects the indices of the selected features"""
+    return [i for i, feature in enumerate(features) if feature in selected_features]
 
-def denormalize_data(Yn, mvdd, idx, multi, lstm=False):
-    """
-    Returns the denormalized target data.
-    ...
-    Parameters
-    ----------
-    Yn : np.array
-        Normalized target data
-    mvdd : dict
-        Dictionary containing the mean, min and max values of the target data
-    idx : pd.Index
-        Index of the target data
-    multi : bool
-        True if the model is a multi-input model, False otherwise
 
-    Returns
-    -------
-    denormalized_Yn : pd.Series
-        Denormalized target data    
-    """
-    if lstm is True:    
-        min_x = mvdd["min"]
-        max_x = mvdd["max"]
-        mean_x = mvdd["mean"]
+def denormalize_data(Yn: np.array, mvdd: dict, idx: pd.Index, multi: bool, lstm: bool = False) -> pd.Series:
+    """Returns the denormalized target data."""
+    if lstm:
+        min_x, max_x, mean_x = mvdd["min"], mvdd["max"], mvdd["mean"]
         denormalized_Yn = pd.Series(Yn, index=idx) * (max_x - min_x) + min_x + mean_x
-        denormalized_Yn.dropna(inplace=True)
-    
     else:
-        if multi is False:
-            min_x = mvdd["min"]
-            max_x = mvdd["max"]
-            mean_x = mvdd["mean"]
-            denormalized_Yn = pd.Series(Yn[:,0,0], index=idx) * (max_x - min_x) + min_x + mean_x
-            denormalized_Yn.dropna(inplace=True)
+        if not multi:
+            min_x, max_x, mean_x = mvdd["min"], mvdd["max"], mvdd["mean"]
+            denormalized_Yn = pd.Series(Yn[:, 0, 0], index=idx) * (max_x - min_x) + min_x + mean_x
         else:
-            min_x = mvdd["min"][0]
-            max_x = mvdd["max"][0]
-            mean_x = mvdd["mean"]['PX_LAST']
-            denormalized_Yn = pd.Series(Yn[:,0,0], index=idx) * (max_x - min_x) + min_x + mean_x
-            denormalized_Yn.dropna(inplace=True)
-    
+            min_x, max_x, mean_x = mvdd["min"][0], mvdd["max"][0], mvdd["mean"]['PX_LAST']
+            denormalized_Yn = pd.Series(Yn[:, 0, 0], index=idx) * (max_x - min_x) + min_x + mean_x
+
+    denormalized_Yn.dropna(inplace=True)
     return denormalized_Yn
 
-def eval_lstm(np_test_X, np_test_y, test_X, model, vdd, Y, ahead):
-    '''Evaluates the LSTM model
-    ...
-    Parameters
-    ----------
-    np_test_X : np.array
-        Test input data
-    np_test_y : np.array
-        Test target data
-    test_X : pd.DataFrame
-        Test input data
-    model : keras model
-        LSTM model
-    vdd : dict
-        Dictionary containing the mean, min and max values of the target data
-    Y : pd.Series
-        Target data
-    ahead : int
-        Number of days ahead to forecast
-
-    Returns
-    -------
-    dict
-        Dictionary containing the mean squared error of the predicted and historical values,
-        the predicted and real values, and the historical values
-        '''
+def eval_lstm(np_test_X: np.array, np_test_y: np.array, test_X: pd.DataFrame, model, vdd: dict, Y: pd.Series, ahead: int) -> dict:
+    """Evaluates the LSTM model"""
     y_hat   = model.predict(np_test_X,verbose=0)
     tans   = y_hat.shape
     if len(tans) > 2 and tans[1] == 1:
@@ -178,52 +80,37 @@ def eval_lstm(np_test_X, np_test_y, test_X, model, vdd, Y, ahead):
 
     return({'msep':msep,'msey':msey, 'maep':maep, 'maey':maey, 'Ys':DY, 'eff': eff})
 
-def load_output_preprocessed_data(win, tr_tst, multi):
-    '''Loads the preprocessed data from the output files
-    ...
-    Parameters
-    ----------
-    win : int
-        Number of days to consider in the window
-    tr_tst : float
-        Percentage of the data to use for training
-    multi : bool
-        True if the model is a multi-input model, False otherwise
-
-    Returns
-    -------
-    all_results : dict
-        Dictionary containing the results of the models
-    '''
+def load_output_preprocessed_data(win: int, tr_tst: float, scenario_name: str) -> dict:
+    """Loads all pickle files from the specified directory that match the scenario name"""
     all_results = {}
+    directory = f'/home/vvallejo/Finance-AI/dataprocessed/output/{win}/{tr_tst}/'
 
-    # Directory containing the results files
-    directory = f'home/vvallejo/Finance-AI/dataprocessed/output/{win}/{tr_tst}/'
+    # Verify if the directory exists
+    if not os.path.exists(directory):
+        raise FileNotFoundError(f"The directory {directory} does not exist.")
 
-    # Get list of files in directory
-    files = os.listdir(directory) 
-
-    for file in files: # Loop through each file in the directory
-        # Verify if the file is type 'output.pkl' o 'output-m.pkl'
-        if file.endswith('-output.pkl') and not multi:
+    for file in os.listdir(directory):  # Loop through each file in the directory
+        # Verify if the file starts with scenario_name and ends with 'output.pkl' or 'm-output.pkl'
+        if file.startswith(scenario_name) and file.endswith('-output.pkl'):
+            # Extract the model type correctly
             mdl = file.split('-')[1]
-        elif file.endswith('-m-output.pkl') and multi:
-            mdl = file.split('-')[1]
+            if file.endswith('-m-output.pkl'):
+                mdl = file.split('-')[1] + '-m'
         else:
             continue
-        
-        # Construir la ruta completa del archivo
+
+        # Construct the full file path
         fdat = os.path.join(directory, file)
 
-        with (open(fdat, "rb")) as openfile:
+        with open(fdat, "rb") as openfile:
             results = {}
             while True:
                 try:
-                    directory1      = pickle.load(openfile)
-                    fdat1      = pickle.load(openfile)
-                    lahead    = pickle.load(openfile)
-                    lpar      = pickle.load(openfile)
-                    tot_res   = pickle.load(openfile)
+                    directory1 = pickle.load(openfile)
+                    fdat1 = pickle.load(openfile)
+                    lahead = pickle.load(openfile)
+                    lpar = pickle.load(openfile)
+                    tot_res = pickle.load(openfile)
                     results['path'] = directory1
                     results['fdat'] = fdat1
                     results['lahead'] = lahead
@@ -235,49 +122,128 @@ def load_output_preprocessed_data(win, tr_tst, multi):
 
     return all_results
 
-
-def plot_res(ax, DY, msep, msey, stck, mdl, itr, ahead, tr_tst, num_heads=None, num_layers=None):
-    '''Plots the results of the model
-    ...
-    Parameters
-    ----------  
-    ax : matplotlib.axes.Axes
-        Axes object
-    DY : pd.DataFrame
-        Dataframe containing the real, predicted and historical values
-    msep : float
-        Mean squared error of the predicted and real values
-    msey : float
-        Mean squared error of the historical and real values
-    stck : str
-        Ticker of the stock
-    mdl : str
-        Name of the model
-    itr : int
-        Number of iterations
-    ahead : int
-        Number of days ahead to forecast
-    tr_tst : float
-        Percentage of the data to use for training
-    num_heads : int
-        Number of heads in the transformer model
-    num_layers : int
-        Number of layers in the transformer model
-        '''
+def plot_res(ax, DY: pd.DataFrame, metricp: float, metricy: float, ahead: int, *parameters: dict) -> None:
     ax.plot(DY.index, DY.Y_real, label="Real Values")
-    ax.plot(DY.index, DY.Y_predicted, label=f"{mdl.upper()} predicted", color='orange')
-    ax.plot(DY.index, DY.Y_yesterday, label="Historical", color='green')
-    ax.set_title(f'{stck} - {mdl.upper()}, Predict {ahead} days ahead. Iter: {itr},\n \
-                Heads: {num_heads}, Hidden Layers: {num_layers},\n Train: {tr_tst*100}%')
-    ax.set_xlabel('Date')
-    ax.set_ylabel('Value')
-    ax.legend()
-    ax.grid(True)
-    
+    p2 = ax.plot(DY.index, DY.Y_predicted, label="Transformer predicted", color='orange')
+    p3 = ax.plot(DY.index, DY.Y_yesterday, label="Historical", color='green')
+    if parameters:
+        num_heads = parameters[0]['num_heads']
+        num_layers = parameters[0]['num_layers']
+        ax.set_title(f'Ahead: {ahead} days - {num_heads} heads - {num_layers} layers')
+        ax.set_xlabel('Date')
+        ax.set_ylabel('Value')
+        ax.legend()
+        ax.grid(True)
+    else:
+        ax.set_title(f'Ahead: {ahead} days')
+        ax.set_xlabel('Date')
+        ax.set_ylabel('Value')
+        ax.legend()
+        ax.grid(True)
     # Agregar texto
-    ax.text(.01, .01, 'MSE Predicted=' + str(round(msep,3)), transform=ax.transAxes, ha='left', va='bottom', fontsize=16, color='#FFA500')
-    ax.text(.01, .05, 'MSE Historical=' + str(round(msey,3)), transform=ax.transAxes, fontsize=16, ha='left', va='bottom', color='green')
+    ax.text(.01, .01, 'MSE Predicted=' + str(round(metricp,3)), transform=ax.transAxes, ha='left', va='bottom', fontsize=16, color='#FFA500')
+    ax.text(.01, .05, 'MSE Historical=' + str(round(metricy,3)), transform=ax.transAxes, fontsize=16, ha='left', va='bottom', color='green')
 
+def run_plot_res(list_tr_tst: list, all_results: dict, stock_list: list, lahead: list, selected_scenario: str, metric: str, scen_name: str, plot_path: str, plot_format: str) -> None:
+    for tr_tst in list_tr_tst:
+        for model in all_results[tr_tst].keys():
+            tot_res = all_results[tr_tst][model]['tot_res']
+            for stock in stock_list:
+                fig, axs = plt.subplots(2, 3, figsize=(15, 10))
+                fig.suptitle(f'{stock} - {model.upper()} - {selected_scenario} - {metric} - {tr_tst*100}%', fontsize=16)
+                for i, ahead in enumerate(lahead):
+                    res1 = tot_res['OUT_MODEL'][stock]
+                    itr = len(res1[ahead]['nit']) - 1
+                    DYs = res1[ahead]['DY']
+                    DY = DYs.loc[itr]
+                    metricp = res1[ahead][f'{metric}P'][itr]
+                    metricy = res1[ahead][f'{metric}Y'][itr]
+                    row = i // 3
+                    col = i % 3
+                    if 'transformer' not in model:
+                        plot_res(axs[row, col], DY, metricp, metricy, ahead)
+                    else:
+                        plot_res(axs[row, col], DY, metricp, metricy, ahead, res1[ahead]['transformer_parameters'][0])
+
+                    axs[row, col].set_xlim(DY.index.min(), DY.index.max())  # Ajustar los límites del eje X
+                    axs[row, col].set_ylim(DY['Y_yesterday'].min()*0.7, DY['Y_yesterday'].max()*1.3)
+                path = f'{plot_path}/{scen_name}/{tr_tst}/'
+                if not os.path.exists(path):
+                    os.makedirs(path)
+
+                plt.tight_layout()
+                figfich = path + f'{model}-{stock}-{itr}-{metric}.{plot_format}'
+                plt.savefig(figfich)
+
+def plot_metric_boxplots(selected_model: str, list_tr_tst: list, all_results: dict, stocks: list, lahead: list, metric: str, scen_name: str, plot_path: str, plot_format: str) -> None:
+    mse_data = {stock: [] for stock in stocks}
+
+    for tr_tst in list_tr_tst:
+        tot_res = all_results[tr_tst][selected_model]['tot_res']
+        for stock in stocks:
+            for ahead in lahead:
+                res1 = tot_res['OUT_MODEL'][stock]
+                for itr in range(len(res1[ahead]['nit'])):
+                    mse_value = res1[ahead][f'{metric}P'][itr]
+                    mse_data[stock].append(mse_value)
+    
+            fig, ax = plt.subplots(figsize=(12, 8))
+            ax.boxplot([mse_data[stock] for stock in stocks], labels=stocks)
+            ax.set_yscale('log')
+            ax.set_title(f'{metric.upper()} - {selected_model.upper()}', fontsize=16)
+            ax.set_xlabel('Acciones', fontsize=14)
+            ax.set_ylabel('MSE', fontsize=14)
+            save_path = f'{plot_path}/{scen_name}/{tr_tst}'
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
+            
+            fig_path = os.path.join(save_path, f'boxplot_{metric}_{selected_model}.{plot_format}')
+            plt.savefig(fig_path)
+            fig.show()
+
+def plot_metric_boxplots_with_yesterday(selected_model: str, tr_tst_list: list, all_results: dict, stock_list: list, lahead: list, metric: str, scen_name: str, plot_path: str, plot_format: str) -> None:
+    for stock in stock_list:
+        fig, axs = plt.subplots(nrows=len(tr_tst_list), figsize=(8, 6 * len(tr_tst_list)))
+        if not isinstance(axs, np.ndarray):
+            axs = [axs]
+        for idx, tr_tst in enumerate(tr_tst_list):
+            metric_data = {ahead: [] for ahead in lahead}
+            yesterday_data = {ahead: [] for ahead in lahead}
+            pred_data = {ahead: [] for ahead in lahead}
+            tot_res = all_results[tr_tst][selected_model]['tot_res']
+            res1 = tot_res['OUT_MODEL'][stock]
+            for ahead in lahead:
+                for itr in range(len(res1[ahead]['nit'])):
+                    metric_value = res1[ahead][f'{metric}P'][itr]
+                    metric_data[ahead].append(metric_value)
+                # Asegurarnos de que estamos tomando el último valor (última iteración)
+                itr = len(res1[ahead]['nit']) - 1
+                metricy = res1[ahead][f'{metric}Y'][itr]
+                yesterday_data[ahead].append(metricy)
+                metricp = res1[ahead][f'{metric}P'][itr]
+                pred_data[ahead].append(metricp)
+
+            axs[idx].boxplot([metric_data[ahead] for ahead in lahead], positions=range(len(lahead)))
+            axs[idx].plot([yesterday_data[ahead] for ahead in lahead], 'r-o', label='Historical', linestyle='--')
+            axs[idx].plot([pred_data[ahead] for ahead in lahead], 'g^', label='Predicted')
+
+            #axs[idx].set_yscale('log')
+            axs[idx].set_xticks(range(len(lahead)))
+            axs[idx].set_xticklabels(lahead)
+            axs[idx].set_title(f'{metric.upper()} - {selected_model.upper()} - {stock} - {tr_tst}', fontsize=16)
+            axs[idx].set_ylabel(f'{metric} (Escala Logarítmica)', fontsize=14)
+            if idx == len(tr_tst_list) - 1:
+                axs[idx].set_xlabel('Horizonte de Predicción (días)', fontsize=14)
+            axs[idx].legend()
+
+            plt.tight_layout()
+
+            save_path = f'{plot_path}/{scen_name}/{metric.upper()}_{selected_model}_boxplot'
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
+            fig_path = os.path.join(save_path, f'{stock}_boxplot_{metric}_{selected_model}.{plot_format}')
+            plt.savefig(fig_path)
+            fig.show()
 
 def plot_results_comparison(model_results, lahead, model_list, scen_name, stck, itr, tr_tst, save_path=None, wdth=10, hght=30):
     '''Plots the results of the models
@@ -376,7 +342,7 @@ def plot_ahead_perf_sameStock(model_results, lahead, model_list, stock_list, lis
 
                 ax = axes[i, j]  # Acceder al eje en la posición i, j
                 ax.boxplot(bp.T, positions=h, showmeans=True, manage_ticks=False)
-                ax.plot(h, yval.values(), '--ko', c='red', label='Yesterday')
+                ax.plot(h, yval.values(), '--ko', c='red', label='Historical')
                 ax.set_xticks(h)
                 ax.set_xticklabels(list(lstd.keys()), rotation='vertical')
                 ax.set_xlabel('Stocks')

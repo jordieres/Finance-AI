@@ -3,12 +3,13 @@ data:
   output_path: "/home/vvallejo/Finance-AI/dataprocessed"
   date: '060124'
   filename_structure: "{ticker} US Equity_{date}.csv"
+  fmdls: '/home/vvallejo/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
 
 visualization:
   plot_path: "/home/vvallejo/Finance-AI/figures"
   plot_format: "png"
   scenario: "scenario_1"
-  metric: "mse" # mse, mae
+  metric: "MSE" # MSE, MAE
 
 scenarios:
   - name: scenario_1
@@ -31,7 +32,7 @@ scenarios:
 
   - name: scenario_2
     tickers: ["AMZN", "GOOGL", "MSFT", "NVDA", "TSLA"]
-    win: 20
+    win: [20]
     tr_tst: [0.75, 0.85]
     lahead: [1, 7, 14, 30, 90]
     n_features: 1
@@ -49,7 +50,7 @@ scenarios:
 
   - name: scenario_3
     tickers: ["AMZN", "PEP", "TMUS", "CSCO"]
-    win: 2
+    win: [2]
     tr_tst: [0.8, 0.875]
     lahead: [1, 7, 14, 30, 90]
     n_features: 1
