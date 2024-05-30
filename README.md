@@ -98,8 +98,8 @@ Below are some example graphs of the results obtained from the models prediction
 
 ### Amazon's stock price prediction for LSTM and transformer multivariate for the first of the scenarios.
 
-![AMZN LSTM Price Prediction](/home/vvallejo/Finance-AI/figures/scenario_1/0.7/lstm-AMZN-9-MSE.png)
-![AMZN Multivariate Transformer Price Prediction](/home/vvallejo/Finance-AI/figures/scenario_1/0.7/lstm-AMZN-9-MSE.png)
+![AMZN LSTM Price Prediction](figures/scenario_1/0.7/lstm-AMZN-9-MSE.png)
+![AMZN Multivariate Transformer Price Prediction](figures/scenario_1/0.7/lstm-AMZN-9-MSE.png)
 
 ## Contributing
 Contributions are welcome!
