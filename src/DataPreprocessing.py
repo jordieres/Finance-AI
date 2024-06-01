@@ -1,9 +1,8 @@
 '''@package DataPreprocessing
 This module contains the Stock class that processes the data and creates the output files for each stock.
 '''
-import os, sys
+import os
 import warnings
-import fin_upm
 import pandas as pd
 import numpy as np
 import os

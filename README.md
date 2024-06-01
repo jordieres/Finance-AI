@@ -1,5 +1,5 @@
 # AI IN FINANCE: TRANSFORMERS APPLIED TO MULTIVARIATE TIME SERIES FORECASTING
-Víctor Vallejo 's final degree thesis (TFG) of the degree in Data Engineering and Systems at Universidad Politécnica de Madrid (UPM).
+Víctor Vallejo's final degree thesis (TFG) of the degree in Data Engineering and Systems at Universidad Politécnica de Madrid (UPM).
 
 ## Overview
 This project aims to develop an artificial intelligence-based price prediction system for financial markets, leveraging transformative models in a multivariate environment. The architecture is designed to facilitate comparisons between transformer models and other AI technologies, applied to data from 15 different stocks within the S&P 500 index.
@@ -90,7 +90,7 @@ Customize the YAML configuration file to specify simulation parameters.
 ### Execution
 Run the main script to start the simulation with the path of the configuration file:
     ```bash
-    python3 main.py -c path_to_config_file.yaml
+    python3 src/main.py -c path_to_config_file.yaml
     ```
 
 ## Results
