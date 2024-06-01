@@ -17,25 +17,6 @@ warnings.simplefilter('ignore')
 class Stock:
     """
     Class that creates the Stock, processes the stock data, and creates the output files for each stock.
-
-    Attributes:
-    -----------
-    ticker : str
-        The stock ticker.
-    _data : pd.DataFrame
-        The stock data.
-    _lahead : list
-        List of the number of days ahead.
-    tr_tst : float
-        Train-test ratio.
-    df : pd.DataFrame
-        The stock data.
-    scen_name : str
-        The scenario name.
-    serial_dict : Dict
-        Dictionary with the univariate data.
-    mserial_dict : Dict
-        Dictionary with the multivariate data.
     """
     
     def __init__(self, ticker: str, file_name: str, lahead: list, tr_tst: float, scen_name: str):
@@ -375,49 +356,49 @@ def main(args) -> None:
     date = config['data']['date']
 
     for scenario in config['scenarios']:
-        win = scenario['win']
+        list_win_size = scenario['win']
         lahead = scenario['lahead']
         stock_list = scenario['tickers']
         n_ftrs = scenario['n_features']
+        for win in list_win_size:
+            for ticker in stock_list:
+                filename = filename_structure.format(ticker=ticker, date=date)
+                file = os.path.join(data_path, filename)
+                assert os.path.exists(file), f"El archivo {file} no existe."
+                
+                for tr_tst in scenario['tr_tst']:
+                    scen_name = scenario['name']
+                    stock = Stock(ticker, file, lahead, tr_tst, scen_name)
+                    stock.process_stocks()
 
-        for ticker in stock_list:
-            filename = filename_structure.format(ticker=ticker, date=date)
-            file = os.path.join(data_path, filename)
-            assert os.path.exists(file), f"El archivo {file} no existe."
-            
-            for tr_tst in scenario['tr_tst']:
-                scen_name = scenario['name']
-                stock = Stock(ticker, file, lahead, tr_tst, scen_name)
-                stock.process_stocks()
+                    lpar = [win, n_ftrs, tr_tst]
+                    # Univariate data processing
+                    stock.process_univariate_data(win)
+                    fdat1 = out_path + "/input/{}/{}/{}-{}-input.pkl".format(win,stock.tr_tst,stock.scen_name,ticker)
 
-                lpar = [win, n_ftrs, tr_tst]
-                # Univariate data processing
-                stock.process_univariate_data(win)
-                fdat1 = out_path + "/input/{}/{}/{}-{}-input.pkl".format(win,stock.tr_tst,stock.scen_name,ticker)
+                    # Multivariate data processing
+                    stock.process_multivariate_data(win, n_ftrs)
+                    fdat2 = out_path + "/input/{}/{}/{}-{}-m-input.pkl".format(win,stock.tr_tst,stock.scen_name,ticker)
 
-                # Multivariate data processing
-                stock.process_multivariate_data(win, n_ftrs)
-                fdat2 = out_path + "/input/{}/{}/{}-{}-m-input.pkl".format(win,stock.tr_tst,stock.scen_name,ticker)
+                    # Save univariate data
+                    if not os.path.exists(fdat1):
+                        directory1 = os.path.dirname(fdat1)
+                        if not os.path.exists(directory1):
+                            os.makedirs(directory1)
+                            print(f"Directory {directory1} created.")
+                            
+                    save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)
+                    print(f"File {fdat1} data saved.")
 
-                # Save univariate data
-                if not os.path.exists(fdat1):
-                    directory1 = os.path.dirname(fdat1)
-                    if not os.path.exists(directory1):
-                        os.makedirs(directory1)
-                        print(f"Directory {directory1} created.")
-                        
-                save_data(fdat1, out_path, lahead, lpar, stock.serial_dict)
-                print(f"File {fdat1} data saved.")
+                    # Save multivariate data
+                    if not os.path.exists(fdat2):
+                        directory1 = os.path.dirname(fdat2)
+                        if not os.path.exists(directory1):
+                            os.makedirs(directory1)
+                            print(f"Directory {directory1} created.")
 
-                # Save multivariate data
-                if not os.path.exists(fdat2):
-                    directory1 = os.path.dirname(fdat2)
-                    if not os.path.exists(directory1):
-                        os.makedirs(directory1)
-                        print(f"Directory {directory1} created.")
-
-                save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
-                print(f"File {fdat2} data saved.")
+                    save_data(fdat2, out_path, lahead, lpar, stock.mserial_dict)
+                    print(f"File {fdat2} data saved.")
 
 
 if __name__ == "__main__":

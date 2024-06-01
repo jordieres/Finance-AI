@@ -24,24 +24,6 @@ import torch.nn.functional as F
 class TransformerL(nn.Module):
     """
     Transformer-based model for time series forecasting.
-
-    Attributes
-    ----------
-    input_dim : int
-        Dimension of the input features.
-    embed_dim : int
-        Dimension of the embeddings.
-    num_layers : int
-        Number of encoder layers in the Transformer.
-    num_heads : int
-        Number of attention heads in each encoder layer.
-    dropout : float
-        Dropout rate for regularization.
-
-    Methods
-    -------
-    forward(src: torch.Tensor) -> torch.Tensor
-        Forward pass of the Transformer model.
     """
     def __init__(self, input_dim: int, embed_dim: int, num_layers: int, num_heads: int, dropout: float):
         super(TransformerL, self).__init__()
@@ -209,7 +191,7 @@ def main(args) -> None:
     transformer_configs = []
     scenarios = []
     for scenario in config['scenarios']:
-        win_size = scenario['win']
+        list_win_size = scenario['win']
         list_tr_tst = scenario['tr_tst']
         lahead = scenario['lahead']
         epochs = scenario['epochs']
@@ -232,63 +214,64 @@ def main(args) -> None:
                 'num_heads': num_heads
             }
 
-        for tr_tst in list_tr_tst:
-            out_model = {}
-            for stock in stock_list:
-                lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, scenario['name'], multi)
-                win, n_ftrs, tr_tst = lpar
-                fmdls = config['data']['fmdls'].format(nhn=nhn,tmod=tmod,tr_tst=tr_tst,stock=stock)
-                if not os.path.exists(fmdls):
-                    os.makedirs(fmdls)
-                res[stock] = {}
-                print(f"Traning for {tr_tst*100}% training data")
-                for ahead in lahead:
-                    tot = tot_res['INPUT_DATA'][ahead]
-                    train_X = tot['trainX']
-                    train_y = tot['trainY']
-                    test_X  = tot['testX']    
-                    test_y  = tot['testY']
-                    Y      = tot['y']
-                    vdd    = tot['vdd']
-                    tmpr = []                 
-                    for irp in range(n_itr):
-                        seed      = random.randint(0,1000)
-                        print('######################################################')
-                        print(f'{irp} Training {stock} {ahead} days ahead.')
-                        transformer_start= time.time()
-                        mdl_name  = f'{tmod}-{stock}-{ahead}-{irp}.hd5'
-                        if tmod == "transformer":
-                            sol   = transformer_fun(transformer_parameters,train_X,train_y,test_X,test_y,
-                                                    Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
-                        transformer_end  = time.time()
-                        ttrain    = transformer_end - transformer_start
-                        sol['ttrain'] = ttrain
-                        sol['epochs']  = epochs
-                        sol['bsize']  = bsize
-                        sol['nhn']    = nhn
-                        sol['win']    = win
-                        sol['tr_tst'] = tr_tst
-                        sol['transformer_parameters'] = transformer_parameters
-                        torch.save(sol['model'], fmdls+mdl_name)
-                        sol['model']  = fmdls+mdl_name
-                        print('   Effort spent: ' + str(ttrain) +' s.')
-                        sys.stdout.flush()
-                        tmpr.append(sol)
-                    res[stock][ahead] = pd.DataFrame(tmpr)
-                out_model[stock] = res[stock]
-                
-            tot_res['OUT_MODEL'] = out_model              
-            fdat = '/home/vvallejo/Finance-AI/dataprocessed/output/{}/{}/{}-{}-output.pkl'.format(win,tr_tst,scenario['name'],tmod)
-            if os.path.exists(fdat):
-                save_data(fdat, processed_path, lahead, lpar, tot_res)
-            else:
-                directory1 = os.path.dirname(fdat)
-                if not os.path.exists(directory1):
-                    os.makedirs(directory1)
-                    print(f"Directory {directory1} created.")
+        for win_size in list_win_size:
+            for tr_tst in list_tr_tst:
+                out_model = {}
+                for stock in stock_list:
+                    lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, scenario['name'], multi)
+                    win, n_ftrs, tr_tst = lpar
+                    fmdls = config['data']['fmdls'].format(nhn=nhn,tmod=tmod,tr_tst=tr_tst,stock=stock)
+                    if not os.path.exists(fmdls):
+                        os.makedirs(fmdls)
+                    res[stock] = {}
+                    print(f"Traning for {win} window size {tr_tst*100}% training data")
+                    for ahead in lahead:
+                        tot = tot_res['INPUT_DATA'][ahead]
+                        train_X = tot['trainX']
+                        train_y = tot['trainY']
+                        test_X  = tot['testX']    
+                        test_y  = tot['testY']
+                        Y      = tot['y']
+                        vdd    = tot['vdd']
+                        tmpr = []                 
+                        for irp in range(n_itr):
+                            seed      = random.randint(0,1000)
+                            print('######################################################')
+                            print(f'{irp} Training {stock} {ahead} days ahead.')
+                            transformer_start= time.time()
+                            mdl_name  = f'{tmod}-{stock}-{ahead}-{irp}.hd5'
+                            if tmod == "transformer":
+                                sol   = transformer_fun(transformer_parameters,train_X,train_y,test_X,test_y,
+                                                        Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
+                            transformer_end  = time.time()
+                            ttrain    = transformer_end - transformer_start
+                            sol['ttrain'] = ttrain
+                            sol['epochs']  = epochs
+                            sol['bsize']  = bsize
+                            sol['nhn']    = nhn
+                            sol['win']    = win
+                            sol['tr_tst'] = tr_tst
+                            sol['transformer_parameters'] = transformer_parameters
+                            torch.save(sol['model'], fmdls+mdl_name)
+                            sol['model']  = fmdls+mdl_name
+                            print('   Effort spent: ' + str(ttrain) +' s.')
+                            sys.stdout.flush()
+                            tmpr.append(sol)
+                        res[stock][ahead] = pd.DataFrame(tmpr)
+                    out_model[stock] = res[stock]
+                    
+                tot_res['OUT_MODEL'] = out_model              
+                fdat = '{}/output/{}/{}/{}-{}-output.pkl'.format(processed_path,win,tr_tst,scenario['name'],tmod)
+                if os.path.exists(fdat):
+                    save_data(fdat, processed_path, lahead, lpar, tot_res)
+                else:
+                    directory1 = os.path.dirname(fdat)
+                    if not os.path.exists(directory1):
+                        os.makedirs(directory1)
+                        print(f"Directory {directory1} created.")
 
-                save_data(fdat, processed_path, lahead, lpar, tot_res)              
-                print(f"File {fdat} created and data saved.")
+                    save_data(fdat, processed_path, lahead, lpar, tot_res)              
+                    print(f"File {fdat} created and data saved.")
 
 
 if __name__ == "__main__":

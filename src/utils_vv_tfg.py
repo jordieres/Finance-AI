@@ -80,10 +80,10 @@ def eval_lstm(np_test_X: np.array, np_test_y: np.array, test_X: pd.DataFrame, mo
 
     return({'msep':msep,'msey':msey, 'maep':maep, 'maey':maey, 'Ys':DY, 'eff': eff})
 
-def load_output_preprocessed_data(win: int, tr_tst: float, scenario_name: str) -> dict:
+def load_output_preprocessed_data(path: str, win: int, tr_tst: float, scenario_name: str) -> dict:
     """Loads all pickle files from the specified directory that match the scenario name"""
     all_results = {}
-    directory = f'/home/vvallejo/Finance-AI/dataprocessed/output/{win}/{tr_tst}/'
+    directory = f'{path}/output/{win}/{tr_tst}/'
 
     # Verify if the directory exists
     if not os.path.exists(directory):
@@ -231,9 +231,9 @@ def plot_metric_boxplots_with_yesterday(selected_model: str, tr_tst_list: list, 
             axs[idx].set_xticks(range(len(lahead)))
             axs[idx].set_xticklabels(lahead)
             axs[idx].set_title(f'{metric.upper()} - {selected_model.upper()} - {stock} - {tr_tst}', fontsize=16)
-            axs[idx].set_ylabel(f'{metric} (Escala Logarítmica)', fontsize=14)
+            axs[idx].set_ylabel(f'{metric}', fontsize=14)
             if idx == len(tr_tst_list) - 1:
-                axs[idx].set_xlabel('Horizonte de Predicción (días)', fontsize=14)
+                axs[idx].set_xlabel('Ahead days prediction (days)', fontsize=14)
             axs[idx].legend()
 
             plt.tight_layout()
