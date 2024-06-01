@@ -14,7 +14,7 @@ visualization:
 scenarios:
   - name: scenario_1
     tickers: ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA"]
-    win: 5
+    win: [5]
     tr_tst: [0.7, 0.8]
     lahead: [1, 7, 14, 30, 90]
     n_features: 1
