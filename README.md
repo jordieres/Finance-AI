@@ -88,18 +88,29 @@ The operation of the system is managed by a flow of Python scripts executed by a
 Customize the YAML configuration file to specify simulation parameters.
 
 ### Execution
-Run the main script to start the simulation with the path of the configuration file:
+Run the main script to start the simulation with the path of the configuration file and the operations to run:
+operations: 'pre;lstm;1DT;MDT;post'
     ```bash
-    python3 src/main.py -c path_to_config_file.yaml
+    python3 src/main.py -c path_to_config_file.yaml -o [operations]
     ```
 
 ## Results
 Below are some example graphs of the results obtained from the models predictions:
 
-### Amazon's stock price prediction for LSTM and transformer multivariate for the first of the scenarios.
+### Amazon's stock price prediction using LSTM and transformer multivariate for the first of the scenarios.
 
 ![AMZN LSTM Price Prediction](figures/scenario_1/0.7/lstm-AMZN-9-MSE.png)
-![AMZN Multivariate Transformer Price Prediction](figures/scenario_1/0.7/lstm-AMZN-9-MSE.png)
+![AMZN Multivariate Transformer Price Prediction](figures/scenario_1/0.7/transformer-m-AMZN-9-MSE.png)
+
+### Amazon's stock price prediction using LSTM and transformer multivariate for the first of the scenarios.
+
+![AMZN LSTM Price Prediction](figures/scenario_1/0.7/lstm-AMZN-9-MSE.png)
+![AMZN Multivariate Transformer Price Prediction](figures/scenario_1/0.7/transformer-m-AMZN-9-MSE.png)
+
+### Apples's MSE comparison for each ahead value using LSTM and transformer multivariate for the first of the scenarios.
+
+![AMZN LSTM Price Prediction](figures/scenario_1/MSE_lstm_boxplot/AAPL_boxplot_MSE_lstm.png)
+![AMZN Multivariate Transformer Price Prediction](figures/scenario_1/MSE_transformer-m_boxplot/AAPL_boxplot_MSE_transformer-m.png)
 
 ## Contributing
 Contributions are welcome!
