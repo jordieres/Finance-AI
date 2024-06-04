@@ -76,8 +76,8 @@ The operation of the system is managed by a flow of Python scripts executed by a
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/financial-market-prediction.git
-   cd financial-market-prediction
+   git clone https://github.com/jordieres/Finance-AI.git
+   cd Finance-AI
    ```
 2. Install the required packages:
    ```bash
