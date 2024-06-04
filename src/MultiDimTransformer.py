@@ -59,7 +59,6 @@ class TransformerL(nn.Module):
         for encoder in self.encoder_layers:
             src_embedded = encoder(src_embedded)
 
-        #src_embedded = src_embedded.permute(1, 0, 2)  # Volvemos a la forma original (batch, seq, embed)
         output = self.output_layer(src_embedded)
         return output
 
@@ -138,7 +137,7 @@ def transformer_fun(transformer_parameters: dict, train_X: pd.DataFrame,
         for epoch in range(epochs):
             optimizer.zero_grad()
             for i in range(0, len(np_train_X), bsize):
-                batch_np_train_X = np_train_X[:, i:i+bsize, :].to(device) # (window size, batch size, number of features)
+                batch_np_train_X = np_train_X[:, i:i+bsize, :].to(device)
                 batch_np_train_y = np_train_y[i:i+bsize].to(device)
                 output = model(batch_np_train_X)
                 loss = criterion(output, batch_np_train_y)

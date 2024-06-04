@@ -83,7 +83,7 @@ class Stock:
 
             x_mean = self.calculate_mean(X, axis=1)
             center_x = X.sub(x_mean, axis=0)
-
+            
             min_x = min(self.calculate_min(center_x))
             max_x = max(self.calculate_max(center_x))
             vdd = pd.DataFrame({'mean': x_mean, 'min': min_x, 'max': max_x})

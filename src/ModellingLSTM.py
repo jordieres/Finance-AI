@@ -62,13 +62,13 @@ class TrainLSTM:
         lloss= np.nan
         while math.isnan(lloss) and nit < 5:
             tf.random.set_seed(seed)
-            # create a very basic LSTM model
             model = Sequential()
             model.add(LSTM(self.nhn, activation='relu', input_shape=(self.win, self.n_ftrs)))
             model.add(Dense(self.n_ftrs))  # Output of a single value
             model.compile(loss='mean_squared_error', optimizer='adam')
-            #
-            hist = model.fit(nptrX, nptrY, epochs=self.epoch, batch_size=self.bsize, verbose=0)
+            checkpoint = ModelCheckpoint('model-basic.keras', verbose=1, \
+                    monitor='val_loss',save_best_only=True, mode='auto') 
+            hist = model.fit(nptrX, nptrY, epochs=self.epoch, batch_size=self.bsize, verbose=0, callbacks=[checkpoint])
             lloss= hist.history['loss'][-1]
             nit  = nit + 1
         # Predict
@@ -102,7 +102,6 @@ class TrainLSTM:
         lloss= np.nan
         while math.isnan(lloss) and nit < 5:
             tf.random.set_seed(seed)
-            # create a very Stcked-LSTM model
             stmodel = Sequential()
             stmodel.add(LSTM(self.nhn, activation='relu', return_sequences=True,
                               input_shape=(self.win,self.n_ftrs)))
@@ -110,7 +109,9 @@ class TrainLSTM:
             stmodel.add(LSTM(self.nhn, activation='relu'))
             stmodel.add(Dense(self.n_ftrs)) # Output of a single value
             stmodel.compile(loss='mean_squared_error', optimizer='adam')
-            hist = stmodel.fit(nptrX, nptrY, epochs=self.epoch, batch_size=self.bsize, verbose=0)
+            checkpoint = ModelCheckpoint('model-stacked.keras', verbose=1, \
+                    monitor='val_loss',save_best_only=True, mode='auto') 
+            hist = stmodel.fit(nptrX, nptrY, epochs=self.epoch, batch_size=self.bsize, verbose=0, callbacks=[checkpoint])
             lloss= hist.history['loss'][-1]
             nit  = nit + 1
         # Predict
@@ -231,7 +232,7 @@ def main(args) -> None:
                                 print('######################################################')
                                 print('Training ' + stock + ' ahead ' + str(ahead) + ' days.')
                                 lstm_start= time.time()
-                                mdl_name  = f'{tmod}-{stock}-{ahead}-{irp}.hd5'
+                                mdl_name  = f'{tmod}-{stock}-{ahead}-{irp}.h5'
                                 if tmod == "lstm":
                                     sol   = model_lstm.lstm_fun(ahead, seed)
                                 if tmod == "stcklstm":

@@ -71,26 +71,70 @@ def run_multidimensional_transformer_script(config_file):
     except Exception as e:
         print("An error occurred while running Transformer.py:", e)
 
-def main(args):
-    user_option = input("Do you want to run the complete system (y/n)? ")
+def check_data_availability(config_file, required_data):
+    config, _ = get_configuration(config_file)
+    data_path = config['data']['data_path']
+    output_data = config['data']['output_path']
+    date = config['data']['date']
+    
 
-    if user_option.lower() == "y":
-        print("Running complete system")
-        run_dataprocessing_script(args.params_file)
-        run_lstm_script(args.params_file)
-        run_unidimensional_transformer_script(args.params_file)
-        run_multidimensional_transformer_script(args.params_file)
-        graphical_results(args.params_file)
-    elif user_option.lower() == "n":
-        print("Running graphical results")
-        graphical_results(args.params_file)
+    if required_data == "pre":
+        csv_files = [f for f in os.listdir(data_path) if f.endswith('.csv')]
+        if not csv_files:
+            print(f"No CSV files found in {data_path}")
+            return False
+    
+    elif required_data == 'post':
+        output_dir = os.path.join(output_data, "output")
+        if not os.path.exists(output_dir) or not os.listdir(output_dir):
+            print(f"The directory {output_dir} is missing or empty.")
+            return False
+    
     else:
-        print("Invalid option. Please try again.")
-        main(args)
+        input_dir = os.path.join(output_data, "input")
+        if not os.path.exists(input_dir) or not os.listdir(input_dir):
+            print(f"The directory {input_dir} is missing or empty.")
+            return False
+
+    return True
+
+def main(args):
+    operations = args.operations.split(';')
+
+    if "pre" in operations:
+        if check_data_availability(args.params_file, required_data="pre"):
+            run_dataprocessing_script(args.params_file)
+        else:
+            print("Required data for preprocessing is not available.")
+
+    if "lstm" in operations:
+        if check_data_availability(args.params_file, required_data="lstm"):
+            run_lstm_script(args.params_file)
+        else:
+            print("Required data for LSTM is not available.")
+
+    if "1DT" in operations:
+        if check_data_availability(args.params_file, required_data="1DT"):
+            run_unidimensional_transformer_script(args.params_file)
+        else:
+            print("Required data for UniDimensional Transformer is not available.")
+
+    if "MDT" in operations:
+        if check_data_availability(args.params_file, required_data="MDT"):
+            run_multidimensional_transformer_script(args.params_file)
+        else:
+            print("Required data for MultiDimensional Transformer is not available.")
+
+    if "post" in operations:
+        if check_data_availability(args.params_file, required_data="post"):
+            graphical_results(args.params_file)
+        else:
+            print("Required data for post-processing is not available.")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="LSTM training, testing and results saving.")
-    parser.add_argument("-c", "--params_file", nargs='?', action='store', help="Configuration file path")
+    parser = argparse.ArgumentParser(description="Full system training, testing and results saving.")
+    parser.add_argument("-c", "--params_file", required=True, nargs='?', action='store', help="Configuration file path")
+    parser.add_argument("-o", "--operations", required=True, help="Operations to run: 'pre;lstm;1DT;MDT;post'")
     args = parser.parse_args()
     main(args)

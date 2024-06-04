@@ -122,7 +122,7 @@ def load_output_preprocessed_data(path: str, win: int, tr_tst: float, scenario_n
 
     return all_results
 
-def plot_res(ax, DY: pd.DataFrame, metricp: float, metricy: float, ahead: int, *parameters: dict) -> None:
+def plot_res(ax, DY: pd.DataFrame, metric: str, metricp: float, metricy: float, ahead: int, *parameters: dict) -> None:
     ax.plot(DY.index, DY.Y_real, label="Real Values")
     p2 = ax.plot(DY.index, DY.Y_predicted, label="Transformer predicted", color='orange')
     p3 = ax.plot(DY.index, DY.Y_yesterday, label="Historical", color='green')
@@ -141,8 +141,8 @@ def plot_res(ax, DY: pd.DataFrame, metricp: float, metricy: float, ahead: int, *
         ax.legend()
         ax.grid(True)
     # Agregar texto
-    ax.text(.01, .01, 'MSE Predicted=' + str(round(metricp,3)), transform=ax.transAxes, ha='left', va='bottom', fontsize=16, color='#FFA500')
-    ax.text(.01, .05, 'MSE Historical=' + str(round(metricy,3)), transform=ax.transAxes, fontsize=16, ha='left', va='bottom', color='green')
+    ax.text(.01, .01, f'{metric.upper()} Predicted=' + str(round(metricp,3)), transform=ax.transAxes, ha='left', va='bottom', fontsize=16, color='#FFA500')
+    ax.text(.01, .05, f'{metric.upper()} Historical=' + str(round(metricy,3)), transform=ax.transAxes, fontsize=16, ha='left', va='bottom', color='green')
 
 def run_plot_res(list_tr_tst: list, all_results: dict, stock_list: list, lahead: list, selected_scenario: str, metric: str, scen_name: str, plot_path: str, plot_format: str) -> None:
     for tr_tst in list_tr_tst:
@@ -161,9 +161,9 @@ def run_plot_res(list_tr_tst: list, all_results: dict, stock_list: list, lahead:
                     row = i // 3
                     col = i % 3
                     if 'transformer' not in model:
-                        plot_res(axs[row, col], DY, metricp, metricy, ahead)
+                        plot_res(axs[row, col], DY, metric, metricp, metricy, ahead)
                     else:
-                        plot_res(axs[row, col], DY, metricp, metricy, ahead, res1[ahead]['transformer_parameters'][0])
+                        plot_res(axs[row, col], DY, metric, metricp, metricy, ahead, res1[ahead]['transformer_parameters'][0])
 
                     axs[row, col].set_xlim(DY.index.min(), DY.index.max())  # Ajustar los límites del eje X
                     axs[row, col].set_ylim(DY['Y_yesterday'].min()*0.7, DY['Y_yesterday'].max()*1.3)
@@ -192,7 +192,7 @@ def plot_metric_boxplots(selected_model: str, list_tr_tst: list, all_results: di
             ax.set_yscale('log')
             ax.set_title(f'{metric.upper()} - {selected_model.upper()}', fontsize=16)
             ax.set_xlabel('Acciones', fontsize=14)
-            ax.set_ylabel('MSE', fontsize=14)
+            ax.set_ylabel(f'{metric.upper()}', fontsize=14)
             save_path = f'{plot_path}/{scen_name}/{tr_tst}'
             if not os.path.exists(save_path):
                 os.makedirs(save_path)
@@ -244,112 +244,3 @@ def plot_metric_boxplots_with_yesterday(selected_model: str, tr_tst_list: list, 
             fig_path = os.path.join(save_path, f'{stock}_boxplot_{metric}_{selected_model}.{plot_format}')
             plt.savefig(fig_path)
             fig.show()
-
-def plot_results_comparison(model_results, lahead, model_list, scen_name, stck, itr, tr_tst, save_path=None, wdth=10, hght=30):
-    '''Plots the results of the models
-    ...
-    Parameters
-    ----------
-    model_results : dict
-        Dictionary containing the results of the models
-    lahead : list
-        List of the number of days ahead to forecast
-    model_list : list
-        List of the models to compare
-    scen_name : str
-        Name of the scenario
-    stck : str
-        Ticker of the stock
-    itr : int
-        Number of iterations
-    tr_tst : float
-        Percentage of the data to use for training
-    save_path : str
-        Path to save the figure
-    wdth : int
-        Width of the figure
-    hght : int
-        Height of the figure
-        '''
-    num_models = len(model_list)
-    fig, axs = plt.subplots(len(lahead), len(model_list), figsize=[wdth*num_models, hght])
-    
-    for j, ahead in enumerate(lahead):
-        for i, model in enumerate(model_list):
-            col = i
-            res = model_results[model]['tot_res']['OUT_MODEL'][scen_name][stck][ahead]
-            DYs = res['DY']
-            DY = DYs.loc[itr]
-            msep = res['MSEP'][itr]
-            msey = res['MSEY'][itr]
-            
-            if model != 'transformer':
-                plot_res(axs[j, col], DY, msep, msey, stck, model, itr, ahead, tr_tst)
-            else:
-                num_heads = res['transformer_parameters'][0]['num_heads']
-                num_layers = res['transformer_parameters'][0]['num_layers']
-                plot_res(axs[j, col], DY, msep, msey, stck, model, itr, ahead, tr_tst, num_heads, num_layers)               
-            # Ajustar los límites del eje X y Y
-            axs[j, col].set_xlim(DY.index.min(), DY.index.max())  # Ajustar los límites del eje X
-            axs[j, col].set_ylim(120, 200)    
-    if save_path:
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        plt.tight_layout()
-        figfich = os.path.join(save_path, f'{stck}-{itr}-{num_heads}-{num_layers}.png')
-        plt.savefig(figfich)
-    else:
-        plt.tight_layout()
-        plt.show()
-
-def plot_ahead_perf_sameStock(model_results, lahead, model_list, stock_list, list_tr_tst, scen_name, wdth=8, hght=9):
-    '''Plots the performance of the models for the same stock
-    ...
-    Parameters
-    ----------
-    model_results : dict
-        Dictionary containing the results of the models
-    lahead : list
-        List of the number of days ahead to forecast
-    model_list : list
-        List of the models to compare
-    stock_list : list
-        List of the stocks to compare
-    list_tr_tst : list
-        List of the percentages of the data to use for training
-    scen_name : str
-        Name of the scenario
-    wdth : int
-        Width of the figure
-    hght : int
-        Height of the figure    
-        '''
-    num_models = len(model_list)
-    fig, axes = plt.subplots(len(list_tr_tst), num_models, figsize=[wdth*num_models, hght])
-
-    for stock in stock_list:
-        for i, tr_tst in enumerate(list_tr_tst):
-            for j, model in enumerate(model_list):
-                res = model_results[model]['tot_res']['OUT_MODEL'][scen_name][stock]
-                lstd = {}
-                yval = {}
-                for ahead in lahead:
-                    lstd[ahead] = res[ahead]['MSEP']
-                    yval[ahead] = res[ahead]['MSEY'][0]
-
-                h = list(range(len(lstd)))
-                bp = np.array(list(lstd.values()))
-
-                ax = axes[i, j]  # Acceder al eje en la posición i, j
-                ax.boxplot(bp.T, positions=h, showmeans=True, manage_ticks=False)
-                ax.plot(h, yval.values(), '--ko', c='red', label='Historical')
-                ax.set_xticks(h)
-                ax.set_xticklabels(list(lstd.keys()), rotation='vertical')
-                ax.set_xlabel('Stocks')
-                ax.set_ylabel('MSE of the 10 simulations')
-                ax.set_yscale('log')
-                ax.set_title(f'{model.upper()} for {stock} and {tr_tst*100}% train')
-                ax.legend()
-
-        plt.tight_layout()
-        plt.show()
