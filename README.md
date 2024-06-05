@@ -90,9 +90,9 @@ Customize the YAML configuration file to specify simulation parameters.
 ### Execution
 Run the main script to start the simulation with the path of the configuration file and the operations to run:
 operations: 'pre;lstm;1DT;MDT;post'
-    ```bash
-    python3 src/main.py -c path_to_config_file.yaml -o [operations]
-    ```
+   ```bash
+   python3 src/main.py -c path_to_config_file.yaml -o [operations]
+   ```
 
 ## Results
 Below are some example graphs of the results obtained from the models predictions:
