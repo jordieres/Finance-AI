@@ -138,5 +138,14 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--operations", required=True, help="Operations to run: 'pre;lstm;1DT;MDT;post' you can run all or some or just one of them."
                         "pre: Data preprocessing, lstm: LSTM model training, 1DT: UniDimensional Transformer model training,"
                         "MDT: MultiDimensional Transformer model training, post: Results visualization.")
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except argparse.ArgumentError as e:
+        print(f"Error: {e}\n")
+        parser.print_help()
+        sys.exit(2)
+    except SystemExit as e:
+        if e.code != 0:
+            parser.print_help()
+        sys.exit(e.code)
     main(args)
