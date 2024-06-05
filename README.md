@@ -85,6 +85,16 @@ The operation of the system is managed by a flow of Python scripts executed by a
 - PyTorch
 - Additional dependencies listed in `requirements.txt`
 
+### Load pretrained models
+To load the pretrained models to use the .h5 files for the LSTMs you can follow this example:
+
+```python
+from tensorflow.keras.models import load_model
+
+# Path to the .h5 file of the model
+model = path_model
+model..summary() #to see that the model is ready to use
+```
 
 ### Installation
 
