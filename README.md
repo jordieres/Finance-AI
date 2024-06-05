@@ -128,7 +128,7 @@ Below are some example graphs of the results obtained from the models prediction
 ## Application of trained Models
 To load and apply the trained models to use the .h5 files for the LSTMs you can follow this example:
 
-###Load input data:
+### Load input data:
 ```python
 from utils_vv_tfg import load_preprocessed_data, denormalize_data
 import numpy as np
@@ -139,7 +139,7 @@ for ahead in lahead:
     testX  = tot['testX']
     vdd    = tot['vdd'] #data to denormalize the predictions
 ```
-###Load model trained:
+### Load model trained:
 ```python
 from tensorflow.keras.models import load_model
 
@@ -148,7 +148,7 @@ model = "path_model"
 model.summary() #to make sure that the model is ready to use
 ```
 
-###Make the predictions:
+### Make the predictions:
 ```python
 model.predict(testX)
 #Denormalize the predictions
