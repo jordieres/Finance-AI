@@ -4,6 +4,20 @@ Víctor Vallejo's final degree thesis (TFG) of the degree in Data Engineering an
 ## Overview
 This project aims to develop an artificial intelligence-based price prediction system for financial markets, leveraging transformative models in a multivariate environment. The architecture is designed to facilitate comparisons between transformer models and other AI technologies, applied to data from 15 different stocks within the S&P 500 index.
 
+See the project's paper for more details:
+```bibtex
+@article{https://doi.org/10.5281/zenodo.11493274,
+  doi = {10.5281/ZENODO.11493274},
+  url = {https://zenodo.org/doi/10.5281/zenodo.11493274},
+  author = {Vallejo Carmona,  Víctor},
+  language = {en},
+  title = {AI in Finance: Transformers applied to multivariate time series forecasting},
+  publisher = {Zenodo},
+  year = {2024},
+  copyright = {Creative Commons Attribution 4.0 International}
+}
+```
+
 ## Features
 
 - **Multivariate Data Analysis**: Incorporates data from various sources, including Twitter and Bloomberg sentiment analysis, daily trading volumes, and stock price-related factors.
