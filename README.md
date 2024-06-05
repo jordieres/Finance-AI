@@ -150,7 +150,7 @@ model.summary() #to make sure that the model is ready to use
 
 ### Make the predictions:
 ```python
-model.predict(testX)
+y_hat = model.predict(testX)
 #Denormalize the predictions
 preds = np.concatenate(y_hat,axis=0).tolist()
 jdx = testX.index
