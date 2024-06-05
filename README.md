@@ -93,7 +93,7 @@ from tensorflow.keras.models import load_model
 
 # Path to the .h5 file of the model
 model = path_model
-model..summary() #to see that the model is ready to use
+model.summary() #to make sure that the model is ready to use
 ```
 
 ### Installation
