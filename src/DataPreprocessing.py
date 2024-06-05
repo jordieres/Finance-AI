@@ -289,7 +289,7 @@ class Stock:
         The mean of the data'''
         return np.mean(data, axis=axis)
 
-    def calculate_min(self, data, axis=None) -> np.ndarray:
+    def calculate_min(self, data, axis=1) -> np.ndarray:
         '''
         Returns the minimum of the data
  
@@ -301,7 +301,7 @@ class Stock:
         The minimum of the data'''
         return data.min(axis=axis)
 
-    def calculate_max(self, data, axis=None) -> np.ndarray:
+    def calculate_max(self, data, axis=1) -> np.ndarray:
         '''
         Returns the maximum of the data
  
