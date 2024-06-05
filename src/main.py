@@ -135,6 +135,8 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Full system training, testing and results saving.")
     parser.add_argument("-c", "--params_file", required=True, nargs='?', action='store', help="Configuration file path")
-    parser.add_argument("-o", "--operations", required=True, help="Operations to run: 'pre;lstm;1DT;MDT;post'")
+    parser.add_argument("-o", "--operations", required=True, help="Operations to run: 'pre;lstm;1DT;MDT;post' you can run all or some or just one of them."
+                        "pre: Data preprocessing, lstm: LSTM model training, 1DT: UniDimensional Transformer model training,"
+                        "MDT: MultiDimensional Transformer model training, post: Results visualization.")
     args = parser.parse_args()
     main(args)
