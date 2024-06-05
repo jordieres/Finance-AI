@@ -85,17 +85,6 @@ The operation of the system is managed by a flow of Python scripts executed by a
 - PyTorch
 - Additional dependencies listed in `requirements.txt`
 
-### Load pretrained models
-To load the pretrained models to use the .h5 files for the LSTMs you can follow this example:
-
-```python
-from tensorflow.keras.models import load_model
-
-# Path to the .h5 file of the model
-model = "path_model"
-model.summary() #to make sure that the model is ready to use
-```
-
 ### Installation
 
 1. Clone the repository:
@@ -135,6 +124,38 @@ Below are some example graphs of the results obtained from the models prediction
 
 ![AMZN LSTM Price Prediction](figures/scenario_1/MSE_lstm_boxplot/AAPL_boxplot_MSE_lstm.png)
 ![AMZN Multivariate Transformer Price Prediction](figures/scenario_1/MSE_transformer-m_boxplot/AAPL_boxplot_MSE_transformer-m.png)
+
+## Application of trained Models
+To load and apply the trained models to use the .h5 files for the LSTMs you can follow this example:
+
+###Load input data:
+```python
+from utils_vv_tfg import load_preprocessed_data, denormalize_data
+import numpy as np
+
+lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, scenario_name, multi)
+for ahead in lahead:
+    tot = tot_res['INPUT_DATA'][ahead]
+    testX  = tot['testX']
+    vdd    = tot['vdd'] #data to denormalize the predictions
+```
+###Load model trained:
+```python
+from tensorflow.keras.models import load_model
+
+# Path to the .h5 file of the model
+model = "path_model"
+model.summary() #to make sure that the model is ready to use
+```
+
+###Make the predictions:
+```python
+model.predict(testX)
+#Denormalize the predictions
+preds = np.concatenate(y_hat,axis=0).tolist()
+jdx = testX.index
+y_forecast = denormalize_data(preds, vdd, jdx, multi=multi, lstm=True)
+```
 
 ## Contributing
 Contributions are welcome!
