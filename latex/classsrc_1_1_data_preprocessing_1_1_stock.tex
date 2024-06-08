@@ -1,0 +1,437 @@
+\doxysection{src.\+Data\+Preprocessing.\+Stock Class Reference}
+\hypertarget{classsrc_1_1_data_preprocessing_1_1_stock}{}\label{classsrc_1_1_data_preprocessing_1_1_stock}\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_ae00121031f70a03e24a80afa60c8fae6}{\+\_\+\+\_\+init\+\_\+\+\_\+}} (self, str \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a75be40f2df1f9b4d57c5e79898540bff}{ticker}}, str file\+\_\+name, list lahead, float \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_af2820257a0a2cf7eb135582b447c9d27}{tr\+\_\+tst}}, str \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a94d30e8ab6d6aac2d0258a130bc1f926}{scen\+\_\+name}})
+\item 
+None \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a8a87bfec753d6205d983eadc56975b12}{process\+\_\+univariate\+\_\+data}} (self, int win)
+\item 
+None \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_acb4c9dd7e676164d3520c2bdd70098fa}{process\+\_\+multivariate\+\_\+data}} (self, int mwin, int m\+\_\+ftrs)
+\item 
+tuple \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_ae34d126cbc15a9f5e6c7f4d4ef8dd7a3}{prepare\+\_\+multivariate\+\_\+data}} (self, pd.\+Data\+Frame df\+\_\+x, int win, int n\+\_\+ftrs, pd.\+Index idx)
+\item 
+None \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a42de0fbde1f905f6eb8798bf1ca9ac6f}{compute\+\_\+sentiment\+\_\+scores}} (self)
+\item 
+None \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a5b3eede0bd65d819f46a16b2690d2157}{compute\+\_\+volatility}} (self)
+\item 
+None \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_ae5c937e5597d171f8e5ab371ed078081}{compute\+\_\+trend}} (self)
+\item 
+None \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_afaadb71ab1b0a8dc3f092e3725fe5653}{check\+\_\+nan\+\_\+values}} (self, pd.\+Data\+Frame train\+\_\+x, pd.\+Data\+Frame test\+\_\+x, int ahead)
+\item 
+None \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_aca93b9261771a54298d5fbe82434e621}{check\+\_\+infinite\+\_\+values}} (self, pd.\+Data\+Frame \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a0255eb2dd671526a2694067535df2720}{df}})
+\item 
+tuple \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a193b5b7257b2826ee06e1d39b961a995}{prepare\+\_\+data\+\_\+for\+\_\+modeling}} (self, x\+\_\+norm, y\+\_\+norm, bool multi)
+\item 
+None \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_ac8adb4c89e3fcada31f5ae481efd16b6}{process\+\_\+stocks}} (self)
+\item 
+np.\+ndarray \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a0d114f6856b9ebafab0609a38c12fd78}{calculate\+\_\+mean}} (self, data, axis=None)
+\item 
+np.\+ndarray \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_ab731a2338fa9f2499d25d17259f77cea}{calculate\+\_\+min}} (self, data, axis=1)
+\item 
+np.\+ndarray \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_ad08c5cea0cbe7dda017033cd2309af3b}{calculate\+\_\+max}} (self, data, axis=1)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a75be40f2df1f9b4d57c5e79898540bff}{ticker}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_af2820257a0a2cf7eb135582b447c9d27}{tr\+\_\+tst}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a0255eb2dd671526a2694067535df2720}{df}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a94d30e8ab6d6aac2d0258a130bc1f926}{scen\+\_\+name}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_aed90980f94a16f3ed881d5c3e6671330}{serial\+\_\+dict}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a3f376b1a40277303ee4984e339d4076c}{mserial\+\_\+dict}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+pd.\+Data\+Frame \mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_ae2a5a9d1b140a88d738236ffd551431d}{\+\_\+read\+\_\+data}} (self, str file\+\_\+name)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_ab7ddd922917cec078b006bfcce204444}{\+\_\+data}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_data_preprocessing_1_1_stock_a5058a601b0c725f1caa4c092e6b52c88}{\+\_\+lahead}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Class that creates the Stock, processes the stock data, and creates the output files for each stock.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00016}{16}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_ae00121031f70a03e24a80afa60c8fae6}\label{classsrc_1_1_data_preprocessing_1_1_stock_ae00121031f70a03e24a80afa60c8fae6} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!\_\_init\_\_@{\_\_init\_\_}}
+\index{\_\_init\_\_@{\_\_init\_\_}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{\_\_init\_\_()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily src.\+Data\+Preprocessing.\+Stock.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{str}]{ticker,  }\item[{str}]{file\+\_\+name,  }\item[{list}]{lahead,  }\item[{float}]{tr\+\_\+tst,  }\item[{str}]{scen\+\_\+name }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Constructs all the necessary attributes for the Stock object.
+
+Parameters:
+-----------
+ticker : str
+    The stock ticker.
+file_name : str
+    Path to the data file.
+lahead : list
+    List of the number of days ahead.
+tr_tst : float
+    Train-test ratio.
+scen_name : str
+    Scenario name.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00021}{21}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_ae2a5a9d1b140a88d738236ffd551431d}\label{classsrc_1_1_data_preprocessing_1_1_stock_ae2a5a9d1b140a88d738236ffd551431d} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!\_read\_data@{\_read\_data}}
+\index{\_read\_data@{\_read\_data}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{\_read\_data()}{\_read\_data()}}
+{\footnotesize\ttfamily  pd.\+Data\+Frame src.\+Data\+Preprocessing.\+Stock.\+\_\+read\+\_\+data (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{str}]{file\+\_\+name }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\begin{DoxyVerb}Returns the data from the data path.
+
+Parameters:
+-----------
+file_name : str
+    Path to the data.
+
+Returns:
+--------
+pd.DataFrame
+    The stock data.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00049}{49}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_ad08c5cea0cbe7dda017033cd2309af3b}\label{classsrc_1_1_data_preprocessing_1_1_stock_ad08c5cea0cbe7dda017033cd2309af3b} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!calculate\_max@{calculate\_max}}
+\index{calculate\_max@{calculate\_max}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{calculate\_max()}{calculate\_max()}}
+{\footnotesize\ttfamily  np.\+ndarray src.\+Data\+Preprocessing.\+Stock.\+calculate\+\_\+max (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{data,  }\item[{}]{axis = {\ttfamily 1} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Returns the maximum of the data
+
+Parameters:
+data : the data
+axis : the axis
+
+Returns:
+The maximum of the data\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00304}{304}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_a0d114f6856b9ebafab0609a38c12fd78}\label{classsrc_1_1_data_preprocessing_1_1_stock_a0d114f6856b9ebafab0609a38c12fd78} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!calculate\_mean@{calculate\_mean}}
+\index{calculate\_mean@{calculate\_mean}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{calculate\_mean()}{calculate\_mean()}}
+{\footnotesize\ttfamily  np.\+ndarray src.\+Data\+Preprocessing.\+Stock.\+calculate\+\_\+mean (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{data,  }\item[{}]{axis = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Returns the mean of the data
+
+Parameters:
+data : the data
+axis : the axis
+
+Returns:
+The mean of the data\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00280}{280}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_ab731a2338fa9f2499d25d17259f77cea}\label{classsrc_1_1_data_preprocessing_1_1_stock_ab731a2338fa9f2499d25d17259f77cea} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!calculate\_min@{calculate\_min}}
+\index{calculate\_min@{calculate\_min}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{calculate\_min()}{calculate\_min()}}
+{\footnotesize\ttfamily  np.\+ndarray src.\+Data\+Preprocessing.\+Stock.\+calculate\+\_\+min (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{data,  }\item[{}]{axis = {\ttfamily 1} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Returns the minimum of the data
+
+Parameters:
+data : the data
+axis : the axis
+
+Returns:
+The minimum of the data\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00292}{292}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_aca93b9261771a54298d5fbe82434e621}\label{classsrc_1_1_data_preprocessing_1_1_stock_aca93b9261771a54298d5fbe82434e621} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!check\_infinite\_values@{check\_infinite\_values}}
+\index{check\_infinite\_values@{check\_infinite\_values}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{check\_infinite\_values()}{check\_infinite\_values()}}
+{\footnotesize\ttfamily  None src.\+Data\+Preprocessing.\+Stock.\+check\+\_\+infinite\+\_\+values (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{pd.\+Data\+Frame}]{df }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Checks for infinite values in the data
+
+Parameters:
+df : the DataFrame
+
+Returns:
+Error message if infinite values are found\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00232}{232}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_afaadb71ab1b0a8dc3f092e3725fe5653}\label{classsrc_1_1_data_preprocessing_1_1_stock_afaadb71ab1b0a8dc3f092e3725fe5653} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!check\_nan\_values@{check\_nan\_values}}
+\index{check\_nan\_values@{check\_nan\_values}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{check\_nan\_values()}{check\_nan\_values()}}
+{\footnotesize\ttfamily  None src.\+Data\+Preprocessing.\+Stock.\+check\+\_\+nan\+\_\+values (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{pd.\+Data\+Frame}]{train\+\_\+x,  }\item[{pd.\+Data\+Frame}]{test\+\_\+x,  }\item[{int}]{ahead }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Checks for NaN values in the data
+
+Parameters:
+train_x : DataFrame
+    the training data
+test_x : DataFrame
+    the testing data
+ahead : int
+    the number of days ahead
+    
+Returns:
+Error message if NaN values are found\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00210}{210}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_a42de0fbde1f905f6eb8798bf1ca9ac6f}\label{classsrc_1_1_data_preprocessing_1_1_stock_a42de0fbde1f905f6eb8798bf1ca9ac6f} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!compute\_sentiment\_scores@{compute\_sentiment\_scores}}
+\index{compute\_sentiment\_scores@{compute\_sentiment\_scores}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{compute\_sentiment\_scores()}{compute\_sentiment\_scores()}}
+{\footnotesize\ttfamily  None src.\+Data\+Preprocessing.\+Stock.\+compute\+\_\+sentiment\+\_\+scores (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Computes the sentiment scores for the data.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00188}{188}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_ae5c937e5597d171f8e5ab371ed078081}\label{classsrc_1_1_data_preprocessing_1_1_stock_ae5c937e5597d171f8e5ab371ed078081} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!compute\_trend@{compute\_trend}}
+\index{compute\_trend@{compute\_trend}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{compute\_trend()}{compute\_trend()}}
+{\footnotesize\ttfamily  None src.\+Data\+Preprocessing.\+Stock.\+compute\+\_\+trend (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Computes the trend for the price and volume data
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00203}{203}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_a5b3eede0bd65d819f46a16b2690d2157}\label{classsrc_1_1_data_preprocessing_1_1_stock_a5b3eede0bd65d819f46a16b2690d2157} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!compute\_volatility@{compute\_volatility}}
+\index{compute\_volatility@{compute\_volatility}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{compute\_volatility()}{compute\_volatility()}}
+{\footnotesize\ttfamily  None src.\+Data\+Preprocessing.\+Stock.\+compute\+\_\+volatility (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Computes the daily volatility for each row in the data
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00197}{197}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_a193b5b7257b2826ee06e1d39b961a995}\label{classsrc_1_1_data_preprocessing_1_1_stock_a193b5b7257b2826ee06e1d39b961a995} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!prepare\_data\_for\_modeling@{prepare\_data\_for\_modeling}}
+\index{prepare\_data\_for\_modeling@{prepare\_data\_for\_modeling}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{prepare\_data\_for\_modeling()}{prepare\_data\_for\_modeling()}}
+{\footnotesize\ttfamily  tuple src.\+Data\+Preprocessing.\+Stock.\+prepare\+\_\+data\+\_\+for\+\_\+modeling (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{x\+\_\+norm,  }\item[{}]{y\+\_\+norm,  }\item[{bool}]{multi }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Returns the data for modeling
+
+Parameters:
+x_norm : the features
+y_norm : the target
+multi : if the data is multivariate
+
+Returns:
+Train_x : data for training
+Train_y : target for training
+Test_x : data for testing
+Test_y : target for testing
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00244}{244}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_ae34d126cbc15a9f5e6c7f4d4ef8dd7a3}\label{classsrc_1_1_data_preprocessing_1_1_stock_ae34d126cbc15a9f5e6c7f4d4ef8dd7a3} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!prepare\_multivariate\_data@{prepare\_multivariate\_data}}
+\index{prepare\_multivariate\_data@{prepare\_multivariate\_data}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{prepare\_multivariate\_data()}{prepare\_multivariate\_data()}}
+{\footnotesize\ttfamily  tuple src.\+Data\+Preprocessing.\+Stock.\+prepare\+\_\+multivariate\+\_\+data (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{pd.\+Data\+Frame}]{df\+\_\+x,  }\item[{int}]{win,  }\item[{int}]{n\+\_\+ftrs,  }\item[{pd.\+Index}]{idx }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Prepares the multivariate data for modeling.
+
+Parameters:
+-----------
+df_x : pd.DataFrame
+    The features.
+win : int
+    The window size.
+n_ftrs : int
+    The number of features.
+idx : pd.Index
+    The index.
+
+Returns:
+--------
+Tuple[np.ndarray, pd.Index]
+    The multivariate data and columns.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00158}{158}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_acb4c9dd7e676164d3520c2bdd70098fa}\label{classsrc_1_1_data_preprocessing_1_1_stock_acb4c9dd7e676164d3520c2bdd70098fa} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!process\_multivariate\_data@{process\_multivariate\_data}}
+\index{process\_multivariate\_data@{process\_multivariate\_data}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{process\_multivariate\_data()}{process\_multivariate\_data()}}
+{\footnotesize\ttfamily  None src.\+Data\+Preprocessing.\+Stock.\+process\+\_\+multivariate\+\_\+data (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{int}]{mwin,  }\item[{int}]{m\+\_\+ftrs }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Processes the multivariate data.
+
+Parameters:
+-----------
+mwin : int
+    Multivariate window size.
+m_ftrs : int
+    Multivariate number of features.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00110}{110}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_ac8adb4c89e3fcada31f5ae481efd16b6}\label{classsrc_1_1_data_preprocessing_1_1_stock_ac8adb4c89e3fcada31f5ae481efd16b6} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!process\_stocks@{process\_stocks}}
+\index{process\_stocks@{process\_stocks}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{process\_stocks()}{process\_stocks()}}
+{\footnotesize\ttfamily  None src.\+Data\+Preprocessing.\+Stock.\+process\+\_\+stocks (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Processes the stock data\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00272}{272}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_a8a87bfec753d6205d983eadc56975b12}\label{classsrc_1_1_data_preprocessing_1_1_stock_a8a87bfec753d6205d983eadc56975b12} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!process\_univariate\_data@{process\_univariate\_data}}
+\index{process\_univariate\_data@{process\_univariate\_data}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{process\_univariate\_data()}{process\_univariate\_data()}}
+{\footnotesize\ttfamily  None src.\+Data\+Preprocessing.\+Stock.\+process\+\_\+univariate\+\_\+data (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{int}]{win }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Processes the univariate data.
+
+Parameters:
+-----------
+win : int
+    Window size.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00065}{65}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_ab7ddd922917cec078b006bfcce204444}\label{classsrc_1_1_data_preprocessing_1_1_stock_ab7ddd922917cec078b006bfcce204444} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!\_data@{\_data}}
+\index{\_data@{\_data}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{\_data}{\_data}}
+{\footnotesize\ttfamily src.\+Data\+Preprocessing.\+Stock.\+\_\+data\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00039}{39}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_a5058a601b0c725f1caa4c092e6b52c88}\label{classsrc_1_1_data_preprocessing_1_1_stock_a5058a601b0c725f1caa4c092e6b52c88} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!\_lahead@{\_lahead}}
+\index{\_lahead@{\_lahead}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{\_lahead}{\_lahead}}
+{\footnotesize\ttfamily src.\+Data\+Preprocessing.\+Stock.\+\_\+lahead\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00040}{40}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_a0255eb2dd671526a2694067535df2720}\label{classsrc_1_1_data_preprocessing_1_1_stock_a0255eb2dd671526a2694067535df2720} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!df@{df}}
+\index{df@{df}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{df}{df}}
+{\footnotesize\ttfamily src.\+Data\+Preprocessing.\+Stock.\+df}
+
+
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00042}{42}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_a3f376b1a40277303ee4984e339d4076c}\label{classsrc_1_1_data_preprocessing_1_1_stock_a3f376b1a40277303ee4984e339d4076c} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!mserial\_dict@{mserial\_dict}}
+\index{mserial\_dict@{mserial\_dict}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{mserial\_dict}{mserial\_dict}}
+{\footnotesize\ttfamily src.\+Data\+Preprocessing.\+Stock.\+mserial\+\_\+dict}
+
+
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00045}{45}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_a94d30e8ab6d6aac2d0258a130bc1f926}\label{classsrc_1_1_data_preprocessing_1_1_stock_a94d30e8ab6d6aac2d0258a130bc1f926} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!scen\_name@{scen\_name}}
+\index{scen\_name@{scen\_name}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{scen\_name}{scen\_name}}
+{\footnotesize\ttfamily src.\+Data\+Preprocessing.\+Stock.\+scen\+\_\+name}
+
+
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00043}{43}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_aed90980f94a16f3ed881d5c3e6671330}\label{classsrc_1_1_data_preprocessing_1_1_stock_aed90980f94a16f3ed881d5c3e6671330} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!serial\_dict@{serial\_dict}}
+\index{serial\_dict@{serial\_dict}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{serial\_dict}{serial\_dict}}
+{\footnotesize\ttfamily src.\+Data\+Preprocessing.\+Stock.\+serial\+\_\+dict}
+
+
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00044}{44}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_a75be40f2df1f9b4d57c5e79898540bff}\label{classsrc_1_1_data_preprocessing_1_1_stock_a75be40f2df1f9b4d57c5e79898540bff} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!ticker@{ticker}}
+\index{ticker@{ticker}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{ticker}{ticker}}
+{\footnotesize\ttfamily src.\+Data\+Preprocessing.\+Stock.\+ticker}
+
+
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00038}{38}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+\Hypertarget{classsrc_1_1_data_preprocessing_1_1_stock_af2820257a0a2cf7eb135582b447c9d27}\label{classsrc_1_1_data_preprocessing_1_1_stock_af2820257a0a2cf7eb135582b447c9d27} 
+\index{src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}!tr\_tst@{tr\_tst}}
+\index{tr\_tst@{tr\_tst}!src.DataPreprocessing.Stock@{src.DataPreprocessing.Stock}}
+\doxysubsubsection{\texorpdfstring{tr\_tst}{tr\_tst}}
+{\footnotesize\ttfamily src.\+Data\+Preprocessing.\+Stock.\+tr\+\_\+tst}
+
+
+
+Definition at line \mbox{\hyperlink{_data_preprocessing_8py_source_l00041}{41}} of file \mbox{\hyperlink{_data_preprocessing_8py_source}{Data\+Preprocessing.\+py}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_data_preprocessing_8py}{Data\+Preprocessing.\+py}}\end{DoxyCompactItemize}

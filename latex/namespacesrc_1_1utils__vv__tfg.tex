@@ -1,0 +1,134 @@
+\doxysection{src.\+utils\+\_\+vv\+\_\+tfg Namespace Reference}
+\hypertarget{namespacesrc_1_1utils__vv__tfg}{}\label{namespacesrc_1_1utils__vv__tfg}\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+None \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a68eac529f6a13b6b6110a3beb2733aaa}{save\+\_\+data}} (str fich, str out\+\_\+path, list lahead, list lpar, dict tot\+\_\+res)
+\item 
+tuple \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a93206807e226620738446d322a16f18a}{load\+\_\+preprocessed\+\_\+data}} (str path, int win, float tr\+\_\+tst, str ticker, str scen\+\_\+name, bool multi)
+\item 
+list \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_af054ab6a74e09eebded08d0f832999ba}{select\+\_\+features}} (list features, list selected\+\_\+features)
+\item 
+pd.\+Series \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a1f22f3cdf1ec45b1ebfbfdc62d00f43a}{denormalize\+\_\+data}} (np.\+array Yn, dict mvdd, pd.\+Index idx, bool multi, bool lstm=False)
+\item 
+dict \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_ad97ee590de7b7188c4377e24b908259d}{eval\+\_\+lstm}} (np.\+array np\+\_\+test\+\_\+X, np.\+array np\+\_\+test\+\_\+y, pd.\+Data\+Frame test\+\_\+X, model, dict vdd, pd.\+Series Y, int ahead)
+\item 
+dict \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a13fa0ebc58b6e2ae9cee2b4e6af4a5db}{load\+\_\+output\+\_\+preprocessed\+\_\+data}} (str path, int win, float tr\+\_\+tst, str scenario\+\_\+name)
+\item 
+None \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_af66e0f4e9d27e3993dd1279730c483fd}{plot\+\_\+res}} (ax, pd.\+Data\+Frame DY, str metric, float metricp, float metricy, int ahead, \texorpdfstring{$\ast$}{*}dict parameters)
+\item 
+None \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_aba3aebfc9986c86dd617a520775c7d04}{run\+\_\+plot\+\_\+res}} (list list\+\_\+tr\+\_\+tst, dict all\+\_\+results, list stock\+\_\+list, list lahead, str selected\+\_\+scenario, str metric, str scen\+\_\+name, str plot\+\_\+path, str plot\+\_\+format)
+\item 
+None \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a8594eb1ea4b629d3e20bd05308a74abd}{plot\+\_\+metric\+\_\+boxplots}} (str selected\+\_\+model, list list\+\_\+tr\+\_\+tst, dict all\+\_\+results, list stocks, list lahead, str metric, str scen\+\_\+name, str plot\+\_\+path, str plot\+\_\+format)
+\item 
+None \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_afe7df567a6f7d77ecf07bf073307c94a}{plot\+\_\+metric\+\_\+boxplots\+\_\+with\+\_\+yesterday}} (str selected\+\_\+model, list tr\+\_\+tst\+\_\+list, dict all\+\_\+results, list stock\+\_\+list, list lahead, str metric, str scen\+\_\+name, str plot\+\_\+path, str plot\+\_\+format)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespacesrc_1_1utils__vv__tfg_a1f22f3cdf1ec45b1ebfbfdc62d00f43a}\label{namespacesrc_1_1utils__vv__tfg_a1f22f3cdf1ec45b1ebfbfdc62d00f43a} 
+\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}!denormalize\_data@{denormalize\_data}}
+\index{denormalize\_data@{denormalize\_data}!src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection{\texorpdfstring{denormalize\_data()}{denormalize\_data()}}
+{\footnotesize\ttfamily  pd.\+Series src.\+utils\+\_\+vv\+\_\+tfg.\+denormalize\+\_\+data (\begin{DoxyParamCaption}\item[{np.\+array}]{Yn,  }\item[{dict}]{mvdd,  }\item[{pd.\+Index}]{idx,  }\item[{bool}]{multi,  }\item[{bool }]{lstm = {\ttfamily False} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Returns the denormalized target data.\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{utils__vv__tfg_8py_source_l00038}{38}} of file \mbox{\hyperlink{utils__vv__tfg_8py_source}{utils\+\_\+vv\+\_\+tfg.\+py}}.
+
+\Hypertarget{namespacesrc_1_1utils__vv__tfg_ad97ee590de7b7188c4377e24b908259d}\label{namespacesrc_1_1utils__vv__tfg_ad97ee590de7b7188c4377e24b908259d} 
+\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}!eval\_lstm@{eval\_lstm}}
+\index{eval\_lstm@{eval\_lstm}!src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection{\texorpdfstring{eval\_lstm()}{eval\_lstm()}}
+{\footnotesize\ttfamily  dict src.\+utils\+\_\+vv\+\_\+tfg.\+eval\+\_\+lstm (\begin{DoxyParamCaption}\item[{np.\+array}]{np\+\_\+test\+\_\+X,  }\item[{np.\+array}]{np\+\_\+test\+\_\+y,  }\item[{pd.\+Data\+Frame}]{test\+\_\+X,  }\item[{}]{model,  }\item[{dict}]{vdd,  }\item[{pd.\+Series}]{Y,  }\item[{int}]{ahead }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Evaluates the LSTM model\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{utils__vv__tfg_8py_source_l00054}{54}} of file \mbox{\hyperlink{utils__vv__tfg_8py_source}{utils\+\_\+vv\+\_\+tfg.\+py}}.
+
+\Hypertarget{namespacesrc_1_1utils__vv__tfg_a13fa0ebc58b6e2ae9cee2b4e6af4a5db}\label{namespacesrc_1_1utils__vv__tfg_a13fa0ebc58b6e2ae9cee2b4e6af4a5db} 
+\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}!load\_output\_preprocessed\_data@{load\_output\_preprocessed\_data}}
+\index{load\_output\_preprocessed\_data@{load\_output\_preprocessed\_data}!src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection{\texorpdfstring{load\_output\_preprocessed\_data()}{load\_output\_preprocessed\_data()}}
+{\footnotesize\ttfamily  dict src.\+utils\+\_\+vv\+\_\+tfg.\+load\+\_\+output\+\_\+preprocessed\+\_\+data (\begin{DoxyParamCaption}\item[{str}]{path,  }\item[{int}]{win,  }\item[{float}]{tr\+\_\+tst,  }\item[{str}]{scenario\+\_\+name }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Loads all pickle files from the specified directory that match the scenario name\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{utils__vv__tfg_8py_source_l00083}{83}} of file \mbox{\hyperlink{utils__vv__tfg_8py_source}{utils\+\_\+vv\+\_\+tfg.\+py}}.
+
+\Hypertarget{namespacesrc_1_1utils__vv__tfg_a93206807e226620738446d322a16f18a}\label{namespacesrc_1_1utils__vv__tfg_a93206807e226620738446d322a16f18a} 
+\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}!load\_preprocessed\_data@{load\_preprocessed\_data}}
+\index{load\_preprocessed\_data@{load\_preprocessed\_data}!src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection{\texorpdfstring{load\_preprocessed\_data()}{load\_preprocessed\_data()}}
+{\footnotesize\ttfamily  tuple src.\+utils\+\_\+vv\+\_\+tfg.\+load\+\_\+preprocessed\+\_\+data (\begin{DoxyParamCaption}\item[{str}]{path,  }\item[{int}]{win,  }\item[{float}]{tr\+\_\+tst,  }\item[{str}]{ticker,  }\item[{str}]{scen\+\_\+name,  }\item[{bool}]{multi }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Loads the preprocessed data from a pickle file\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{utils__vv__tfg_8py_source_l00018}{18}} of file \mbox{\hyperlink{utils__vv__tfg_8py_source}{utils\+\_\+vv\+\_\+tfg.\+py}}.
+
+\Hypertarget{namespacesrc_1_1utils__vv__tfg_a8594eb1ea4b629d3e20bd05308a74abd}\label{namespacesrc_1_1utils__vv__tfg_a8594eb1ea4b629d3e20bd05308a74abd} 
+\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}!plot\_metric\_boxplots@{plot\_metric\_boxplots}}
+\index{plot\_metric\_boxplots@{plot\_metric\_boxplots}!src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection{\texorpdfstring{plot\_metric\_boxplots()}{plot\_metric\_boxplots()}}
+{\footnotesize\ttfamily  None src.\+utils\+\_\+vv\+\_\+tfg.\+plot\+\_\+metric\+\_\+boxplots (\begin{DoxyParamCaption}\item[{str}]{selected\+\_\+model,  }\item[{list}]{list\+\_\+tr\+\_\+tst,  }\item[{dict}]{all\+\_\+results,  }\item[{list}]{stocks,  }\item[{list}]{lahead,  }\item[{str}]{metric,  }\item[{str}]{scen\+\_\+name,  }\item[{str}]{plot\+\_\+path,  }\item[{str}]{plot\+\_\+format }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{utils__vv__tfg_8py_source_l00178}{178}} of file \mbox{\hyperlink{utils__vv__tfg_8py_source}{utils\+\_\+vv\+\_\+tfg.\+py}}.
+
+\Hypertarget{namespacesrc_1_1utils__vv__tfg_afe7df567a6f7d77ecf07bf073307c94a}\label{namespacesrc_1_1utils__vv__tfg_afe7df567a6f7d77ecf07bf073307c94a} 
+\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}!plot\_metric\_boxplots\_with\_yesterday@{plot\_metric\_boxplots\_with\_yesterday}}
+\index{plot\_metric\_boxplots\_with\_yesterday@{plot\_metric\_boxplots\_with\_yesterday}!src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection{\texorpdfstring{plot\_metric\_boxplots\_with\_yesterday()}{plot\_metric\_boxplots\_with\_yesterday()}}
+{\footnotesize\ttfamily  None src.\+utils\+\_\+vv\+\_\+tfg.\+plot\+\_\+metric\+\_\+boxplots\+\_\+with\+\_\+yesterday (\begin{DoxyParamCaption}\item[{str}]{selected\+\_\+model,  }\item[{list}]{tr\+\_\+tst\+\_\+list,  }\item[{dict}]{all\+\_\+results,  }\item[{list}]{stock\+\_\+list,  }\item[{list}]{lahead,  }\item[{str}]{metric,  }\item[{str}]{scen\+\_\+name,  }\item[{str}]{plot\+\_\+path,  }\item[{str}]{plot\+\_\+format }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{utils__vv__tfg_8py_source_l00204}{204}} of file \mbox{\hyperlink{utils__vv__tfg_8py_source}{utils\+\_\+vv\+\_\+tfg.\+py}}.
+
+\Hypertarget{namespacesrc_1_1utils__vv__tfg_af66e0f4e9d27e3993dd1279730c483fd}\label{namespacesrc_1_1utils__vv__tfg_af66e0f4e9d27e3993dd1279730c483fd} 
+\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}!plot\_res@{plot\_res}}
+\index{plot\_res@{plot\_res}!src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection{\texorpdfstring{plot\_res()}{plot\_res()}}
+{\footnotesize\ttfamily  None src.\+utils\+\_\+vv\+\_\+tfg.\+plot\+\_\+res (\begin{DoxyParamCaption}\item[{}]{ax,  }\item[{pd.\+Data\+Frame}]{DY,  }\item[{str}]{metric,  }\item[{float}]{metricp,  }\item[{float}]{metricy,  }\item[{int}]{ahead,  }\item[{\texorpdfstring{$\ast$}{*}dict}]{parameters }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{utils__vv__tfg_8py_source_l00125}{125}} of file \mbox{\hyperlink{utils__vv__tfg_8py_source}{utils\+\_\+vv\+\_\+tfg.\+py}}.
+
+\Hypertarget{namespacesrc_1_1utils__vv__tfg_aba3aebfc9986c86dd617a520775c7d04}\label{namespacesrc_1_1utils__vv__tfg_aba3aebfc9986c86dd617a520775c7d04} 
+\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}!run\_plot\_res@{run\_plot\_res}}
+\index{run\_plot\_res@{run\_plot\_res}!src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection{\texorpdfstring{run\_plot\_res()}{run\_plot\_res()}}
+{\footnotesize\ttfamily  None src.\+utils\+\_\+vv\+\_\+tfg.\+run\+\_\+plot\+\_\+res (\begin{DoxyParamCaption}\item[{list}]{list\+\_\+tr\+\_\+tst,  }\item[{dict}]{all\+\_\+results,  }\item[{list}]{stock\+\_\+list,  }\item[{list}]{lahead,  }\item[{str}]{selected\+\_\+scenario,  }\item[{str}]{metric,  }\item[{str}]{scen\+\_\+name,  }\item[{str}]{plot\+\_\+path,  }\item[{str}]{plot\+\_\+format }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{utils__vv__tfg_8py_source_l00147}{147}} of file \mbox{\hyperlink{utils__vv__tfg_8py_source}{utils\+\_\+vv\+\_\+tfg.\+py}}.
+
+\Hypertarget{namespacesrc_1_1utils__vv__tfg_a68eac529f6a13b6b6110a3beb2733aaa}\label{namespacesrc_1_1utils__vv__tfg_a68eac529f6a13b6b6110a3beb2733aaa} 
+\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}!save\_data@{save\_data}}
+\index{save\_data@{save\_data}!src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection{\texorpdfstring{save\_data()}{save\_data()}}
+{\footnotesize\ttfamily  None src.\+utils\+\_\+vv\+\_\+tfg.\+save\+\_\+data (\begin{DoxyParamCaption}\item[{str}]{fich,  }\item[{str}]{out\+\_\+path,  }\item[{list}]{lahead,  }\item[{list}]{lpar,  }\item[{dict}]{tot\+\_\+res }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Saves the data to a pickle file\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{utils__vv__tfg_8py_source_l00009}{9}} of file \mbox{\hyperlink{utils__vv__tfg_8py_source}{utils\+\_\+vv\+\_\+tfg.\+py}}.
+
+\Hypertarget{namespacesrc_1_1utils__vv__tfg_af054ab6a74e09eebded08d0f832999ba}\label{namespacesrc_1_1utils__vv__tfg_af054ab6a74e09eebded08d0f832999ba} 
+\index{src.utils\_vv\_tfg@{src.utils\_vv\_tfg}!select\_features@{select\_features}}
+\index{select\_features@{select\_features}!src.utils\_vv\_tfg@{src.utils\_vv\_tfg}}
+\doxysubsubsection{\texorpdfstring{select\_features()}{select\_features()}}
+{\footnotesize\ttfamily  list src.\+utils\+\_\+vv\+\_\+tfg.\+select\+\_\+features (\begin{DoxyParamCaption}\item[{list}]{features,  }\item[{list}]{selected\+\_\+features }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Selects the indices of the selected features\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{utils__vv__tfg_8py_source_l00033}{33}} of file \mbox{\hyperlink{utils__vv__tfg_8py_source}{utils\+\_\+vv\+\_\+tfg.\+py}}.
+

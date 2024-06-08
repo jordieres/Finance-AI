@@ -1,0 +1,252 @@
+\doxysection{utils\+\_\+vv\+\_\+tfg.\+py}
+\hypertarget{utils__vv__tfg_8py_source}{}\label{utils__vv__tfg_8py_source}\index{src/utils\_vv\_tfg.py@{src/utils\_vv\_tfg.py}}
+\mbox{\hyperlink{utils__vv__tfg_8py}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00001}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg}{00001}}\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00002}00002\ \textcolor{keyword}{import}\ pickle}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00003}00003\ \textcolor{keyword}{import}\ matplotlib.pyplot\ \textcolor{keyword}{as}\ plt}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00004}00004\ \textcolor{keyword}{import}\ pandas\ \textcolor{keyword}{as}\ pd}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00005}00005\ \textcolor{keyword}{import}\ numpy\ \textcolor{keyword}{as}\ np}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00006}00006\ \textcolor{keyword}{from}\ sklearn.metrics\ \textcolor{keyword}{import}\ mean\_squared\_error,\ mean\_absolute\_error}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00009}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a68eac529f6a13b6b6110a3beb2733aaa}{00009}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a68eac529f6a13b6b6110a3beb2733aaa}{save\_data}}(fich:\ str,\ out\_path:\ str,\ lahead:\ list,\ lpar:\ list,\ tot\_res:\ dict)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00010}00010\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Saves\ the\ data\ to\ a\ pickle\ file"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00011}00011\ \ \ \ \ \textcolor{keyword}{with}\ open(fich,\ \textcolor{stringliteral}{'wb'})\ \textcolor{keyword}{as}\ file:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00012}00012\ \ \ \ \ \ \ \ \ pickle.dump(out\_path,\ file)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00013}00013\ \ \ \ \ \ \ \ \ pickle.dump(fich,\ file)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00014}00014\ \ \ \ \ \ \ \ \ pickle.dump(lahead,\ file)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00015}00015\ \ \ \ \ \ \ \ \ pickle.dump(lpar,\ file)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00016}00016\ \ \ \ \ \ \ \ \ pickle.dump(tot\_res,\ file)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00017}00017\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00018}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a93206807e226620738446d322a16f18a}{00018}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a93206807e226620738446d322a16f18a}{load\_preprocessed\_data}}(path:\ str,\ win:\ int,\ tr\_tst:\ float,\ ticker:\ str,\ scen\_name:\ str,\ multi:\ bool)\ -\/>\ tuple:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00019}00019\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Loads\ the\ preprocessed\ data\ from\ a\ pickle\ file"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00020}00020\ \ \ \ \ fdat\ =\ f\textcolor{stringliteral}{"{}\{path\}/input/\{win\}/\{tr\_tst\}/\{scen\_name\}-\/\{ticker\}-\/\{'m-\/'\ if\ multi\ else\ ''\}input.pkl"{}}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00021}00021\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00022}00022\ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(fdat):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00023}00023\ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ open(fdat,\ \textcolor{stringliteral}{"{}rb"{}})\ \textcolor{keyword}{as}\ openfile:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00024}00024\ \ \ \ \ \ \ \ \ \ \ \ \ lpath\ =\ pickle.load(openfile)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00025}00025\ \ \ \ \ \ \ \ \ \ \ \ \ lfdat\ =\ pickle.load(openfile)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00026}00026\ \ \ \ \ \ \ \ \ \ \ \ \ lahead\ =\ pickle.load(openfile)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00027}00027\ \ \ \ \ \ \ \ \ \ \ \ \ lparams\ =\ pickle.load(openfile)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00028}00028\ \ \ \ \ \ \ \ \ \ \ \ \ ltot\_res\ =\ pickle.load(openfile)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00029}00029\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lparams,\ ltot\_res}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00030}00030\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00031}00031\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ FileNotFoundError(f\textcolor{stringliteral}{"{}El\ archivo\ \{fdat\}\ no\ existe."{}})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00032}00032\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00033}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_af054ab6a74e09eebded08d0f832999ba}{00033}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_af054ab6a74e09eebded08d0f832999ba}{select\_features}}(features:\ list,\ selected\_features:\ list)\ -\/>\ list:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00034}00034\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Selects\ the\ indices\ of\ the\ selected\ features"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00035}00035\ \ \ \ \ \textcolor{keywordflow}{return}\ [i\ \textcolor{keywordflow}{for}\ i,\ feature\ \textcolor{keywordflow}{in}\ enumerate(features)\ \textcolor{keywordflow}{if}\ feature\ \textcolor{keywordflow}{in}\ selected\_features]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00036}00036\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00037}00037\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00038}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a1f22f3cdf1ec45b1ebfbfdc62d00f43a}{00038}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a1f22f3cdf1ec45b1ebfbfdc62d00f43a}{denormalize\_data}}(Yn:\ np.array,\ mvdd:\ dict,\ idx:\ pd.Index,\ multi:\ bool,\ lstm:\ bool\ =\ \textcolor{keyword}{False})\ -\/>\ pd.Series:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00039}00039\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Returns\ the\ denormalized\ target\ data."{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00040}00040\ \ \ \ \ \textcolor{keywordflow}{if}\ lstm:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00041}00041\ \ \ \ \ \ \ \ \ min\_x,\ max\_x,\ mean\_x\ =\ mvdd[\textcolor{stringliteral}{"{}min"{}}],\ mvdd[\textcolor{stringliteral}{"{}max"{}}],\ mvdd[\textcolor{stringliteral}{"{}mean"{}}]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00042}00042\ \ \ \ \ \ \ \ \ denormalized\_Yn\ =\ pd.Series(Yn,\ index=idx)\ *\ (max\_x\ -\/\ min\_x)\ +\ min\_x\ +\ mean\_x}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00043}00043\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00044}00044\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ multi:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00045}00045\ \ \ \ \ \ \ \ \ \ \ \ \ min\_x,\ max\_x,\ mean\_x\ =\ mvdd[\textcolor{stringliteral}{"{}min"{}}],\ mvdd[\textcolor{stringliteral}{"{}max"{}}],\ mvdd[\textcolor{stringliteral}{"{}mean"{}}]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00046}00046\ \ \ \ \ \ \ \ \ \ \ \ \ denormalized\_Yn\ =\ pd.Series(Yn[:,\ 0,\ 0],\ index=idx)\ *\ (max\_x\ -\/\ min\_x)\ +\ min\_x\ +\ mean\_x}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00047}00047\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00048}00048\ \ \ \ \ \ \ \ \ \ \ \ \ min\_x,\ max\_x,\ mean\_x\ =\ mvdd[\textcolor{stringliteral}{"{}min"{}}][0],\ mvdd[\textcolor{stringliteral}{"{}max"{}}][0],\ mvdd[\textcolor{stringliteral}{"{}mean"{}}][\textcolor{stringliteral}{'PX\_LAST'}]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00049}00049\ \ \ \ \ \ \ \ \ \ \ \ \ denormalized\_Yn\ =\ pd.Series(Yn[:,\ 0,\ 0],\ index=idx)\ *\ (max\_x\ -\/\ min\_x)\ +\ min\_x\ +\ mean\_x}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00050}00050\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00051}00051\ \ \ \ \ denormalized\_Yn.dropna(inplace=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00052}00052\ \ \ \ \ \textcolor{keywordflow}{return}\ denormalized\_Yn}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00053}00053\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00054}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_ad97ee590de7b7188c4377e24b908259d}{00054}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_ad97ee590de7b7188c4377e24b908259d}{eval\_lstm}}(np\_test\_X:\ np.array,\ np\_test\_y:\ np.array,\ test\_X:\ pd.DataFrame,\ model,\ vdd:\ dict,\ Y:\ pd.Series,\ ahead:\ int)\ -\/>\ dict:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00055}00055\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Evaluates\ the\ LSTM\ model"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00056}00056\ \ \ \ \ y\_hat\ \ \ =\ model.predict(np\_test\_X,verbose=0)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00057}00057\ \ \ \ \ tans\ \ \ =\ y\_hat.shape}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00058}00058\ \ \ \ \ \textcolor{keywordflow}{if}\ len(tans)\ >\ 2\ \textcolor{keywordflow}{and}\ tans[1]\ ==\ 1:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ y\_hat=\ np.concatenate(y\_hat,axis=0)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00060}00060\ \ \ \ \ \textcolor{keywordflow}{if}\ len(tans)\ >\ 2\ \textcolor{keywordflow}{and}\ tans[1]\ >\ 1:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00061}00061\ \ \ \ \ \ \ \ \ y\_hat=\ [vk[0].tolist()\ \textcolor{keywordflow}{for}\ vk\ \textcolor{keywordflow}{in}\ y\_hat]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00062}00062\ \ \ \ \ y\_pred\ \ \ =\ np.concatenate(y\_hat,axis=0).tolist()}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00063}00063\ \ \ \ \ eff\ \ \ \ =\ pd.DataFrame(\{\textcolor{stringliteral}{'Yorg'}:np\_test\_y,\textcolor{stringliteral}{'Yfct'}:y\_pred\})\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00064}00064\ \ \ \ \ eff.set\_index(test\_X.index,drop=\textcolor{keyword}{True},inplace=\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00065}00065\ \ \ \ \ absolute\_difference\ =\ np.abs(y\_pred\ -\/\ np\_test\_y)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00066}00066\ \ \ \ \ correct\ =\ np.count\_nonzero(absolute\_difference\ <=\ 0.1)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00067}00067\ \ \ \ \ accuracy\ =\ round((correct\ /\ len(np\_test\_y))\ *100,\ 3)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00068}00068\ \ \ \ \ print(f\textcolor{stringliteral}{"{}Accuracy:\ \{accuracy\}\%"{}})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00069}00069\ \ \ \ \ jdx\ =\ test\_X.index}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00070}00070\ \ \ \ \ y\_forecast\ =\ denormalize\_data(y\_pred,\ vdd,\ jdx,\ multi=\textcolor{keyword}{False},\ lstm=\textcolor{keyword}{True})\ \textcolor{comment}{\#\ denormalize\ the\ forecast}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00071}00071\ \ \ \ \ y\_real\ \ =\ Y.loc[jdx]\ \textcolor{comment}{\#\ y\ real}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00072}00072\ \ \ \ \ y\_yesterday\ \ =\ Y.shift(ahead).loc[jdx]\ \textcolor{comment}{\#\ Y\ yesterday}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00073}00073\ \ \ \ \ DY\ \ =\ pd.concat([y\_real,y\_forecast,y\_yesterday],axis=1)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00074}00074\ \ \ \ \ DY.columns\ =\ [\textcolor{stringliteral}{'Y\_real'},\textcolor{stringliteral}{'Y\_predicted'},\textcolor{stringliteral}{'Y\_yesterday'}]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00075}00075\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00076}00076\ \ \ \ \ msep=\ mean\_squared\_error(DY.Y\_predicted\ ,\ DY.Y\_real)\ \textcolor{comment}{\#\ error\ y\ predicted\ -\/\ y\ real}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00077}00077\ \ \ \ \ msey=\ mean\_squared\_error(DY.Y\_yesterday\ ,\ DY.Y\_real)\ \textcolor{comment}{\#\ error\ y\ yesterday\ -\/\ y\ real}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00078}00078\ \ \ \ \ maep\ =\ mean\_absolute\_error(DY.Y\_predicted\ ,\ DY.Y\_real)\ \textcolor{comment}{\#\ error\ y\ predicted\ -\/\ y\ real}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00079}00079\ \ \ \ \ maey\ =\ mean\_absolute\_error(DY.Y\_yesterday\ ,\ DY.Y\_real)\ \textcolor{comment}{\#\ error\ y\ yesterday\ -\/\ y\ real}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00081}00081\ \ \ \ \ return(\{\textcolor{stringliteral}{'msep'}:msep,\textcolor{stringliteral}{'msey'}:msey,\ \textcolor{stringliteral}{'maep'}:maep,\ \textcolor{stringliteral}{'maey'}:maey,\ \textcolor{stringliteral}{'Ys'}:DY,\ \textcolor{stringliteral}{'eff'}:\ eff\})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00082}00082\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00083}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a13fa0ebc58b6e2ae9cee2b4e6af4a5db}{00083}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a13fa0ebc58b6e2ae9cee2b4e6af4a5db}{load\_output\_preprocessed\_data}}(path:\ str,\ win:\ int,\ tr\_tst:\ float,\ scenario\_name:\ str)\ -\/>\ dict:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00084}00084\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}Loads\ all\ pickle\ files\ from\ the\ specified\ directory\ that\ match\ the\ scenario\ name"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00085}00085\ \ \ \ \ all\_results\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00086}00086\ \ \ \ \ directory\ =\ f\textcolor{stringliteral}{'\{path\}/output/\{win\}/\{tr\_tst\}/'}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00088}00088\ \ \ \ \ \textcolor{comment}{\#\ Verify\ if\ the\ directory\ exists}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00089}00089\ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.exists(directory):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00090}00090\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{raise}\ FileNotFoundError(f\textcolor{stringliteral}{"{}The\ directory\ \{directory\}\ does\ not\ exist."{}})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00091}00091\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00092}00092\ \ \ \ \ \textcolor{keywordflow}{for}\ file\ \textcolor{keywordflow}{in}\ os.listdir(directory):\ \ \textcolor{comment}{\#\ Loop\ through\ each\ file\ in\ the\ directory}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00093}00093\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Verify\ if\ the\ file\ starts\ with\ scenario\_name\ and\ ends\ with\ 'output.pkl'\ or\ 'm-\/output.pkl'}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00094}00094\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ file.startswith(scenario\_name)\ \textcolor{keywordflow}{and}\ file.endswith(\textcolor{stringliteral}{'-\/output.pkl'}):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00095}00095\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Extract\ the\ model\ type\ correctly}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00096}00096\ \ \ \ \ \ \ \ \ \ \ \ \ mdl\ =\ file.split(\textcolor{stringliteral}{'-\/'})[1]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00097}00097\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ file.endswith(\textcolor{stringliteral}{'-\/m-\/output.pkl'}):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00098}00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mdl\ =\ file.split(\textcolor{stringliteral}{'-\/'})[1]\ +\ \textcolor{stringliteral}{'-\/m'}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00099}00099\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00100}00100\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00101}00101\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00102}00102\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Construct\ the\ full\ file\ path}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00103}00103\ \ \ \ \ \ \ \ \ fdat\ =\ os.path.join(directory,\ file)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00104}00104\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00105}00105\ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ open(fdat,\ \textcolor{stringliteral}{"{}rb"{}})\ \textcolor{keyword}{as}\ openfile:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00106}00106\ \ \ \ \ \ \ \ \ \ \ \ \ results\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00107}00107\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ \textcolor{keyword}{True}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00108}00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00109}00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ directory1\ =\ pickle.load(openfile)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00110}00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fdat1\ =\ pickle.load(openfile)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00111}00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lahead\ =\ pickle.load(openfile)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00112}00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lpar\ =\ pickle.load(openfile)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00113}00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tot\_res\ =\ pickle.load(openfile)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00114}00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ results[\textcolor{stringliteral}{'path'}]\ =\ directory1}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00115}00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ results[\textcolor{stringliteral}{'fdat'}]\ =\ fdat1}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00116}00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ results[\textcolor{stringliteral}{'lahead'}]\ =\ lahead}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00117}00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ results[\textcolor{stringliteral}{'lpar'}]\ =\ lpar}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ results[\textcolor{stringliteral}{'tot\_res'}]\ =\ tot\_res}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00119}00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{except}\ EOFError:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00120}00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ all\_results[mdl]\ =\ results}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00123}00123\ \ \ \ \ \textcolor{keywordflow}{return}\ all\_results}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00124}00124\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00125}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_af66e0f4e9d27e3993dd1279730c483fd}{00125}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_af66e0f4e9d27e3993dd1279730c483fd}{plot\_res}}(ax,\ DY:\ pd.DataFrame,\ metric:\ str,\ metricp:\ float,\ metricy:\ float,\ ahead:\ int,\ *parameters:\ dict)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00126}00126\ \ \ \ \ ax.plot(DY.index,\ DY.Y\_real,\ label=\textcolor{stringliteral}{"{}Real\ Values"{}})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00127}00127\ \ \ \ \ p2\ =\ ax.plot(DY.index,\ DY.Y\_predicted,\ label=\textcolor{stringliteral}{"{}Transformer\ predicted"{}},\ color=\textcolor{stringliteral}{'orange'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00128}00128\ \ \ \ \ p3\ =\ ax.plot(DY.index,\ DY.Y\_yesterday,\ label=\textcolor{stringliteral}{"{}Historical"{}},\ color=\textcolor{stringliteral}{'green'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00129}00129\ \ \ \ \ \textcolor{keywordflow}{if}\ parameters:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00130}00130\ \ \ \ \ \ \ \ \ num\_heads\ =\ parameters[0][\textcolor{stringliteral}{'num\_heads'}]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ num\_layers\ =\ parameters[0][\textcolor{stringliteral}{'num\_layers'}]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ ax.set\_title(f\textcolor{stringliteral}{'Ahead:\ \{ahead\}\ days\ -\/\ \{num\_heads\}\ heads\ -\/\ \{num\_layers\}\ layers'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ ax.set\_xlabel(\textcolor{stringliteral}{'Date'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ ax.set\_ylabel(\textcolor{stringliteral}{'Value'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ ax.legend()}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ ax.grid(\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00137}00137\ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ ax.set\_title(f\textcolor{stringliteral}{'Ahead:\ \{ahead\}\ days'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ ax.set\_xlabel(\textcolor{stringliteral}{'Date'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ ax.set\_ylabel(\textcolor{stringliteral}{'Value'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ ax.legend()}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ ax.grid(\textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00143}00143\ \ \ \ \ \textcolor{comment}{\#\ Agregar\ texto}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00144}00144\ \ \ \ \ ax.text(.01,\ .01,\ f\textcolor{stringliteral}{'\{metric.upper()\}\ Predicted='}\ +\ str(round(metricp,3)),\ transform=ax.transAxes,\ ha=\textcolor{stringliteral}{'left'},\ va=\textcolor{stringliteral}{'bottom'},\ fontsize=16,\ color=\textcolor{stringliteral}{'\#FFA500'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00145}00145\ \ \ \ \ ax.text(.01,\ .05,\ f\textcolor{stringliteral}{'\{metric.upper()\}\ Historical='}\ +\ str(round(metricy,3)),\ transform=ax.transAxes,\ fontsize=16,\ ha=\textcolor{stringliteral}{'left'},\ va=\textcolor{stringliteral}{'bottom'},\ color=\textcolor{stringliteral}{'green'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00146}00146\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00147}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_aba3aebfc9986c86dd617a520775c7d04}{00147}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_aba3aebfc9986c86dd617a520775c7d04}{run\_plot\_res}}(list\_tr\_tst:\ list,\ all\_results:\ dict,\ stock\_list:\ list,\ lahead:\ list,\ selected\_scenario:\ str,\ metric:\ str,\ scen\_name:\ str,\ plot\_path:\ str,\ plot\_format:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00148}00148\ \ \ \ \ \textcolor{keywordflow}{for}\ tr\_tst\ \textcolor{keywordflow}{in}\ list\_tr\_tst:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ model\ \textcolor{keywordflow}{in}\ all\_results[tr\_tst].keys():}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ tot\_res\ =\ all\_results[tr\_tst][model][\textcolor{stringliteral}{'tot\_res'}]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ stock\ \textcolor{keywordflow}{in}\ stock\_list:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fig,\ axs\ =\ plt.subplots(2,\ 3,\ figsize=(15,\ 10))}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fig.suptitle(f\textcolor{stringliteral}{'\{stock\}\ -\/\ \{model.upper()\}\ -\/\ \{selected\_scenario\}\ -\/\ \{metric\}\ -\/\ \{tr\_tst*100\}\%'},\ fontsize=16)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i,\ ahead\ \textcolor{keywordflow}{in}\ enumerate(lahead):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res1\ =\ tot\_res[\textcolor{stringliteral}{'OUT\_MODEL'}][stock]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ itr\ =\ len(res1[ahead][\textcolor{stringliteral}{'nit'}])\ -\/\ 1}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DYs\ =\ res1[ahead][\textcolor{stringliteral}{'DY'}]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DY\ =\ DYs.loc[itr]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ metricp\ =\ res1[ahead][f\textcolor{stringliteral}{'\{metric.upper()\}P'}][itr]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00160}00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ metricy\ =\ res1[ahead][f\textcolor{stringliteral}{'\{metric.upper()\}Y'}][itr]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00161}00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ row\ =\ i\ //\ 3}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00162}00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ col\ =\ i\ \%\ 3}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00163}00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'transformer'}\ \textcolor{keywordflow}{not}\ \textcolor{keywordflow}{in}\ model:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00164}00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_af66e0f4e9d27e3993dd1279730c483fd}{plot\_res}}(axs[row,\ col],\ DY,\ metric,\ metricp,\ metricy,\ ahead)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00165}00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00166}00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_af66e0f4e9d27e3993dd1279730c483fd}{plot\_res}}(axs[row,\ col],\ DY,\ metric,\ metricp,\ metricy,\ ahead,\ res1[ahead][\textcolor{stringliteral}{'transformer\_parameters'}][0])}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00167}00167\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00168}00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ axs[row,\ col].set\_xlim(DY.index.min(),\ DY.index.max())\ \ \textcolor{comment}{\#\ Ajustar\ los\ límites\ del\ eje\ X}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00169}00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ axs[row,\ col].set\_ylim(DY[\textcolor{stringliteral}{'Y\_yesterday'}].min()*0.7,\ DY[\textcolor{stringliteral}{'Y\_yesterday'}].max()*1.3)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00170}00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ path\ =\ f\textcolor{stringliteral}{'\{plot\_path\}/\{scen\_name\}/\{tr\_tst\}/'}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00171}00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.exists(path):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00172}00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ os.makedirs(path)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00173}00173\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ plt.tight\_layout()}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ figfich\ =\ path\ +\ f\textcolor{stringliteral}{'\{model\}-\/\{stock\}-\/\{itr\}-\/\{metric\}.\{plot\_format\}'}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ plt.savefig(figfich)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00177}00177\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00178}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a8594eb1ea4b629d3e20bd05308a74abd}{00178}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_a8594eb1ea4b629d3e20bd05308a74abd}{plot\_metric\_boxplots}}(selected\_model:\ str,\ list\_tr\_tst:\ list,\ all\_results:\ dict,\ stocks:\ list,\ lahead:\ list,\ metric:\ str,\ scen\_name:\ str,\ plot\_path:\ str,\ plot\_format:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00179}00179\ \ \ \ \ mse\_data\ =\ \{stock:\ []\ \textcolor{keywordflow}{for}\ stock\ \textcolor{keywordflow}{in}\ stocks\}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00180}00180\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00181}00181\ \ \ \ \ \textcolor{keywordflow}{for}\ tr\_tst\ \textcolor{keywordflow}{in}\ list\_tr\_tst:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00182}00182\ \ \ \ \ \ \ \ \ tot\_res\ =\ all\_results[tr\_tst][selected\_model][\textcolor{stringliteral}{'tot\_res'}]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00183}00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ stock\ \textcolor{keywordflow}{in}\ stocks:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00184}00184\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ ahead\ \textcolor{keywordflow}{in}\ lahead:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00185}00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res1\ =\ tot\_res[\textcolor{stringliteral}{'OUT\_MODEL'}][stock]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00186}00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ itr\ \textcolor{keywordflow}{in}\ range(len(res1[ahead][\textcolor{stringliteral}{'nit'}])):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00187}00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mse\_value\ =\ res1[ahead][f\textcolor{stringliteral}{'\{metric.upper()\}P'}][itr]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00188}00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mse\_data[stock].append(mse\_value)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00189}00189\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00190}00190\ \ \ \ \ \ \ \ \ \ \ \ \ fig,\ ax\ =\ plt.subplots(figsize=(12,\ 8))}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00191}00191\ \ \ \ \ \ \ \ \ \ \ \ \ ax.boxplot([mse\_data[stock]\ \textcolor{keywordflow}{for}\ stock\ \textcolor{keywordflow}{in}\ stocks],\ labels=stocks)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00192}00192\ \ \ \ \ \ \ \ \ \ \ \ \ ax.set\_yscale(\textcolor{stringliteral}{'log'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00193}00193\ \ \ \ \ \ \ \ \ \ \ \ \ ax.set\_title(f\textcolor{stringliteral}{'\{metric.upper()\}\ -\/\ \{selected\_model.upper()\}'},\ fontsize=16)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00194}00194\ \ \ \ \ \ \ \ \ \ \ \ \ ax.set\_xlabel(\textcolor{stringliteral}{'Acciones'},\ fontsize=14)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00195}00195\ \ \ \ \ \ \ \ \ \ \ \ \ ax.set\_ylabel(f\textcolor{stringliteral}{'\{metric.upper()\}'},\ fontsize=14)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00196}00196\ \ \ \ \ \ \ \ \ \ \ \ \ save\_path\ =\ f\textcolor{stringliteral}{'\{plot\_path\}/\{scen\_name\}/\{tr\_tst\}'}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00197}00197\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.exists(save\_path):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00198}00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ os.makedirs(save\_path)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00199}00199\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ \ \ \ \ fig\_path\ =\ os.path.join(save\_path,\ f\textcolor{stringliteral}{'boxplot\_\{metric\}\_\{selected\_model\}.\{plot\_format\}'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ \ \ \ \ plt.savefig(fig\_path)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ \ \ \ \ fig.show()}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00203}00203\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00204}\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_afe7df567a6f7d77ecf07bf073307c94a}{00204}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1utils__vv__tfg_afe7df567a6f7d77ecf07bf073307c94a}{plot\_metric\_boxplots\_with\_yesterday}}(selected\_model:\ str,\ tr\_tst\_list:\ list,\ all\_results:\ dict,\ stock\_list:\ list,\ lahead:\ list,\ metric:\ str,\ scen\_name:\ str,\ plot\_path:\ str,\ plot\_format:\ str)\ -\/>\ \textcolor{keywordtype}{None}:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00205}00205\ \ \ \ \ \textcolor{keywordflow}{for}\ stock\ \textcolor{keywordflow}{in}\ stock\_list:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ fig,\ axs\ =\ plt.subplots(nrows=len(tr\_tst\_list),\ figsize=(8,\ 6\ *\ len(tr\_tst\_list)))}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ isinstance(axs,\ np.ndarray):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \ \ \ \ axs\ =\ [axs]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ idx,\ tr\_tst\ \textcolor{keywordflow}{in}\ enumerate(tr\_tst\_list):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ metric\_data\ =\ \{ahead:\ []\ \textcolor{keywordflow}{for}\ ahead\ \textcolor{keywordflow}{in}\ lahead\}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ \ \ \ \ yesterday\_data\ =\ \{ahead:\ []\ \textcolor{keywordflow}{for}\ ahead\ \textcolor{keywordflow}{in}\ lahead\}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \ \ \ \ pred\_data\ =\ \{ahead:\ []\ \textcolor{keywordflow}{for}\ ahead\ \textcolor{keywordflow}{in}\ lahead\}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ tot\_res\ =\ all\_results[tr\_tst][selected\_model][\textcolor{stringliteral}{'tot\_res'}]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ res1\ =\ tot\_res[\textcolor{stringliteral}{'OUT\_MODEL'}][stock]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ ahead\ \textcolor{keywordflow}{in}\ lahead:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ itr\ \textcolor{keywordflow}{in}\ range(len(res1[ahead][\textcolor{stringliteral}{'nit'}])):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ metric\_value\ =\ res1[ahead][f\textcolor{stringliteral}{'\{metric.upper()\}P'}][itr]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ metric\_data[ahead].append(metric\_value)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Asegurarnos\ de\ que\ estamos\ tomando\ el\ último\ valor\ (última\ iteración)}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ itr\ =\ len(res1[ahead][\textcolor{stringliteral}{'nit'}])\ -\/\ 1}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ metricy\ =\ res1[ahead][f\textcolor{stringliteral}{'\{metric.upper()\}Y'}][itr]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yesterday\_data[ahead].append(metricy)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ metricp\ =\ res1[ahead][f\textcolor{stringliteral}{'\{metric.upper()\}P'}][itr]}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pred\_data[ahead].append(metricp)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00225}00225\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ axs[idx].boxplot([metric\_data[ahead]\ \textcolor{keywordflow}{for}\ ahead\ \textcolor{keywordflow}{in}\ lahead],\ positions=range(len(lahead)))}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ axs[idx].plot([yesterday\_data[ahead]\ \textcolor{keywordflow}{for}\ ahead\ \textcolor{keywordflow}{in}\ lahead],\ \textcolor{stringliteral}{'r-\/o'},\ label=\textcolor{stringliteral}{'Historical'},\ linestyle=\textcolor{stringliteral}{'-\/-\/'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ axs[idx].plot([pred\_data[ahead]\ \textcolor{keywordflow}{for}\ ahead\ \textcolor{keywordflow}{in}\ lahead],\ \textcolor{stringliteral}{'g\string^'},\ label=\textcolor{stringliteral}{'Predicted'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00229}00229\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#axs[idx].set\_yscale('log')}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ axs[idx].set\_xticks(range(len(lahead)))}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ axs[idx].set\_xticklabels(lahead)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ axs[idx].set\_title(f\textcolor{stringliteral}{'\{metric.upper()\}\ -\/\ \{selected\_model.upper()\}\ -\/\ \{stock\}\ -\/\ \{tr\_tst\}'},\ fontsize=16)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ axs[idx].set\_ylabel(f\textcolor{stringliteral}{'\{metric\}'},\ fontsize=14)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ idx\ ==\ len(tr\_tst\_list)\ -\/\ 1:}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ axs[idx].set\_xlabel(\textcolor{stringliteral}{'Ahead\ days\ prediction\ (days)'},\ fontsize=14)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ axs[idx].legend()}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00238}00238\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ plt.tight\_layout()}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00240}00240\ }
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ save\_path\ =\ f\textcolor{stringliteral}{'\{plot\_path\}/\{scen\_name\}/\{metric.upper()\}\_\{selected\_model\}\_boxplot'}}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.exists(save\_path):}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ os.makedirs(save\_path)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ fig\_path\ =\ os.path.join(save\_path,\ f\textcolor{stringliteral}{'\{stock\}\_boxplot\_\{metric\}\_\{selected\_model\}.\{plot\_format\}'})}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ plt.savefig(fig\_path)}
+\DoxyCodeLine{\Hypertarget{utils__vv__tfg_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ fig.show()}
+
+\end{DoxyCode}

@@ -2,9 +2,9 @@ var classsrc_1_1_data_preprocessing_1_1_stock =
 [
     [ "__init__", "classsrc_1_1_data_preprocessing_1_1_stock.html#ae00121031f70a03e24a80afa60c8fae6", null ],
     [ "_read_data", "classsrc_1_1_data_preprocessing_1_1_stock.html#ae2a5a9d1b140a88d738236ffd551431d", null ],
-    [ "calculate_max", "classsrc_1_1_data_preprocessing_1_1_stock.html#a3cf996dfd3a5bfaa3d9ce1047d5029ae", null ],
+    [ "calculate_max", "classsrc_1_1_data_preprocessing_1_1_stock.html#ad08c5cea0cbe7dda017033cd2309af3b", null ],
     [ "calculate_mean", "classsrc_1_1_data_preprocessing_1_1_stock.html#a0d114f6856b9ebafab0609a38c12fd78", null ],
-    [ "calculate_min", "classsrc_1_1_data_preprocessing_1_1_stock.html#a48182657de63c03e81b0701a94c069ec", null ],
+    [ "calculate_min", "classsrc_1_1_data_preprocessing_1_1_stock.html#ab731a2338fa9f2499d25d17259f77cea", null ],
     [ "check_infinite_values", "classsrc_1_1_data_preprocessing_1_1_stock.html#aca93b9261771a54298d5fbe82434e621", null ],
     [ "check_nan_values", "classsrc_1_1_data_preprocessing_1_1_stock.html#afaadb71ab1b0a8dc3f092e3725fe5653", null ],
     [ "compute_sentiment_scores", "classsrc_1_1_data_preprocessing_1_1_stock.html#a42de0fbde1f905f6eb8798bf1ca9ac6f", null ],

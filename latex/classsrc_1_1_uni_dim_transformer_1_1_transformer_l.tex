@@ -1,0 +1,169 @@
+\doxysection{src.\+Uni\+Dim\+Transformer.\+TransformerL Class Reference}
+\hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l}{}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l}\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+Inheritance diagram for src.\+Uni\+Dim\+Transformer.\+TransformerL\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classsrc_1_1_uni_dim_transformer_1_1_transformer_l}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_aa7e2ae5e10aedeb6a7b1a3103fbd2bac}{\+\_\+\+\_\+init\+\_\+\+\_\+}} (self, int \mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a12fab2bba071726e77eac30bdac611bd}{input\+\_\+dim}}, int \mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_af85fad7f8232d0523baad00ca36781c7}{embed\+\_\+dim}}, int \mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_ada6e51bb89797487cabcd717e93a00fc}{num\+\_\+layers}}, int \mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a6d3bfcc8e29e3261e85542b14040ed43}{num\+\_\+heads}}, float \mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a8bdde3efaec8862953281596f140d965}{dropout}})
+\item 
+torch.\+Tensor \mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a9e1f6619d9e2d7ab81c491b148fe4cc6}{forward}} (self, src)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a12fab2bba071726e77eac30bdac611bd}{input\+\_\+dim}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_af85fad7f8232d0523baad00ca36781c7}{embed\+\_\+dim}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_ada6e51bb89797487cabcd717e93a00fc}{num\+\_\+layers}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a6d3bfcc8e29e3261e85542b14040ed43}{num\+\_\+heads}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a8bdde3efaec8862953281596f140d965}{dropout}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a1cacda2012808d7cb5679abc50bcd3a6}{embedding}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_aa9f7943646c0d9a4f8277c1d70d592cf}{encoder\+\_\+layers}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a454669de7506bdd02f0e5eea9cbf6300}{output\+\_\+layer}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Transformer-based model for time series forecasting.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00024}{24}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_aa7e2ae5e10aedeb6a7b1a3103fbd2bac}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_aa7e2ae5e10aedeb6a7b1a3103fbd2bac} 
+\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}!\_\_init\_\_@{\_\_init\_\_}}
+\index{\_\_init\_\_@{\_\_init\_\_}!src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{\_\_init\_\_()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+Transformer\+L.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{int}]{input\+\_\+dim,  }\item[{int}]{embed\+\_\+dim,  }\item[{int}]{num\+\_\+layers,  }\item[{int}]{num\+\_\+heads,  }\item[{float}]{dropout }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00028}{28}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a9e1f6619d9e2d7ab81c491b148fe4cc6}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a9e1f6619d9e2d7ab81c491b148fe4cc6} 
+\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}!forward@{forward}}
+\index{forward@{forward}!src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{forward()}{forward()}}
+{\footnotesize\ttfamily  torch.\+Tensor src.\+Uni\+Dim\+Transformer.\+Transformer\+L.\+forward (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{src }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Forward pass of the Transformer model.
+
+Parameters
+----------
+src : torch.Tensor
+    Input tensor of shape (batch_size, seq_length, input_dim).
+
+Returns
+-------
+torch.Tensor
+    Output tensor of shape (batch_size, seq_length, 1).
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00041}{41}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a8bdde3efaec8862953281596f140d965}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a8bdde3efaec8862953281596f140d965} 
+\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}!dropout@{dropout}}
+\index{dropout@{dropout}!src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{dropout}{dropout}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+Transformer\+L.\+dropout}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00034}{34}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_af85fad7f8232d0523baad00ca36781c7}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_af85fad7f8232d0523baad00ca36781c7} 
+\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}!embed\_dim@{embed\_dim}}
+\index{embed\_dim@{embed\_dim}!src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{embed\_dim}{embed\_dim}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+Transformer\+L.\+embed\+\_\+dim}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00031}{31}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a1cacda2012808d7cb5679abc50bcd3a6}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a1cacda2012808d7cb5679abc50bcd3a6} 
+\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}!embedding@{embedding}}
+\index{embedding@{embedding}!src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{embedding}{embedding}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+Transformer\+L.\+embedding}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00036}{36}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_aa9f7943646c0d9a4f8277c1d70d592cf}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_aa9f7943646c0d9a4f8277c1d70d592cf} 
+\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}!encoder\_layers@{encoder\_layers}}
+\index{encoder\_layers@{encoder\_layers}!src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{encoder\_layers}{encoder\_layers}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+Transformer\+L.\+encoder\+\_\+layers}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00037}{37}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a12fab2bba071726e77eac30bdac611bd}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a12fab2bba071726e77eac30bdac611bd} 
+\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}!input\_dim@{input\_dim}}
+\index{input\_dim@{input\_dim}!src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{input\_dim}{input\_dim}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+Transformer\+L.\+input\+\_\+dim}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00030}{30}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a6d3bfcc8e29e3261e85542b14040ed43}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a6d3bfcc8e29e3261e85542b14040ed43} 
+\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}!num\_heads@{num\_heads}}
+\index{num\_heads@{num\_heads}!src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{num\_heads}{num\_heads}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+Transformer\+L.\+num\+\_\+heads}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00033}{33}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_ada6e51bb89797487cabcd717e93a00fc}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_ada6e51bb89797487cabcd717e93a00fc} 
+\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}!num\_layers@{num\_layers}}
+\index{num\_layers@{num\_layers}!src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{num\_layers}{num\_layers}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+Transformer\+L.\+num\+\_\+layers}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00032}{32}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a454669de7506bdd02f0e5eea9cbf6300}\label{classsrc_1_1_uni_dim_transformer_1_1_transformer_l_a454669de7506bdd02f0e5eea9cbf6300} 
+\index{src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}!output\_layer@{output\_layer}}
+\index{output\_layer@{output\_layer}!src.UniDimTransformer.TransformerL@{src.UniDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{output\_layer}{output\_layer}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+Transformer\+L.\+output\+\_\+layer}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00039}{39}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_uni_dim_transformer_8py}{Uni\+Dim\+Transformer.\+py}}\end{DoxyCompactItemize}

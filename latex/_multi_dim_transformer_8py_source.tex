@@ -1,0 +1,300 @@
+\doxysection{Multi\+Dim\+Transformer.\+py}
+\hypertarget{_multi_dim_transformer_8py_source}{}\label{_multi_dim_transformer_8py_source}\index{src/MultiDimTransformer.py@{src/MultiDimTransformer.py}}
+\mbox{\hyperlink{_multi_dim_transformer_8py}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00001}\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer}{00001}}\ \textcolor{stringliteral}{'''This\ module\ trains\ a\ univariate\ Transformer\ model\ for\ time\ series\ forecasting'''}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00002}00002\ \textcolor{keyword}{import}\ os}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00003}00003\ \textcolor{keyword}{import}\ random}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00004}00004\ \textcolor{keyword}{import}\ sys}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00005}00005\ \textcolor{keyword}{import}\ time}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00006}00006\ \textcolor{keyword}{import}\ warnings}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00007}00007\ \textcolor{keyword}{import}\ argparse}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00008}00008\ \textcolor{keyword}{import}\ pandas\ \textcolor{keyword}{as}\ pd}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00009}00009\ \textcolor{keyword}{import}\ torch}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00010}00010\ \textcolor{keyword}{import}\ torch.nn\ \textcolor{keyword}{as}\ nn}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00011}00011\ \textcolor{keyword}{import}\ torch.optim\ \textcolor{keyword}{as}\ optim}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00012}00012\ \textcolor{keyword}{from}\ sklearn.metrics\ \textcolor{keyword}{import}\ mean\_squared\_error,\ mean\_absolute\_error}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00013}00013\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00014}00014\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00015}00015\ \textcolor{keyword}{from}\ utils\_vv\_tfg\ \textcolor{keyword}{import}\ load\_preprocessed\_data,\ save\_data,\ denormalize\_data,\ select\_features}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00016}00016\ \textcolor{keyword}{from}\ config.config\ \textcolor{keyword}{import}\ get\_configuration}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00017}00017\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00018}00018\ warnings.filterwarnings(\textcolor{stringliteral}{'ignore'})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00019}00019\ warnings.simplefilter(\textcolor{stringliteral}{'ignore'})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00020}00020\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00021}00021\ \textcolor{keyword}{import}\ torch}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00022}00022\ \textcolor{keyword}{import}\ torch.nn\ \textcolor{keyword}{as}\ nn}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00023}00023\ \textcolor{keyword}{import}\ torch.nn.functional\ \textcolor{keyword}{as}\ F}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00024}00024\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00025}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l}{00025}}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l}{TransformerL}}(nn.Module):}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00026}00026\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00027}00027\ \textcolor{stringliteral}{\ \ \ \ Linear\ transformer-\/based\ model\ for\ time\ series\ forecasting.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00028}00028\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00029}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a9f8b348260a1cd94c4823cd0e1f0414d}{00029}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a9f8b348260a1cd94c4823cd0e1f0414d}{\_\_init\_\_}}(self,\ input\_dim:\ int,\ embed\_dim:\ int,\ num\_layers:\ int,\ num\_heads:\ int,\ dropout:\ float):}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00030}00030\ \ \ \ \ \ \ \ \ super(TransformerL,\ self).\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a9f8b348260a1cd94c4823cd0e1f0414d}{\_\_init\_\_}}()}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00031}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a23a3cfd264e56c829bf7c3256b1c06ee}{00031}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a23a3cfd264e56c829bf7c3256b1c06ee}{input\_dim}}\ =\ input\_dim}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00032}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_abac6526f1626f5809a1d68bd06a214e9}{00032}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_abac6526f1626f5809a1d68bd06a214e9}{embed\_dim}}\ =\ embed\_dim}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00033}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_af522c88b630fb682497b1602cd91665b}{00033}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_af522c88b630fb682497b1602cd91665b}{num\_layers}}\ =\ num\_layers}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00034}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a0d0e2241a424714888fc411973b5b8f6}{00034}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a0d0e2241a424714888fc411973b5b8f6}{num\_heads}}\ =\ num\_heads}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00035}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a5b0601a951941f5cadc7e245142963bd}{00035}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a5b0601a951941f5cadc7e245142963bd}{dropout}}\ =\ dropout}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00036}00036\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00037}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a94dead6a9de1f20549d9c6654826cc84}{00037}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a94dead6a9de1f20549d9c6654826cc84}{embedding}}\ =\ nn.Linear(self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a23a3cfd264e56c829bf7c3256b1c06ee}{input\_dim}},\ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_abac6526f1626f5809a1d68bd06a214e9}{embed\_dim}})\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00038}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a8a39984a237b8e7eb94a85ea0285cb0b}{00038}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a8a39984a237b8e7eb94a85ea0285cb0b}{encoder\_layers}}\ =\ nn.ModuleList([nn.TransformerEncoderLayer(self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_abac6526f1626f5809a1d68bd06a214e9}{embed\_dim}},\ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a0d0e2241a424714888fc411973b5b8f6}{num\_heads}},\ dim\_feedforward=4*self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_abac6526f1626f5809a1d68bd06a214e9}{embed\_dim}},\ dropout=self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a5b0601a951941f5cadc7e245142963bd}{dropout}})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00039}00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ \_\ \textcolor{keywordflow}{in}\ range(self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_af522c88b630fb682497b1602cd91665b}{num\_layers}})])}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00040}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_aa38249782ec6910ab5b9e638c7d0afcd}{00040}}\ \ \ \ \ \ \ \ \ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_aa38249782ec6910ab5b9e638c7d0afcd}{output\_layer}}\ =\ nn.Linear(self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_abac6526f1626f5809a1d68bd06a214e9}{embed\_dim}},\ 1)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00041}00041\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00042}\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a238a2686eea2b78dddab2be7bee8bf06}{00042}}\ \ \ \ \ \textcolor{keyword}{def\ }\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a238a2686eea2b78dddab2be7bee8bf06}{forward}}(self,\ src)\ -\/>\ torch.Tensor:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00043}00043\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00044}00044\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Forward\ pass\ of\ the\ Transformer\ model.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00045}00045\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00046}00046\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Parameters}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00047}00047\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00048}00048\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ src\ :\ torch.Tensor}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00049}00049\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Input\ tensor\ of\ shape\ (batch\_size,\ seq\_length,\ input\_dim).}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00050}00050\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00051}00051\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Returns}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00052}00052\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ -\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00053}00053\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ torch.Tensor}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00054}00054\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ \ \ \ \ Output\ tensor\ of\ shape\ (batch\_size,\ seq\_length,\ 1).}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00055}00055\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00056}00056\ \ \ \ \ \ \ \ \ src\_embedded\ =\ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a94dead6a9de1f20549d9c6654826cc84}{embedding}}(src)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00057}00057\ \ \ \ \ \ \ \ \ src\_embedded\ =\ src\_embedded.permute(1,\ 0,\ 2)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00058}00058\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00059}00059\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ encoder\ \textcolor{keywordflow}{in}\ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a8a39984a237b8e7eb94a85ea0285cb0b}{encoder\_layers}}:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00060}00060\ \ \ \ \ \ \ \ \ \ \ \ \ src\_embedded\ =\ encoder(src\_embedded)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00062}00062\ \ \ \ \ \ \ \ \ output\ =\ self.\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_aa38249782ec6910ab5b9e638c7d0afcd}{output\_layer}}(src\_embedded)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00063}00063\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ output}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00064}00064\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00065}\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_a0baad9126712e9ec629e9d16d3cc33e4}{00065}}\ \textcolor{keyword}{def\ }\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_a0baad9126712e9ec629e9d16d3cc33e4}{transformer\_fun}}(transformer\_parameters:\ dict,\ train\_X:\ pd.DataFrame,\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00066}00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ train\_y:\ pd.DataFrame,\ test\_X:\ pd.DataFrame,\ test\_y:\ pd.DataFrame,\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00067}00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Y:\ pd.DataFrame,\ vdd:\ dict,\ epochs:\ int,\ bsize:\ int,\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00068}00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ nhn:\ int,\ win:\ int,\ n\_ftrs:\ int,\ ahead:\ int,\ stock:\ str,\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00069}00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_X\_idx:\ pd.Index,\ k:\ int,\ seed:\ int)\ -\/>\ dict:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00070}00070\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00071}00071\ \textcolor{stringliteral}{\ \ \ \ Trains\ a\ Transformer\ model\ for\ time\ series\ forecasting.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00072}00072\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00073}00073\ \textcolor{stringliteral}{\ \ \ \ Parameters}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00074}00074\ \textcolor{stringliteral}{\ \ \ \ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00075}00075\ \textcolor{stringliteral}{\ \ \ \ transformer\_parameters\ :\ dict}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00076}00076\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Dictionary\ containing\ the\ number\ of\ layers\ and\ heads\ for\ the\ Transformer\ model.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00077}00077\ \textcolor{stringliteral}{\ \ \ \ train\_X\ :\ pd.DataFrame}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00078}00078\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Training\ input\ data.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00079}00079\ \textcolor{stringliteral}{\ \ \ \ train\_y\ :\ pd.DataFrame}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00080}00080\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Training\ target\ data.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00081}00081\ \textcolor{stringliteral}{\ \ \ \ test\_X\ :\ pd.DataFrame}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00082}00082\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Test\ input\ data.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00083}00083\ \textcolor{stringliteral}{\ \ \ \ test\_y\ :\ pd.DataFrame}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00084}00084\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Test\ target\ data.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00085}00085\ \textcolor{stringliteral}{\ \ \ \ Y\ :\ pd.DataFrame}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00086}00086\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Target\ data.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00087}00087\ \textcolor{stringliteral}{\ \ \ \ vdd\ :\ dict}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00088}00088\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Dictionary\ containing\ the\ mean,\ min,\ and\ max\ values\ used\ for\ normalization.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00089}00089\ \textcolor{stringliteral}{\ \ \ \ epochs\ :\ int}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00090}00090\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Number\ of\ epochs.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00091}00091\ \textcolor{stringliteral}{\ \ \ \ bsize\ :\ int}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00092}00092\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Batch\ size.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00093}00093\ \textcolor{stringliteral}{\ \ \ \ nhn\ :\ int}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00094}00094\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Number\ of\ hidden\ neurons\ (embedding\ dimension).}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00095}00095\ \textcolor{stringliteral}{\ \ \ \ win\ :\ int}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00096}00096\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Window\ size.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00097}00097\ \textcolor{stringliteral}{\ \ \ \ n\_ftrs\ :\ int}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00098}00098\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Number\ of\ features.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00099}00099\ \textcolor{stringliteral}{\ \ \ \ ahead\ :\ int}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00100}00100\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Number\ of\ days\ ahead.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00101}00101\ \textcolor{stringliteral}{\ \ \ \ stock\ :\ str}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00102}00102\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Stock\ ticker.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00103}00103\ \textcolor{stringliteral}{\ \ \ \ test\_X\_idx\ :\ pd.Index}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00104}00104\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Index\ of\ the\ test\ input\ data.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00105}00105\ \textcolor{stringliteral}{\ \ \ \ k\ :\ int}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00106}00106\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Number\ of\ features\ in\ the\ input\ data.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00107}00107\ \textcolor{stringliteral}{\ \ \ \ seed\ :\ int}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00108}00108\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Random\ seed.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00109}00109\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00110}00110\ \textcolor{stringliteral}{\ \ \ \ Returns}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00111}00111\ \textcolor{stringliteral}{\ \ \ \ -\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00112}00112\ \textcolor{stringliteral}{\ \ \ \ dict}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00113}00113\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Dictionary\ containing\ the\ results\ of\ the\ Transformer\ model\ training.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00114}00114\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00115}00115\ \ \ \ \ device\ =\ torch.device(\textcolor{stringliteral}{'cuda'}\ \textcolor{keywordflow}{if}\ torch.cuda.is\_available()\ \textcolor{keywordflow}{else}\ \textcolor{stringliteral}{'cpu'})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00116}00116\ \ \ \ \ \textcolor{comment}{\#\ Convert\ to\ PyTorch\ tensors}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00117}00117\ \ \ \ \ np\_train\_X\ =\ torch.tensor(train\_X.reshape(train\_X.shape[1],\ train\_X.shape[0],\ k),\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00118}00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dtype=torch.float32).to(device)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00119}00119\ \ \ \ \ np\_train\_y\ =\ torch.tensor(train\_y,\ dtype=torch.float32).to(device)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00120}00120\ \ \ \ \ np\_test\_X\ =\ torch.tensor(test\_X.reshape(test\_X.shape[1],\ test\_X.shape[0],\ k),\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00121}00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dtype=torch.float32).to(device)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00122}00122\ \ \ \ \ np\_test\_y\ =\ torch.tensor(test\_y,\ dtype=torch.float32).to(device)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00123}00123\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00124}00124\ \ \ \ \ nit\ =\ 0}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00125}00125\ \ \ \ \ lloss\ =\ float(\textcolor{stringliteral}{'nan'})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00126}00126\ \ \ \ \ model\ =\ \mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l}{TransformerL}}(input\_dim=k,\ embed\_dim=nhn,\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00127}00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ num\_layers=transformer\_parameters[\textcolor{stringliteral}{'num\_layers'}],\ num\_heads=transformer\_parameters[\textcolor{stringliteral}{'num\_heads'}],\ dropout=0.01)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00128}00128\ \ \ \ \ \textcolor{comment}{\#\ Define\ the\ loss\ function\ and\ optimizer}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00129}00129\ \ \ \ \ model.to(device)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00130}00130\ \ \ \ \ \textcolor{keywordflow}{while}\ torch.isnan(torch.Tensor([lloss]))\ \textcolor{keywordflow}{and}\ nit\ <\ 5:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00131}00131\ \ \ \ \ \ \ \ \ torch.manual\_seed(seed)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00132}00132\ \ \ \ \ \ \ \ \ criterion\ =\ nn.MSELoss()}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00133}00133\ \ \ \ \ \ \ \ \ optimizer\ =\ optim.AdamW(model.parameters(),\ lr=0.0001)\ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00134}00134\ \ \ \ \ \ \ \ \ outputs\ =\ []}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00135}00135\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ Train\ the\ model}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00136}00136\ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{"{}Training\ the\ model..."{}})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00137}00137\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ epoch\ \textcolor{keywordflow}{in}\ range(epochs):}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00138}00138\ \ \ \ \ \ \ \ \ \ \ \ \ optimizer.zero\_grad()}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00139}00139\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i\ \textcolor{keywordflow}{in}\ range(0,\ len(np\_train\_X),\ bsize):}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00140}00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ batch\_np\_train\_X\ =\ np\_train\_X[:,\ i:i+bsize,\ :].to(device)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00141}00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ batch\_np\_train\_y\ =\ np\_train\_y[i:i+bsize].to(device)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00142}00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ output\ =\ model(batch\_np\_train\_X)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00143}00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ loss\ =\ criterion(output,\ batch\_np\_train\_y)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00144}00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ loss.backward()}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00145}00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optimizer.step()}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00146}00146\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ epoch\ \%\ 10\ ==\ 0:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00147}00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(f\textcolor{stringliteral}{"{}Epoch\ [\{epoch+1\}/\{epochs\}]:"{}})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00148}00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(f\textcolor{stringliteral}{"{}Train\ Loss:\ \{loss.item()\}"{}})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00149}00149\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#Evaluate\ the\ model}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00150}00150\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{with}\ torch.no\_grad():}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00151}00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ y\_hat\ \ =\ model(np\_test\_X)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00152}00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_loss\ =\ criterion(y\_hat,\ np\_test\_y)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00153}00153\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ epoch\ \%\ 10\ ==\ 0:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00154}00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(f\textcolor{stringliteral}{"{}Test\ Loss:\ \{test\_loss.item()\}"{}})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00155}00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{'-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/'})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00156}00156\ \ \ \ \ \ \ \ \ outputs.append(y\_hat.cpu().detach().numpy())}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00157}00157\ \ \ \ \ \ \ \ \ lloss\ =\ loss.item()}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00158}00158\ \ \ \ \ \ \ \ \ nit\ +=\ 1}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00159}00159\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00160}00160\ \ \ \ \ y\_forecast\ =\ denormalize\_data(outputs[0],\ vdd,\ test\_X\_idx,\ \textcolor{keyword}{True})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00161}00161\ \ \ \ \ \textcolor{comment}{\#y\_forecast\ =\ y\_forecast.apply(lambda\ x:\ x)\ \#\ get\ the\ value}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00162}00162\ \ \ \ \ y\_real\ \ =\ Y.loc[test\_X\_idx]\ \textcolor{comment}{\#\ y\ real}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00163}00163\ \ \ \ \ y\_yesterday\ \ =\ Y.shift(ahead).loc[test\_X\_idx]\ \textcolor{comment}{\#\ Y\ yesterday}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00164}00164\ \ \ \ \ DY\ \ =\ pd.concat([y\_real,y\_forecast,y\_yesterday],axis=1)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00165}00165\ \ \ \ \ DY.columns\ =\ [\textcolor{stringliteral}{'Y\_real'},\textcolor{stringliteral}{'Y\_predicted'},\textcolor{stringliteral}{'Y\_yesterday'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00166}00166\ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00167}00167\ \ \ \ \ msep\ =\ mean\_squared\_error(DY.Y\_predicted,\ DY.Y\_real)\ \textcolor{comment}{\#\ error\ y\ predicted\ -\/\ y\ real}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00168}00168\ \ \ \ \ msey\ =\ mean\_squared\_error(DY.Y\_yesterday,\ DY.Y\_real)\ \textcolor{comment}{\#\ error\ y\ yesterday\ -\/\ y\ real}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00169}00169\ \ \ \ \ maep\ =\ mean\_absolute\_error(DY.Y\_predicted\ ,\ DY.Y\_real)\ \textcolor{comment}{\#\ error\ y\ predicted\ -\/\ y\ real}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00170}00170\ \ \ \ \ maey\ =\ mean\_absolute\_error(DY.Y\_yesterday\ ,\ DY.Y\_real)\ \textcolor{comment}{\#\ error\ y\ yesterday\ -\/\ y\ real}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00171}00171\ \ \ \ \ \textcolor{comment}{\#\ Prepare\ the\ result\ dictionary}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00172}00172\ \ \ \ \ df\_result\ =\ \{}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00173}00173\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'MSEP'}:\ msep,\textcolor{stringliteral}{'MSEY'}:\ msey,}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00174}00174\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'MAEP'}:\ maep,\ \textcolor{stringliteral}{'MAEY'}:\ maey,\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00175}00175\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'Stock'}:\ stock,\textcolor{stringliteral}{'DY'}:\ DY,}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00176}00176\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'ALG'}:\ \textcolor{stringliteral}{'Transformer'},\textcolor{stringliteral}{'seed'}:\ seed,}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00177}00177\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'epochs'}:\ epoch,\textcolor{stringliteral}{'nhn'}:\ nhn,\textcolor{stringliteral}{'win'}:\ win,}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00178}00178\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'ndims'}:\ 1,\textcolor{stringliteral}{'lossh'}:\ lloss,}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00179}00179\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'nit'}:\ nit,\textcolor{stringliteral}{'model'}:\ model}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00180}00180\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00182}00182\ \ \ \ \ \textcolor{keywordflow}{return}\ df\_result}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00183}00183\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00185}\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_ae1d571b0894ee66cfa714a09ab6c43e4}{00185}}\ \textcolor{keyword}{def\ }main(args):}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00186}00186\ \ \ \ \ \textcolor{stringliteral}{"{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00187}00187\ \textcolor{stringliteral}{\ \ \ \ Main\ function\ to\ train\ a\ Transformer\ model\ for\ time\ series\ forecasting.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00188}00188\ \textcolor{stringliteral}{\ \ \ \ }}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00189}00189\ \textcolor{stringliteral}{\ \ \ \ Parameters}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00190}00190\ \textcolor{stringliteral}{\ \ \ \ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00191}00191\ \textcolor{stringliteral}{\ \ \ \ args\ :\ Namespace}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00192}00192\ \textcolor{stringliteral}{\ \ \ \ \ \ \ \ Arguments\ from\ the\ command\ line.}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00193}00193\ \textcolor{stringliteral}{\ \ \ \ "{}"{}"{}}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00194}00194\ \ \ \ \ config,\ \_\ =\ get\_configuration(args.params\_file)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00195}00195\ \ \ \ \ processed\_path\ =\ config[\textcolor{stringliteral}{'data'}][\textcolor{stringliteral}{'output\_path'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00196}00196\ \ \ \ \ multi\ =\ \textcolor{keyword}{True}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00197}00197\ \ \ \ \ transformer\_configs\ =\ []}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00198}00198\ \ \ \ \ scenarios\ =\ []}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00199}00199\ \ \ \ \ \textcolor{keywordflow}{for}\ scenario\ \textcolor{keywordflow}{in}\ config[\textcolor{stringliteral}{'scenarios'}]:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00200}00200\ \ \ \ \ \ \ \ \ list\_win\_size\ =\ scenario[\textcolor{stringliteral}{'win'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00201}00201\ \ \ \ \ \ \ \ \ list\_tr\_tst\ =\ scenario[\textcolor{stringliteral}{'tr\_tst'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00202}00202\ \ \ \ \ \ \ \ \ lahead\ =\ scenario[\textcolor{stringliteral}{'lahead'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00203}00203\ \ \ \ \ \ \ \ \ epochs\ =\ scenario[\textcolor{stringliteral}{'epochs'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00204}00204\ \ \ \ \ \ \ \ \ bsize\ =\ scenario[\textcolor{stringliteral}{'batch\_size'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00205}00205\ \ \ \ \ \ \ \ \ nhn\ =\ scenario[\textcolor{stringliteral}{'nhn'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00206}00206\ \ \ \ \ \ \ \ \ n\_itr\ =\ scenario[\textcolor{stringliteral}{'n\_itr'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00207}00207\ \ \ \ \ \ \ \ \ stock\_list\ =\ scenario[\textcolor{stringliteral}{'tickers'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00208}00208\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{stringliteral}{'Transformer'}\ \textcolor{keywordflow}{in}\ scenario:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00209}00209\ \ \ \ \ \ \ \ \ \ \ \ \ transformer\_configs.append(scenario[\textcolor{stringliteral}{'Transformer'}])}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00210}00210\ \ \ \ \ \ \ \ \ \ \ \ \ scenarios.append(scenario[\textcolor{stringliteral}{'name'}])}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00211}00211\ \ \ \ \ \ \ \ \ res\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00212}00212\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ i,\ config\_transformer\ \textcolor{keywordflow}{in}\ enumerate(transformer\_configs):}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00213}00213\ \ \ \ \ \ \ \ \ \ \ \ \ tmod\ =\ config\_transformer[\textcolor{stringliteral}{'model'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00214}00214\ \ \ \ \ \ \ \ \ \ \ \ \ scen\_model\ =\ \textcolor{stringliteral}{'MODEL\_'}+scenario[\textcolor{stringliteral}{'name'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00215}00215\ \ \ \ \ \ \ \ \ \ \ \ \ res[scen\_model]\ =\ tmod}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00216}00216\ \ \ \ \ \ \ \ \ \ \ \ \ num\_layers\ =\ config\_transformer[\textcolor{stringliteral}{'num\_layers'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00217}00217\ \ \ \ \ \ \ \ \ \ \ \ \ num\_heads\ =\ config\_transformer[\textcolor{stringliteral}{'num\_heads'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00218}00218\ \ \ \ \ \ \ \ \ \ \ \ \ scenario\_features\ =\ config\_transformer[\textcolor{stringliteral}{'features'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00219}00219\ \ \ \ \ \ \ \ \ \ \ \ \ k\_variables\ =\ len(scenario\_features)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00220}00220\ \ \ \ \ \ \ \ \ \ \ \ \ transformer\_parameters\ =\ \{}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00221}00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'num\_layers'}:\ num\_layers,}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00222}00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{'num\_heads'}:\ num\_heads}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00223}00223\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00224}00224\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ win\_size\ \textcolor{keywordflow}{in}\ list\_win\_size:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00225}00225\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ tr\_tst\ \textcolor{keywordflow}{in}\ list\_tr\_tst:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00226}00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ out\_model\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00227}00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transformer\_parameters[\textcolor{stringliteral}{'num\_variables'}]\ =\ k\_variables}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00228}00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ stock\ \textcolor{keywordflow}{in}\ stock\_list:\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00229}00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lpar,\ tot\_res\ =\ load\_preprocessed\_data(processed\_path,\ win\_size,\ tr\_tst,\ stock,\ scenario[\textcolor{stringliteral}{'name'}],\ multi)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00230}00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ win,\ n\_ftrs,\ tr\_tst\ =\ lpar}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00231}00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fmdls\ =\ config[\textcolor{stringliteral}{'data'}][\textcolor{stringliteral}{'fmdls'}].format(nhn=nhn,tmod=tmod,tr\_tst=tr\_tst,stock=stock)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00232}00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.exists(fmdls):}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00233}00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ os.makedirs(fmdls)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00234}00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res[stock]\ =\ \{\}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00235}00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(f\textcolor{stringliteral}{"{}Traning\ for\ \{win\}\ window\ size\ \{tr\_tst*100\}\%\ training\ data"{}})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00236}00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ ahead\ \textcolor{keywordflow}{in}\ lahead:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00237}00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tot\ =\ tot\_res[\textcolor{stringliteral}{'INPUT\_DATA'}][ahead]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00238}00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ train\_X\ =\ tot[\textcolor{stringliteral}{'trainX'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00239}00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ train\_y\ =\ tot[\textcolor{stringliteral}{'trainY'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00240}00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_X\ \ =\ tot[\textcolor{stringliteral}{'testX'}]\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00241}00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_y\ \ =\ tot[\textcolor{stringliteral}{'testY'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00242}00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Y\ \ \ \ \ \ =\ tot[\textcolor{stringliteral}{'y'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00243}00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vdd\ \ \ \ =\ tot[\textcolor{stringliteral}{'vdd'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00244}00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_X\_idx\ =\ tot[\textcolor{stringliteral}{'idtest'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00245}00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ features\ =\ tot[\textcolor{stringliteral}{'cnms'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00246}00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ selected\_features\ =\ select\_features(features,\ scenario\_features)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00247}00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ train\_X\ =\ train\_X[:,:,selected\_features]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00248}00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ test\_X\ =\ test\_X[:,:,selected\_features]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00249}00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tmpr\ =\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00250}00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ irp\ \textcolor{keywordflow}{in}\ range(n\_itr):}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00251}00251\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seed\ \ \ \ \ \ =\ random.randint(0,1000)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00252}00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{'\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#'})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00253}00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(f\textcolor{stringliteral}{'\{irp\}\ Training\ \{stock\}\ \{ahead\}\ days\ ahead'})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00254}00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transformer\_start=\ time.time()}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00255}00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ name\ =\ scenario[\textcolor{stringliteral}{'name'}]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00256}00256\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mdl\_name\ \ =\ f\textcolor{stringliteral}{'\{name\}-\/\{tmod\}-\/\{stock\}-\/\{ahead\}-\/\{irp\}.hd5'}}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00257}00257\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ tmod\ ==\ \textcolor{stringliteral}{"{}transformer"{}}:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00258}00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sol\ \ \ =\ \mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_a0baad9126712e9ec629e9d16d3cc33e4}{transformer\_fun}}(transformer\_parameters,train\_X,train\_y,test\_X,test\_y,}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00259}00259\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Y,vdd,epochs,bsize,nhn,win,n\_ftrs,ahead,stock,test\_X\_idx,k\_variables,seed)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00260}00260\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transformer\_end\ \ =\ time.time()}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00261}00261\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ttrain\ \ \ \ =\ transformer\_end\ -\/\ transformer\_start}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00262}00262\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sol[\textcolor{stringliteral}{'ttrain'}]\ =\ ttrain}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00263}00263\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sol[\textcolor{stringliteral}{'epochs'}]\ \ =\ epochs}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00264}00264\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sol[\textcolor{stringliteral}{'bsize'}]\ \ =\ bsize}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00265}00265\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sol[\textcolor{stringliteral}{'nhn'}]\ \ \ \ =\ nhn}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00266}00266\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sol[\textcolor{stringliteral}{'win'}]\ \ \ \ =\ win}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00267}00267\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sol[\textcolor{stringliteral}{'tr\_tst'}]\ =\ tr\_tst}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00268}00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sol[\textcolor{stringliteral}{'transformer\_parameters'}]\ =\ transformer\_parameters}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00269}00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sol[\textcolor{stringliteral}{'model'}]\ \ =\ fmdls+mdl\_name}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00270}00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(\textcolor{stringliteral}{'\ \ \ Effort\ spent:\ '}\ +\ str(ttrain)\ +\textcolor{stringliteral}{'\ s.'})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00271}00271\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sys.stdout.flush()}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00272}00272\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tmpr.append(sol)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00273}00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res[stock][ahead]\ =\ pd.DataFrame(tmpr)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00274}00274\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ out\_model[stock]\ =\ res[stock]}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00275}00275\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00276}00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tot\_res[\textcolor{stringliteral}{'OUT\_MODEL'}]\ =\ out\_model\ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00277}00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fdat\ =\ \textcolor{stringliteral}{'\{\}/output/\{\}/\{\}/\{\}-\/\{\}-\/m-\/output.pkl'}.format(processed\_path,win,tr\_tst,scenario[\textcolor{stringliteral}{'name'}],tmod)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00278}00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ os.path.exists(fdat):}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00279}00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ save\_data(fdat,\ processed\_path,\ lahead,\ lpar,\ tot\_res)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00280}00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00281}00281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ directory1\ =\ os.path.dirname(fdat)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00282}00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keywordflow}{not}\ os.path.exists(directory1):}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00283}00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ os.makedirs(directory1)}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00284}00284\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(f\textcolor{stringliteral}{"{}Directory\ \{directory1\}\ created."{}})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00285}00285\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00286}00286\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ save\_data(fdat,\ processed\_path,\ lahead,\ lpar,\ tot\_res)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00287}00287\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ print(f\textcolor{stringliteral}{"{}File\ \{fdat\}\ created\ and\ data\ saved."{}})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00288}00288\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00289}00289\ }
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00290}00290\ \textcolor{keywordflow}{if}\ \_\_name\_\_\ ==\ \textcolor{stringliteral}{"{}\_\_main\_\_"{}}:}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00291}\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_a5cd1ec4063dadd30586cee99c63e6b07}{00291}}\ \ \ \ \ parser\ =\ argparse.ArgumentParser(description=\textcolor{stringliteral}{"{}LSTM\ training,\ testing\ and\ results\ saving."{}})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00292}\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_a29d1a468eb6d196abd81b329fa550676}{00292}}\ \ \ \ \ parser.add\_argument(\textcolor{stringliteral}{"{}-\/c"{}},\ \textcolor{stringliteral}{"{}-\/-\/params\_file"{}},\ nargs=\textcolor{stringliteral}{'?'},\ action=\textcolor{stringliteral}{'store'},\ help=\textcolor{stringliteral}{"{}Configuration\ file\ path"{}})}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00293}\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_ae8cdb921ca6d91fb20c5d8ed8b9c249a}{00293}}\ \ \ \ \ args\ =\ parser.parse\_args()}
+\DoxyCodeLine{\Hypertarget{_multi_dim_transformer_8py_source_l00294}00294\ \ \ \ \ main(args)}
+
+\end{DoxyCode}

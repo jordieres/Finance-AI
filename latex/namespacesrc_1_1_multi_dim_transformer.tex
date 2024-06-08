@@ -1,0 +1,158 @@
+\doxysection{src.\+Multi\+Dim\+Transformer Namespace Reference}
+\hypertarget{namespacesrc_1_1_multi_dim_transformer}{}\label{namespacesrc_1_1_multi_dim_transformer}\index{src.MultiDimTransformer@{src.MultiDimTransformer}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l}{TransformerL}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+dict \mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_a0baad9126712e9ec629e9d16d3cc33e4}{transformer\+\_\+fun}} (dict transformer\+\_\+parameters, pd.\+Data\+Frame train\+\_\+X, pd.\+Data\+Frame train\+\_\+y, pd.\+Data\+Frame test\+\_\+X, pd.\+Data\+Frame test\+\_\+y, pd.\+Data\+Frame Y, dict vdd, int epochs, int bsize, int nhn, int win, int n\+\_\+ftrs, int ahead, str stock, pd.\+Index test\+\_\+\+X\+\_\+idx, int k, int seed)
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_ae1d571b0894ee66cfa714a09ab6c43e4}{main}} (\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_ae8cdb921ca6d91fb20c5d8ed8b9c249a}{args}})
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_a5cd1ec4063dadd30586cee99c63e6b07}{parser}} = argparse.\+Argument\+Parser(description="{}LSTM training, testing and results saving."{})
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_a7fad96202e1289b10c7cafbea9a2cd0c}{nargs}}
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_a29d1a468eb6d196abd81b329fa550676}{action}}
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_a0c42828ad6956f49037877b9b42ab55d}{help}}
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_multi_dim_transformer_ae8cdb921ca6d91fb20c5d8ed8b9c249a}{args}} = parser.\+parse\+\_\+args()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}This module trains a univariate Transformer model for time series forecasting\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespacesrc_1_1_multi_dim_transformer_ae1d571b0894ee66cfa714a09ab6c43e4}\label{namespacesrc_1_1_multi_dim_transformer_ae1d571b0894ee66cfa714a09ab6c43e4} 
+\index{src.MultiDimTransformer@{src.MultiDimTransformer}!main@{main}}
+\index{main@{main}!src.MultiDimTransformer@{src.MultiDimTransformer}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+main (\begin{DoxyParamCaption}\item[{}]{args }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Main function to train a Transformer model for time series forecasting.
+
+Parameters
+----------
+args : Namespace
+    Arguments from the command line.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00185}{185}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{namespacesrc_1_1_multi_dim_transformer_a0baad9126712e9ec629e9d16d3cc33e4}\label{namespacesrc_1_1_multi_dim_transformer_a0baad9126712e9ec629e9d16d3cc33e4} 
+\index{src.MultiDimTransformer@{src.MultiDimTransformer}!transformer\_fun@{transformer\_fun}}
+\index{transformer\_fun@{transformer\_fun}!src.MultiDimTransformer@{src.MultiDimTransformer}}
+\doxysubsubsection{\texorpdfstring{transformer\_fun()}{transformer\_fun()}}
+{\footnotesize\ttfamily  dict src.\+Multi\+Dim\+Transformer.\+transformer\+\_\+fun (\begin{DoxyParamCaption}\item[{dict}]{transformer\+\_\+parameters,  }\item[{pd.\+Data\+Frame}]{train\+\_\+X,  }\item[{pd.\+Data\+Frame}]{train\+\_\+y,  }\item[{pd.\+Data\+Frame}]{test\+\_\+X,  }\item[{pd.\+Data\+Frame}]{test\+\_\+y,  }\item[{pd.\+Data\+Frame}]{Y,  }\item[{dict}]{vdd,  }\item[{int}]{epochs,  }\item[{int}]{bsize,  }\item[{int}]{nhn,  }\item[{int}]{win,  }\item[{int}]{n\+\_\+ftrs,  }\item[{int}]{ahead,  }\item[{str}]{stock,  }\item[{pd.\+Index}]{test\+\_\+\+X\+\_\+idx,  }\item[{int}]{k,  }\item[{int}]{seed }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Trains a Transformer model for time series forecasting.
+
+Parameters
+----------
+transformer_parameters : dict
+    Dictionary containing the number of layers and heads for the Transformer model.
+train_X : pd.DataFrame
+    Training input data.
+train_y : pd.DataFrame
+    Training target data.
+test_X : pd.DataFrame
+    Test input data.
+test_y : pd.DataFrame
+    Test target data.
+Y : pd.DataFrame
+    Target data.
+vdd : dict
+    Dictionary containing the mean, min, and max values used for normalization.
+epochs : int
+    Number of epochs.
+bsize : int
+    Batch size.
+nhn : int
+    Number of hidden neurons (embedding dimension).
+win : int
+    Window size.
+n_ftrs : int
+    Number of features.
+ahead : int
+    Number of days ahead.
+stock : str
+    Stock ticker.
+test_X_idx : pd.Index
+    Index of the test input data.
+k : int
+    Number of features in the input data.
+seed : int
+    Random seed.
+
+Returns
+-------
+dict
+    Dictionary containing the results of the Transformer model training.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00065}{65}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespacesrc_1_1_multi_dim_transformer_a29d1a468eb6d196abd81b329fa550676}\label{namespacesrc_1_1_multi_dim_transformer_a29d1a468eb6d196abd81b329fa550676} 
+\index{src.MultiDimTransformer@{src.MultiDimTransformer}!action@{action}}
+\index{action@{action}!src.MultiDimTransformer@{src.MultiDimTransformer}}
+\doxysubsubsection{\texorpdfstring{action}{action}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+action}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00292}{292}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{namespacesrc_1_1_multi_dim_transformer_ae8cdb921ca6d91fb20c5d8ed8b9c249a}\label{namespacesrc_1_1_multi_dim_transformer_ae8cdb921ca6d91fb20c5d8ed8b9c249a} 
+\index{src.MultiDimTransformer@{src.MultiDimTransformer}!args@{args}}
+\index{args@{args}!src.MultiDimTransformer@{src.MultiDimTransformer}}
+\doxysubsubsection{\texorpdfstring{args}{args}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+args = parser.\+parse\+\_\+args()}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00293}{293}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{namespacesrc_1_1_multi_dim_transformer_a0c42828ad6956f49037877b9b42ab55d}\label{namespacesrc_1_1_multi_dim_transformer_a0c42828ad6956f49037877b9b42ab55d} 
+\index{src.MultiDimTransformer@{src.MultiDimTransformer}!help@{help}}
+\index{help@{help}!src.MultiDimTransformer@{src.MultiDimTransformer}}
+\doxysubsubsection{\texorpdfstring{help}{help}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+help}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00292}{292}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{namespacesrc_1_1_multi_dim_transformer_a7fad96202e1289b10c7cafbea9a2cd0c}\label{namespacesrc_1_1_multi_dim_transformer_a7fad96202e1289b10c7cafbea9a2cd0c} 
+\index{src.MultiDimTransformer@{src.MultiDimTransformer}!nargs@{nargs}}
+\index{nargs@{nargs}!src.MultiDimTransformer@{src.MultiDimTransformer}}
+\doxysubsubsection{\texorpdfstring{nargs}{nargs}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+nargs}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00292}{292}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{namespacesrc_1_1_multi_dim_transformer_a5cd1ec4063dadd30586cee99c63e6b07}\label{namespacesrc_1_1_multi_dim_transformer_a5cd1ec4063dadd30586cee99c63e6b07} 
+\index{src.MultiDimTransformer@{src.MultiDimTransformer}!parser@{parser}}
+\index{parser@{parser}!src.MultiDimTransformer@{src.MultiDimTransformer}}
+\doxysubsubsection{\texorpdfstring{parser}{parser}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+parser = argparse.\+Argument\+Parser(description="{}LSTM training, testing and results saving."{})}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00291}{291}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+

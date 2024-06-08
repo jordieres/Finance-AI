@@ -1,0 +1,154 @@
+\doxysection{src.\+Uni\+Dim\+Transformer Namespace Reference}
+\hypertarget{namespacesrc_1_1_uni_dim_transformer}{}\label{namespacesrc_1_1_uni_dim_transformer}\index{src.UniDimTransformer@{src.UniDimTransformer}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classsrc_1_1_uni_dim_transformer_1_1_transformer_l}{TransformerL}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+dict \mbox{\hyperlink{namespacesrc_1_1_uni_dim_transformer_a513e0ed9d7f4031041a0e616bfc4e3d3}{transformer\+\_\+fun}} (dict transformer\+\_\+parameters, pd.\+Data\+Frame train\+\_\+X, pd.\+Data\+Frame train\+\_\+y, pd.\+Data\+Frame test\+\_\+X, pd.\+Data\+Frame test\+\_\+y, pd.\+Data\+Frame Y, dict vdd, int epochs, int bsize, int nhn, int win, int n\+\_\+ftrs, int ahead, str stock, int seed)
+\item 
+None \mbox{\hyperlink{namespacesrc_1_1_uni_dim_transformer_a9cc5cab47951567cacb5df19f6cc11b4}{main}} (\mbox{\hyperlink{namespacesrc_1_1_uni_dim_transformer_a88bd0b403396d3cda24b18bd4f3e806e}{args}})
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_uni_dim_transformer_a59ec6666855904fba19ee7d44b70ed11}{parser}} = argparse.\+Argument\+Parser(description="{}LSTM training, testing and results saving."{})
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_uni_dim_transformer_ac773b394b600fb427e3a462d26f615eb}{nargs}}
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_uni_dim_transformer_aca122929685a584d806f2828ba37d8d1}{action}}
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_uni_dim_transformer_ad01445ba48a68980596969b26e6e642f}{help}}
+\item 
+\mbox{\hyperlink{namespacesrc_1_1_uni_dim_transformer_a88bd0b403396d3cda24b18bd4f3e806e}{args}} = parser.\+parse\+\_\+args()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}This module trains a univariate Transformer model for time series forecasting\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespacesrc_1_1_uni_dim_transformer_a9cc5cab47951567cacb5df19f6cc11b4}\label{namespacesrc_1_1_uni_dim_transformer_a9cc5cab47951567cacb5df19f6cc11b4} 
+\index{src.UniDimTransformer@{src.UniDimTransformer}!main@{main}}
+\index{main@{main}!src.UniDimTransformer@{src.UniDimTransformer}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily  None src.\+Uni\+Dim\+Transformer.\+main (\begin{DoxyParamCaption}\item[{}]{args }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Main function to train a Transformer model for time series forecasting.
+
+Parameters
+----------
+args : argparse.Namespace
+    Arguments from the command line.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00179}{179}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{namespacesrc_1_1_uni_dim_transformer_a513e0ed9d7f4031041a0e616bfc4e3d3}\label{namespacesrc_1_1_uni_dim_transformer_a513e0ed9d7f4031041a0e616bfc4e3d3} 
+\index{src.UniDimTransformer@{src.UniDimTransformer}!transformer\_fun@{transformer\_fun}}
+\index{transformer\_fun@{transformer\_fun}!src.UniDimTransformer@{src.UniDimTransformer}}
+\doxysubsubsection{\texorpdfstring{transformer\_fun()}{transformer\_fun()}}
+{\footnotesize\ttfamily  dict src.\+Uni\+Dim\+Transformer.\+transformer\+\_\+fun (\begin{DoxyParamCaption}\item[{dict}]{transformer\+\_\+parameters,  }\item[{pd.\+Data\+Frame}]{train\+\_\+X,  }\item[{pd.\+Data\+Frame}]{train\+\_\+y,  }\item[{pd.\+Data\+Frame}]{test\+\_\+X,  }\item[{pd.\+Data\+Frame}]{test\+\_\+y,  }\item[{pd.\+Data\+Frame}]{Y,  }\item[{dict}]{vdd,  }\item[{int}]{epochs,  }\item[{int}]{bsize,  }\item[{int}]{nhn,  }\item[{int}]{win,  }\item[{int}]{n\+\_\+ftrs,  }\item[{int}]{ahead,  }\item[{str}]{stock,  }\item[{int}]{seed }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Trains a Transformer model for time series forecasting.
+
+Parameters
+----------
+transformer_parameters : dict
+    Dictionary containing the number of layers and heads for the Transformer model.
+train_X : pd.DataFrame
+    Training input data.
+train_y : pd.DataFrame
+    Training target data.
+test_X : pd.DataFrame
+    Test input data.
+test_y : pd.DataFrame
+    Test target data.
+Y : pd.DataFrame
+    Target data.
+vdd : dict
+    Dictionary containing the mean, min, and max values used for normalization.
+epochs : int
+    Number of epochs.
+bsize : int
+    Batch size.
+nhn : int
+    Number of hidden neurons (embedding dimension).
+win : int
+    Window size.
+n_ftrs : int
+    Number of features.
+ahead : int
+    Number of days ahead.
+stock : str
+    Stock ticker.
+seed : int
+    Random seed.
+
+Returns
+-------
+dict
+    Dictionary containing the results of the Transformer model training.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00066}{66}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespacesrc_1_1_uni_dim_transformer_aca122929685a584d806f2828ba37d8d1}\label{namespacesrc_1_1_uni_dim_transformer_aca122929685a584d806f2828ba37d8d1} 
+\index{src.UniDimTransformer@{src.UniDimTransformer}!action@{action}}
+\index{action@{action}!src.UniDimTransformer@{src.UniDimTransformer}}
+\doxysubsubsection{\texorpdfstring{action}{action}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+action}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00279}{279}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{namespacesrc_1_1_uni_dim_transformer_a88bd0b403396d3cda24b18bd4f3e806e}\label{namespacesrc_1_1_uni_dim_transformer_a88bd0b403396d3cda24b18bd4f3e806e} 
+\index{src.UniDimTransformer@{src.UniDimTransformer}!args@{args}}
+\index{args@{args}!src.UniDimTransformer@{src.UniDimTransformer}}
+\doxysubsubsection{\texorpdfstring{args}{args}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+args = parser.\+parse\+\_\+args()}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00280}{280}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{namespacesrc_1_1_uni_dim_transformer_ad01445ba48a68980596969b26e6e642f}\label{namespacesrc_1_1_uni_dim_transformer_ad01445ba48a68980596969b26e6e642f} 
+\index{src.UniDimTransformer@{src.UniDimTransformer}!help@{help}}
+\index{help@{help}!src.UniDimTransformer@{src.UniDimTransformer}}
+\doxysubsubsection{\texorpdfstring{help}{help}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+help}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00279}{279}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{namespacesrc_1_1_uni_dim_transformer_ac773b394b600fb427e3a462d26f615eb}\label{namespacesrc_1_1_uni_dim_transformer_ac773b394b600fb427e3a462d26f615eb} 
+\index{src.UniDimTransformer@{src.UniDimTransformer}!nargs@{nargs}}
+\index{nargs@{nargs}!src.UniDimTransformer@{src.UniDimTransformer}}
+\doxysubsubsection{\texorpdfstring{nargs}{nargs}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+nargs}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00279}{279}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{namespacesrc_1_1_uni_dim_transformer_a59ec6666855904fba19ee7d44b70ed11}\label{namespacesrc_1_1_uni_dim_transformer_a59ec6666855904fba19ee7d44b70ed11} 
+\index{src.UniDimTransformer@{src.UniDimTransformer}!parser@{parser}}
+\index{parser@{parser}!src.UniDimTransformer@{src.UniDimTransformer}}
+\doxysubsubsection{\texorpdfstring{parser}{parser}}
+{\footnotesize\ttfamily src.\+Uni\+Dim\+Transformer.\+parser = argparse.\+Argument\+Parser(description="{}LSTM training, testing and results saving."{})}
+
+
+
+Definition at line \mbox{\hyperlink{_uni_dim_transformer_8py_source_l00278}{278}} of file \mbox{\hyperlink{_uni_dim_transformer_8py_source}{Uni\+Dim\+Transformer.\+py}}.
+

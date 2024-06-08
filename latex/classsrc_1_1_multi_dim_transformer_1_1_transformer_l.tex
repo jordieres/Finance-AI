@@ -1,0 +1,169 @@
+\doxysection{src.\+Multi\+Dim\+Transformer.\+TransformerL Class Reference}
+\hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l}{}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l}\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+Inheritance diagram for src.\+Multi\+Dim\+Transformer.\+TransformerL\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classsrc_1_1_multi_dim_transformer_1_1_transformer_l}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a9f8b348260a1cd94c4823cd0e1f0414d}{\+\_\+\+\_\+init\+\_\+\+\_\+}} (self, int \mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a23a3cfd264e56c829bf7c3256b1c06ee}{input\+\_\+dim}}, int \mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_abac6526f1626f5809a1d68bd06a214e9}{embed\+\_\+dim}}, int \mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_af522c88b630fb682497b1602cd91665b}{num\+\_\+layers}}, int \mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a0d0e2241a424714888fc411973b5b8f6}{num\+\_\+heads}}, float \mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a5b0601a951941f5cadc7e245142963bd}{dropout}})
+\item 
+torch.\+Tensor \mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a238a2686eea2b78dddab2be7bee8bf06}{forward}} (self, src)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a23a3cfd264e56c829bf7c3256b1c06ee}{input\+\_\+dim}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_abac6526f1626f5809a1d68bd06a214e9}{embed\+\_\+dim}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_af522c88b630fb682497b1602cd91665b}{num\+\_\+layers}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a0d0e2241a424714888fc411973b5b8f6}{num\+\_\+heads}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a5b0601a951941f5cadc7e245142963bd}{dropout}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a94dead6a9de1f20549d9c6654826cc84}{embedding}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a8a39984a237b8e7eb94a85ea0285cb0b}{encoder\+\_\+layers}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_aa38249782ec6910ab5b9e638c7d0afcd}{output\+\_\+layer}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Linear transformer-based model for time series forecasting.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00025}{25}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a9f8b348260a1cd94c4823cd0e1f0414d}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a9f8b348260a1cd94c4823cd0e1f0414d} 
+\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}!\_\_init\_\_@{\_\_init\_\_}}
+\index{\_\_init\_\_@{\_\_init\_\_}!src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{\_\_init\_\_()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+Transformer\+L.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{int}]{input\+\_\+dim,  }\item[{int}]{embed\+\_\+dim,  }\item[{int}]{num\+\_\+layers,  }\item[{int}]{num\+\_\+heads,  }\item[{float}]{dropout }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00029}{29}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a238a2686eea2b78dddab2be7bee8bf06}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a238a2686eea2b78dddab2be7bee8bf06} 
+\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}!forward@{forward}}
+\index{forward@{forward}!src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{forward()}{forward()}}
+{\footnotesize\ttfamily  torch.\+Tensor src.\+Multi\+Dim\+Transformer.\+Transformer\+L.\+forward (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{src }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Forward pass of the Transformer model.
+
+Parameters
+----------
+src : torch.Tensor
+    Input tensor of shape (batch_size, seq_length, input_dim).
+
+Returns
+-------
+torch.Tensor
+    Output tensor of shape (batch_size, seq_length, 1).
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00042}{42}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a5b0601a951941f5cadc7e245142963bd}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a5b0601a951941f5cadc7e245142963bd} 
+\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}!dropout@{dropout}}
+\index{dropout@{dropout}!src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{dropout}{dropout}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+Transformer\+L.\+dropout}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00035}{35}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_abac6526f1626f5809a1d68bd06a214e9}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_abac6526f1626f5809a1d68bd06a214e9} 
+\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}!embed\_dim@{embed\_dim}}
+\index{embed\_dim@{embed\_dim}!src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{embed\_dim}{embed\_dim}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+Transformer\+L.\+embed\+\_\+dim}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00032}{32}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a94dead6a9de1f20549d9c6654826cc84}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a94dead6a9de1f20549d9c6654826cc84} 
+\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}!embedding@{embedding}}
+\index{embedding@{embedding}!src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{embedding}{embedding}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+Transformer\+L.\+embedding}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00037}{37}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a8a39984a237b8e7eb94a85ea0285cb0b}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a8a39984a237b8e7eb94a85ea0285cb0b} 
+\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}!encoder\_layers@{encoder\_layers}}
+\index{encoder\_layers@{encoder\_layers}!src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{encoder\_layers}{encoder\_layers}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+Transformer\+L.\+encoder\+\_\+layers}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00038}{38}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a23a3cfd264e56c829bf7c3256b1c06ee}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a23a3cfd264e56c829bf7c3256b1c06ee} 
+\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}!input\_dim@{input\_dim}}
+\index{input\_dim@{input\_dim}!src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{input\_dim}{input\_dim}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+Transformer\+L.\+input\+\_\+dim}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00031}{31}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a0d0e2241a424714888fc411973b5b8f6}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_a0d0e2241a424714888fc411973b5b8f6} 
+\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}!num\_heads@{num\_heads}}
+\index{num\_heads@{num\_heads}!src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{num\_heads}{num\_heads}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+Transformer\+L.\+num\+\_\+heads}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00034}{34}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_af522c88b630fb682497b1602cd91665b}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_af522c88b630fb682497b1602cd91665b} 
+\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}!num\_layers@{num\_layers}}
+\index{num\_layers@{num\_layers}!src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{num\_layers}{num\_layers}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+Transformer\+L.\+num\+\_\+layers}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00033}{33}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+\Hypertarget{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_aa38249782ec6910ab5b9e638c7d0afcd}\label{classsrc_1_1_multi_dim_transformer_1_1_transformer_l_aa38249782ec6910ab5b9e638c7d0afcd} 
+\index{src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}!output\_layer@{output\_layer}}
+\index{output\_layer@{output\_layer}!src.MultiDimTransformer.TransformerL@{src.MultiDimTransformer.TransformerL}}
+\doxysubsubsection{\texorpdfstring{output\_layer}{output\_layer}}
+{\footnotesize\ttfamily src.\+Multi\+Dim\+Transformer.\+Transformer\+L.\+output\+\_\+layer}
+
+
+
+Definition at line \mbox{\hyperlink{_multi_dim_transformer_8py_source_l00040}{40}} of file \mbox{\hyperlink{_multi_dim_transformer_8py_source}{Multi\+Dim\+Transformer.\+py}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_multi_dim_transformer_8py}{Multi\+Dim\+Transformer.\+py}}\end{DoxyCompactItemize}

@@ -1,0 +1,248 @@
+\doxysection{src.\+Modelling\+LSTM.\+Train\+LSTM Class Reference}
+\hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m}{}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m}\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a2fa61dc7d94daa06b0dd8451bf790d41}{\+\_\+\+\_\+init\+\_\+\+\_\+}} (self, pd.\+Data\+Frame \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_adb1f537b3c926f747e5563048fbcd55e}{trainX}}, pd.\+Data\+Frame \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a7f32a660db4982ffc0b3d750e64df0c8}{trainY}}, pd.\+Data\+Frame \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a400bebe5f4c4ad8824deb1b1f823d62f}{testX}}, pd.\+Data\+Frame \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a223005f9dcb1b4afc4289918daf55e6a}{testY}}, pd.\+Data\+Frame \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a730e38b17e5d49f4b06a24510aa8deec}{Y}}, dict \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a66e492113cac2e903f3d6d682e741465}{vdd}}, int \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a17c5d00e814f05fedd00e1a40374cac3}{epoch}}, int \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a141db82792ac745534ca651fc1211fc5}{bsize}}, int \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a745333640821f8db0e4f41bef6b4a7f4}{nhn}}, int \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a298dc8c477b0867855891a1702f0dcab}{win}}, int \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_ae8d9668e2d19d98aff6f15fa47bd5978}{n\+\_\+ftrs}}, str \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a72e3c67b4d903fc49598beaa93146f3b}{stock}})
+\item 
+dict \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a07ccb2fc7dfc2ef514ff604779fbabc0}{lstm\+\_\+fun}} (self, int ahead, int seed)
+\item 
+dict \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a0411dff9a94d95357d4e25bdac35f20d}{stck\+\_\+lstm\+\_\+fun}} (self, int ahead, int seed)
+\item 
+dict \mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a868a152b080b9215aade277c60bcc484}{att\+\_\+lstm\+\_\+fun}} (self, int ahead, int seed)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_adb1f537b3c926f747e5563048fbcd55e}{trainX}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a7f32a660db4982ffc0b3d750e64df0c8}{trainY}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a400bebe5f4c4ad8824deb1b1f823d62f}{testX}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a223005f9dcb1b4afc4289918daf55e6a}{testY}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a730e38b17e5d49f4b06a24510aa8deec}{Y}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a66e492113cac2e903f3d6d682e741465}{vdd}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a17c5d00e814f05fedd00e1a40374cac3}{epoch}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a141db82792ac745534ca651fc1211fc5}{bsize}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a745333640821f8db0e4f41bef6b4a7f4}{nhn}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a298dc8c477b0867855891a1702f0dcab}{win}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_ae8d9668e2d19d98aff6f15fa47bd5978}{n\+\_\+ftrs}}
+\item 
+\mbox{\hyperlink{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a72e3c67b4d903fc49598beaa93146f3b}{stock}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00030}{30}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a2fa61dc7d94daa06b0dd8451bf790d41}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a2fa61dc7d94daa06b0dd8451bf790d41} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!\_\_init\_\_@{\_\_init\_\_}}
+\index{\_\_init\_\_@{\_\_init\_\_}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{\_\_init\_\_()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{pd.\+Data\+Frame}]{trainX,  }\item[{pd.\+Data\+Frame}]{trainY,  }\item[{pd.\+Data\+Frame}]{testX,  }\item[{pd.\+Data\+Frame}]{testY,  }\item[{pd.\+Data\+Frame}]{Y,  }\item[{dict}]{vdd,  }\item[{int}]{epoch,  }\item[{int}]{bsize,  }\item[{int}]{nhn,  }\item[{int}]{win,  }\item[{int}]{n\+\_\+ftrs,  }\item[{str}]{stock }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00031}{31}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a868a152b080b9215aade277c60bcc484}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a868a152b080b9215aade277c60bcc484} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!att\_lstm\_fun@{att\_lstm\_fun}}
+\index{att\_lstm\_fun@{att\_lstm\_fun}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{att\_lstm\_fun()}{att\_lstm\_fun()}}
+{\footnotesize\ttfamily  dict src.\+Modelling\+LSTM.\+Train\+LSTM.\+att\+\_\+lstm\+\_\+fun (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{int}]{ahead,  }\item[{int}]{seed }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Trains an attention-based LSTM model and evaluates its performance.
+
+Args:
+    ahead (int): Number of days ahead for forecasting.
+    seed (int): Random seed for reproducibility.
+
+Returns:
+    dict: Results of the attention-based LSTM model training and evaluation.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00130}{130}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a07ccb2fc7dfc2ef514ff604779fbabc0}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a07ccb2fc7dfc2ef514ff604779fbabc0} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!lstm\_fun@{lstm\_fun}}
+\index{lstm\_fun@{lstm\_fun}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{lstm\_fun()}{lstm\_fun()}}
+{\footnotesize\ttfamily  dict src.\+Modelling\+LSTM.\+Train\+LSTM.\+lstm\+\_\+fun (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{int}]{ahead,  }\item[{int}]{seed }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Trains a basic LSTM model and evaluates its performance.
+
+Args:
+    ahead (int): Number of days ahead for forecasting.
+    seed (int): Random seed for reproducibility.
+
+Returns:
+    dict: Results of the LSTM model training and evaluation.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00048}{48}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a0411dff9a94d95357d4e25bdac35f20d}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a0411dff9a94d95357d4e25bdac35f20d} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!stck\_lstm\_fun@{stck\_lstm\_fun}}
+\index{stck\_lstm\_fun@{stck\_lstm\_fun}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{stck\_lstm\_fun()}{stck\_lstm\_fun()}}
+{\footnotesize\ttfamily  dict src.\+Modelling\+LSTM.\+Train\+LSTM.\+stck\+\_\+lstm\+\_\+fun (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{int}]{ahead,  }\item[{int}]{seed }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Trains a stacked LSTM model and evaluates its performance.
+
+Args:
+    ahead (int): Number of days ahead for forecasting.
+    seed (int): Random seed for reproducibility.
+
+Returns:
+    dict: Results of the stacked LSTM model training and evaluation.
+\end{DoxyVerb}
+ 
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00088}{88}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a141db82792ac745534ca651fc1211fc5}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a141db82792ac745534ca651fc1211fc5} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!bsize@{bsize}}
+\index{bsize@{bsize}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{bsize}{bsize}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+bsize}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00042}{42}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a17c5d00e814f05fedd00e1a40374cac3}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a17c5d00e814f05fedd00e1a40374cac3} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!epoch@{epoch}}
+\index{epoch@{epoch}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{epoch}{epoch}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+epoch}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00041}{41}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_ae8d9668e2d19d98aff6f15fa47bd5978}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_ae8d9668e2d19d98aff6f15fa47bd5978} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!n\_ftrs@{n\_ftrs}}
+\index{n\_ftrs@{n\_ftrs}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{n\_ftrs}{n\_ftrs}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+n\+\_\+ftrs}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00045}{45}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a745333640821f8db0e4f41bef6b4a7f4}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a745333640821f8db0e4f41bef6b4a7f4} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!nhn@{nhn}}
+\index{nhn@{nhn}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{nhn}{nhn}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+nhn}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00043}{43}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a72e3c67b4d903fc49598beaa93146f3b}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a72e3c67b4d903fc49598beaa93146f3b} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!stock@{stock}}
+\index{stock@{stock}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{stock}{stock}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+stock}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00046}{46}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a400bebe5f4c4ad8824deb1b1f823d62f}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a400bebe5f4c4ad8824deb1b1f823d62f} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!testX@{testX}}
+\index{testX@{testX}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{testX}{testX}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+testX}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00037}{37}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a223005f9dcb1b4afc4289918daf55e6a}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a223005f9dcb1b4afc4289918daf55e6a} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!testY@{testY}}
+\index{testY@{testY}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{testY}{testY}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+testY}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00038}{38}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_adb1f537b3c926f747e5563048fbcd55e}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_adb1f537b3c926f747e5563048fbcd55e} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!trainX@{trainX}}
+\index{trainX@{trainX}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{trainX}{trainX}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+trainX}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00035}{35}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a7f32a660db4982ffc0b3d750e64df0c8}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a7f32a660db4982ffc0b3d750e64df0c8} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!trainY@{trainY}}
+\index{trainY@{trainY}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{trainY}{trainY}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+trainY}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00036}{36}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a66e492113cac2e903f3d6d682e741465}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a66e492113cac2e903f3d6d682e741465} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!vdd@{vdd}}
+\index{vdd@{vdd}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{vdd}{vdd}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+vdd}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00040}{40}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a298dc8c477b0867855891a1702f0dcab}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a298dc8c477b0867855891a1702f0dcab} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!win@{win}}
+\index{win@{win}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{win}{win}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+win}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00044}{44}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+\Hypertarget{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a730e38b17e5d49f4b06a24510aa8deec}\label{classsrc_1_1_modelling_l_s_t_m_1_1_train_l_s_t_m_a730e38b17e5d49f4b06a24510aa8deec} 
+\index{src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}!Y@{Y}}
+\index{Y@{Y}!src.ModellingLSTM.TrainLSTM@{src.ModellingLSTM.TrainLSTM}}
+\doxysubsubsection{\texorpdfstring{Y}{Y}}
+{\footnotesize\ttfamily src.\+Modelling\+LSTM.\+Train\+LSTM.\+Y}
+
+
+
+Definition at line \mbox{\hyperlink{_modelling_l_s_t_m_8py_source_l00039}{39}} of file \mbox{\hyperlink{_modelling_l_s_t_m_8py_source}{Modelling\+LSTM.\+py}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/\mbox{\hyperlink{_modelling_l_s_t_m_8py}{Modelling\+LSTM.\+py}}\end{DoxyCompactItemize}
