@@ -156,8 +156,8 @@ def run_plot_res(list_tr_tst: list, all_results: dict, stock_list: list, lahead:
                     itr = len(res1[ahead]['nit']) - 1
                     DYs = res1[ahead]['DY']
                     DY = DYs.loc[itr]
-                    metricp = res1[ahead][f'{metric}P'][itr]
-                    metricy = res1[ahead][f'{metric}Y'][itr]
+                    metricp = res1[ahead][f'{metric.upper()}P'][itr]
+                    metricy = res1[ahead][f'{metric.upper()}Y'][itr]
                     row = i // 3
                     col = i % 3
                     if 'transformer' not in model:
@@ -184,7 +184,7 @@ def plot_metric_boxplots(selected_model: str, list_tr_tst: list, all_results: di
             for ahead in lahead:
                 res1 = tot_res['OUT_MODEL'][stock]
                 for itr in range(len(res1[ahead]['nit'])):
-                    mse_value = res1[ahead][f'{metric}P'][itr]
+                    mse_value = res1[ahead][f'{metric.upper()}P'][itr]
                     mse_data[stock].append(mse_value)
     
             fig, ax = plt.subplots(figsize=(12, 8))
@@ -214,13 +214,13 @@ def plot_metric_boxplots_with_yesterday(selected_model: str, tr_tst_list: list, 
             res1 = tot_res['OUT_MODEL'][stock]
             for ahead in lahead:
                 for itr in range(len(res1[ahead]['nit'])):
-                    metric_value = res1[ahead][f'{metric}P'][itr]
+                    metric_value = res1[ahead][f'{metric.upper()}P'][itr]
                     metric_data[ahead].append(metric_value)
                 # Asegurarnos de que estamos tomando el último valor (última iteración)
                 itr = len(res1[ahead]['nit']) - 1
-                metricy = res1[ahead][f'{metric}Y'][itr]
+                metricy = res1[ahead][f'{metric.upper()}Y'][itr]
                 yesterday_data[ahead].append(metricy)
-                metricp = res1[ahead][f'{metric}P'][itr]
+                metricp = res1[ahead][f'{metric.upper()}P'][itr]
                 pred_data[ahead].append(metricp)
 
             axs[idx].boxplot([metric_data[ahead] for ahead in lahead], positions=range(len(lahead)))
