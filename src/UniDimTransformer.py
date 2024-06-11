@@ -9,6 +9,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import json
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 from utils_vv_tfg import save_data, load_preprocessed_data, denormalize_data
@@ -16,10 +17,6 @@ from config.config import get_configuration
 
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
 class TransformerL(nn.Module):
     """
@@ -36,6 +33,7 @@ class TransformerL(nn.Module):
         self.embedding = nn.Linear(self.input_dim, self.embed_dim)        
         self.encoder_layers = nn.ModuleList([nn.TransformerEncoderLayer(self.embed_dim, self.num_heads, dim_feedforward=4*self.embed_dim, dropout=self.dropout)
                                              for _ in range(self.num_layers)])
+                                             
         self.output_layer = nn.Linear(self.embed_dim, 1)
 
     def forward(self, src) -> torch.Tensor:
@@ -220,6 +218,7 @@ def main(args) -> None:
                 for stock in stock_list:
                     lpar, tot_res = load_preprocessed_data(processed_path, win_size, tr_tst, stock, scenario['name'], multi)
                     win, n_ftrs, tr_tst = lpar
+                    name = scenario['name']
                     fmdls = config['data']['fmdls'].format(nhn=nhn,tmod=tmod,tr_tst=tr_tst,stock=stock)
                     if not os.path.exists(fmdls):
                         os.makedirs(fmdls)
@@ -239,7 +238,7 @@ def main(args) -> None:
                             print('######################################################')
                             print(f'{irp} Training {stock} {ahead} days ahead.')
                             transformer_start= time.time()
-                            mdl_name  = f'{tmod}-{stock}-{ahead}-{irp}.hd5'
+                            mdl_name  = f'{name}-{tmod}-{stock}-{ahead}-{irp}'
                             if tmod == "transformer":
                                 sol   = transformer_fun(transformer_parameters,train_X,train_y,test_X,test_y,
                                                         Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,seed)
@@ -252,7 +251,18 @@ def main(args) -> None:
                             sol['win']    = win
                             sol['tr_tst'] = tr_tst
                             sol['transformer_parameters'] = transformer_parameters
-                            torch.save(sol['model'], fmdls+mdl_name)
+                            model_json 	= {}
+                            vdd_json = vdd.copy()
+                            vdd_json.pop('mean')
+                            min = vdd_json['min'].iloc[0]
+                            max = vdd_json['max'].iloc[0]
+                            #vdd_json = vdd_json.to_dict()
+                            model_json['vdd'] = {}
+                            model_json['vdd']['min'] = min
+                            model_json['vdd']['max'] = max
+                            with open(f"{fmdls}{mdl_name}.json","w") as json_file:
+                                    json.dump(model_json, json_file)
+                            torch.save(sol['model'], f"{fmdls}{mdl_name}.h5")
                             sol['model']  = fmdls+mdl_name
                             print('   Effort spent: ' + str(ttrain) +' s.')
                             sys.stdout.flush()

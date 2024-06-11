@@ -4,6 +4,7 @@ import random
 import math
 import argparse
 import warnings
+import json
 warnings.filterwarnings('ignore')
 warnings.simplefilter('ignore')
 
@@ -232,7 +233,7 @@ def main(args) -> None:
                                 print('######################################################')
                                 print('Training ' + stock + ' ahead ' + str(ahead) + ' days.')
                                 lstm_start= time.time()
-                                mdl_name  = f'{tmod}-{stock}-{ahead}-{irp}.h5'
+                                mdl_name  = f'{tmod}-{stock}-{ahead}-{irp}'
                                 if tmod == "lstm":
                                     sol   = model_lstm.lstm_fun(ahead, seed)
                                 if tmod == "stcklstm":
@@ -247,7 +248,15 @@ def main(args) -> None:
                                 sol['nhn']    = nhn
                                 sol['win']    = win
                                 sol['tr_tst'] = tr_tst
-                                sol['model'].save(fmdls+mdl_name)
+                                model_json 	= {}
+                                model_json['model'] = sol['model'].to_json()
+                                model_json['vdd'] 	 = vdd.to_json()
+                                with open(f"{fmdls}{mdl_name}.json","w") as json_file:
+                                    json.dump(model_json, json_file)
+                                # 	serialize weights to HDF5
+                                sol['model'].save_weights(f"{fmdls}{mdl_name}.h5")
+                                print("Saved model to disk")
+                                #sol['model'].save(fmdls+mdl_name)
                                 sol['model']  = fmdls+mdl_name
                                 print('   Effort spent: ' + str(ttrain) +' s.')
                                 sys.stdout.flush()

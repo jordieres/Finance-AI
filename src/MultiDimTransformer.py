@@ -9,6 +9,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import json
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 
@@ -253,7 +254,7 @@ def main(args):
                             print(f'{irp} Training {stock} {ahead} days ahead')
                             transformer_start= time.time()
                             name = scenario['name']
-                            mdl_name  = f'{name}-{tmod}-{stock}-{ahead}-{irp}.hd5'
+                            mdl_name  = f'{name}-{tmod}-m-{stock}-{ahead}-{irp}'
                             if tmod == "transformer":
                                 sol   = transformer_fun(transformer_parameters,train_X,train_y,test_X,test_y,
                                                         Y,vdd,epochs,bsize,nhn,win,n_ftrs,ahead,stock,test_X_idx,k_variables,seed)
@@ -266,6 +267,15 @@ def main(args):
                             sol['win']    = win
                             sol['tr_tst'] = tr_tst
                             sol['transformer_parameters'] = transformer_parameters
+                            model_json 	= {}
+                            vdd_json = vdd.copy()
+                            vdd_json.pop('mean')
+                            vdd_json['min'] = vdd_json['min'][0]
+                            vdd_json['max'] = vdd_json['max'][0]
+                            model_json['vdd'] = vdd_json
+                            with open(f"{fmdls}{mdl_name}.json","w") as json_file:
+                                    json.dump(model_json, json_file)
+                            torch.save(sol['model'], f"{fmdls}{mdl_name}.h5")
                             sol['model']  = fmdls+mdl_name
                             print('   Effort spent: ' + str(ttrain) +' s.')
                             sys.stdout.flush()
