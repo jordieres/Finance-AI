@@ -141,15 +141,6 @@ for ahead in lahead:
     vdd    = tot['vdd'] #data to denormalize the predictions
 ```
 
-#### Make the predictions with LSTM:
-```python
-model = "path_model"
-y_hat = model.predict(testX)
-#Denormalize the predictions
-preds = np.concatenate(y_hat,axis=0).tolist()
-jdx = testX.index
-y_forecast = denormalize_data(preds, vdd, jdx, multi=multi, lstm=True)
-```
 #### Load the Transformer pre trained model:
 ```python
 import json
