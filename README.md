@@ -6,8 +6,8 @@ This project aims to develop an artificial intelligence-based price prediction s
 
 See the project's paper for more details:
 ```bibtex
-@article{https://doi.org/10.5281/zenodo.11493274,
-  doi = {10.5281/ZENODO.11493274},
+@article{https://doi.org/10.5281/zenodo.11583436,
+  doi = {10.5281/zenodo.11583436},
   url = {https://zenodo.org/doi/10.5281/zenodo.11493274},
   author = {Vallejo Carmona,  Víctor},
   language = {en},
