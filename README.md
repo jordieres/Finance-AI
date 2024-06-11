@@ -128,7 +128,8 @@ Below are some example graphs of the results obtained from the models prediction
 ## Application of trained Models
 To load and apply the trained models to use the .h5 files for the LSTMs you can follow this example:
 
-### Load input data:
+### With pre processed data:
+#### Load input data:
 ```python
 from utils_vv_tfg import load_preprocessed_data, denormalize_data
 import numpy as np
@@ -139,23 +140,75 @@ for ahead in lahead:
     testX  = tot['testX']
     vdd    = tot['vdd'] #data to denormalize the predictions
 ```
-### Load model trained:
-```python
-from tensorflow.keras.models import load_model
 
-# Path to the .h5 file of the model
+#### Make the predictions with LSTM:
+```python
 model = "path_model"
-model.summary() #to make sure that the model is ready to use
-```
-
-### Make the predictions:
-```python
 y_hat = model.predict(testX)
 #Denormalize the predictions
 preds = np.concatenate(y_hat,axis=0).tolist()
 jdx = testX.index
 y_forecast = denormalize_data(preds, vdd, jdx, multi=multi, lstm=True)
 ```
+#### Load the Transformer pre trained model:
+```python
+import json
+import numpy as np
+import pandas as pd
+import torch
+from MultiDimTransformer import TransformerL as multiTransformer
+from UniDimTransformer import TransformerL as uniTransformer
+file_route = 'file_route'
+json_file=open(f'{file_route}.json','r')
+with open(f'{file_route}.json','r') as json_file:
+    loaded_model_json = json.load(json_file)
+vdd = loaded_model_json['vdd']
+model = torch.load(f"{file_route}.h5")
+```
+
+### Without preprocessed data:
+
+#### Load LSTM model trained:
+```python
+import json
+from tensorflow.keras.models import model_from_json
+import numpy as np
+import pandas as pd
+
+file_route = 'file_route'
+json_file=open(f'{file_route}.json','r')
+with open(f'{file_route}.json','r') as json_file:
+    loaded_model_json = json.load(json_file)
+
+vdd = loaded_model_json['vdd']
+vdd = json.loads(vdd)
+loaded_model=model_from_json(loaded_model_json['model'])
+loaded_model.load_weights(f'{file_route}.h5')
+print("Loaded 	model from disk")
+```
+
+#### Normalize the new data:
+``` python
+min_x, max_x, mean_x = vdd["min"], vdd["max"], vdd["mean"]
+min_x = set(min_x.values())
+max_x = set(max_x.values())
+for m in min_x:
+    min_x = m
+for m in max_x:
+    max_x = m
+```
+
+#### Make predictions with new data:
+```python
+X = np.array(new_data)
+X = pd.DataFrame(X)
+x_mean = np.mean(X, axis=1)
+center_x = X.sub(x_mean, axis=0)
+center_x_norm = center_x.apply(lambda x: (x - min_x) / (max_x - min_x), axis=1)
+loaded_model.compile(loss='binary_crossentropy',optimizer='rmsprop',metrics=['accuracy'])
+score=loaded_model.predict(center_x_norm)
+```
+
 
 ## Contributing
 Contributions are welcome!
