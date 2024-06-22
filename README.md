@@ -115,11 +115,6 @@ Below are some example graphs of the results obtained from the models prediction
 ![AMZN LSTM Price Prediction](figures/scenario_1/0.7/lstm-AMZN-0-MSE.png)
 ![AMZN Multivariate Transformer Price Prediction](figures/scenario_1/0.7/transformer-m-AMZN-0-MSE.png)
 
-### Amazon's stock price prediction using LSTM and transformer multivariate for the first of the scenarios.
-
-![AMZN LSTM Price Prediction](figures/scenario_1/0.7/lstm-AMZN-0-MSE.png)
-![AMZN Multivariate Transformer Price Prediction](figures/scenario_1/0.7/transformer-m-AMZN-0-MSE.png)
-
 ### Apples's MSE comparison for each ahead value using LSTM and transformer multivariate for the first of the scenarios.
 
 ![AMZN LSTM Price Prediction](figures/scenario_1/MSE_lstm_boxplot/AAPL_boxplot_MSE_lstm.png)
