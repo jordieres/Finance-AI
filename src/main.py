@@ -14,6 +14,7 @@ def graphical_results(config_file):
     output_path = config['data']['output_path']
     selected_scenario = config['visualization']['scenario']
     metric = config['visualization']['metric']
+    nr, nc = config['visualization']['layout']
     plot_path = config['visualization']['plot_path']
     plot_format = config['visualization']['plot_format']
 
@@ -29,7 +30,7 @@ def graphical_results(config_file):
         for tr_tst in list_tr_tst:
             all_results[tr_tst] = load_output_preprocessed_data(output_path, win, tr_tst, selected_scenario)
         
-        run_plot_res(list_tr_tst, all_results, stock_list, lahead, selected_scenario, metric, scen_name, plot_path, plot_format)
+        run_plot_res(list_tr_tst, all_results, stock_list, lahead, selected_scenario, metric, scen_name, plot_path, plot_format, nr,nc)
 
         for selected_model in all_results[tr_tst].keys():
             plot_metric_boxplots(selected_model, list_tr_tst, all_results, stock_list, lahead, metric, scen_name, plot_path, plot_format)
@@ -40,7 +41,7 @@ def run_dataprocessing_script(config_file):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         data_script_path = os.path.join(current_dir, "DataPreprocessing.py")
 
-        subprocess.run(["python3", data_script_path, "-v", "1", "-c", config_file], check=True)
+        subprocess.run(["python3.12", data_script_path, "-v", "1", "-c", config_file], check=True)
     except Exception as e:
         print("An error occurred while running DataPreprocessing.py:", e)
 
@@ -49,7 +50,7 @@ def run_lstm_script(config_file):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         lstm_script_path = os.path.join(current_dir, "ModellingLSTM.py")
 
-        subprocess.run(["python3", lstm_script_path, "-c", config_file], check=True)
+        subprocess.run(["python3.12", lstm_script_path, "-c", config_file], check=True)
     except Exception as e:
         print("An error occurred while running ModellingLSTM.py:", e)
 
@@ -58,7 +59,7 @@ def run_unidimensional_transformer_script(config_file):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         transformer_script_path = os.path.join(current_dir, "UniDimTransformer.py")
 
-        subprocess.run(["python3", transformer_script_path, "-c", config_file], check=True)
+        subprocess.run(["python3.12", transformer_script_path, "-c", config_file], check=True)
     except Exception as e:
         print("An error occurred while running Transformer.py:", e)
 
@@ -67,7 +68,7 @@ def run_multidimensional_transformer_script(config_file):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         multi_transformer_script_path = os.path.join(current_dir, "MultiDimTransformer.py")
 
-        subprocess.run(["python3", multi_transformer_script_path, "-c", config_file], check=True)
+        subprocess.run(["python3.12", multi_transformer_script_path, "-c", config_file], check=True)
     except Exception as e:
         print("An error occurred while running Transformer.py:", e)
 

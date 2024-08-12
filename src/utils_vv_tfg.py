@@ -141,10 +141,10 @@ def plot_res(ax, DY: pd.DataFrame, metric: str, metricp: float, metricy: float, 
         ax.legend()
         ax.grid(True)
     # Agregar texto
-    ax.text(.01, .01, f'{metric.upper()} Predicted=' + str(round(metricp,3)), transform=ax.transAxes, ha='left', va='bottom', fontsize=16, color='#FFA500')
-    ax.text(.01, .05, f'{metric.upper()} Historical=' + str(round(metricy,3)), transform=ax.transAxes, fontsize=16, ha='left', va='bottom', color='green')
+    ax.text(.01, .01, f'{metric.upper()} Predicted=' + str(round(metricp,3)), transform=ax.transAxes, ha='left', va='bottom', fontsize=12, color='#FFA500')
+    ax.text(.01, .05, f'{metric.upper()} Historical=' + str(round(metricy,3)), transform=ax.transAxes, fontsize=12, ha='left', va='bottom', color='green')
 
-def run_plot_res(list_tr_tst: list, all_results: dict, stock_list: list, lahead: list, selected_scenario: str, metric: str, scen_name: str, plot_path: str, plot_format: str) -> None:
+def run_plot_res(list_tr_tst: list, all_results: dict, stock_list: list, lahead: list, selected_scenario: str, metric: str, scen_name: str, plot_path: str, plot_format: str, nr: int = 2, nc: int = 2) -> None:
     for tr_tst in list_tr_tst:
         for model in all_results[tr_tst].keys():
             tot_res = all_results[tr_tst][model]['tot_res']
@@ -167,6 +167,10 @@ def run_plot_res(list_tr_tst: list, all_results: dict, stock_list: list, lahead:
 
                     axs[row, col].set_xlim(DY.index.min(), DY.index.max())  # Ajustar los límites del eje X
                     axs[row, col].set_ylim(DY['Y_yesterday'].min()*0.7, DY['Y_yesterday'].max()*1.3)
+                    for label in axs[row,col].get_xmajorticklabels():
+                        label.set_rotation(30)
+                        label.set_horizontalalignment("right")
+
                 path = f'{plot_path}/{scen_name}/{tr_tst}/'
                 if not os.path.exists(path):
                     os.makedirs(path)

@@ -254,7 +254,7 @@ def main(args) -> None:
                                 with open(f"{fmdls}{mdl_name}.json","w") as json_file:
                                     json.dump(model_json, json_file)
                                 # 	serialize weights to HDF5
-                                sol['model'].save_weights(f"{fmdls}{mdl_name}.h5")
+                                sol['model'].save_weights(f"{fmdls}{mdl_name}.weights.h5")
                                 print("Saved model to disk")
                                 #sol['model'].save(fmdls+mdl_name)
                                 sol['model']  = fmdls+mdl_name

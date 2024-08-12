@@ -1,22 +1,24 @@
 data:
-  data_path: "/home/vvallejo/Finance-AI/datasets"
-  output_path: "/home/vvallejo/Finance-AI/dataprocessed"
-  date: '060124'
+  data_path: "/home/jb/soft/AlejandroMoreno/Finance-AI/datasets"
+  output_path: "/home/jb/soft/AlejandroMoreno/Finance-AI/dataprocessed"
+  date: '20240604'
+  sep: ';'
+  encoding: 'ISO-8859-1'
   filename_structure: "{ticker} US Equity_{date}.csv"
-  fmdls: '/home/vvallejo/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
+  fmdls: '/home/jb/soft/AlejandroMoreno/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
 
 visualization:
-  plot_path: "/home/vvallejo/Finance-AI/figures"
-  plot_format: "png"
-  scenario: "scenario_1"
+  plot_path: "/home/jb/soft/AlejandroMoreno/Finance-AI/figures"
+  plot_format: "pdf"
+  scenario: "scenario_2"
   metric: "MSE" # MSE, MAE
 
 scenarios:
   - name: scenario_1
     tickers: ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA"]
-    win: [5]
-    tr_tst: [0.7, 0.8]
-    lahead: [1, 7, 14, 30, 90]
+    win: [5,15]
+    tr_tst: [0.85]
+    lahead: [1, 7, 14, 30, 60, 90]
     n_features: 1
     n_itr: 10
     epochs: 256
@@ -26,15 +28,15 @@ scenarios:
       model: "lstm" #lstm, attlstm, stcklstm
     Transformer:
       model: "transformer"
-      num_layers: 4
+      num_layers: 8
       num_heads: 16
       features: ["PX_LAST", "RSI_14D", "PX_TREND", "PX_VTREND"]
 
   - name: scenario_2
     tickers: ["AMZN", "GOOGL", "MSFT", "NVDA", "TSLA"]
-    win: [20]
+    win: [25]
     tr_tst: [0.75, 0.85]
-    lahead: [1, 7, 14, 30, 90]
+    lahead: [1, 7, 14, 30, 60, 90]
     n_features: 1
     n_itr: 2
     epochs: 256
@@ -52,7 +54,7 @@ scenarios:
     tickers: ["AMZN", "PEP", "TMUS", "CSCO"]
     win: [2]
     tr_tst: [0.8, 0.875]
-    lahead: [1, 7, 14, 30, 90]
+    lahead: [1, 7, 14, 30, 60, 90]
     n_features: 1
     n_itr: 5
     epochs: 256
@@ -62,7 +64,7 @@ scenarios:
       model: "attlstm" # lstm, attlstm, stcklstm
     Transformer:
       model: "transformer"
-      num_layers: 2
+      num_layers: 16
       num_heads: 8
       features: ["PX_LAST", "PX_TREND", "VOLATILITY"]
 

@@ -18,7 +18,7 @@ class Stock:
     Class that creates the Stock, processes the stock data, and creates the output files for each stock.
     """
     
-    def __init__(self, ticker: str, file_name: str, lahead: list, tr_tst: float, scen_name: str):
+    def __init__(self, ticker: str, file_name: str, lahead: list, tr_tst: float, scen_name: str, sep: str = ',', encoding: str = 'utf-8'):
         """
         Constructs all the necessary attributes for the Stock object.
         
@@ -36,6 +36,8 @@ class Stock:
             Scenario name.
         """
         self.ticker = ticker
+        self.sep    = sep
+        self.encoding=encoding
         self._data = pd.DataFrame(self._read_data(file_name))
         self._lahead = lahead
         self.tr_tst = tr_tst
@@ -45,6 +47,10 @@ class Stock:
         self.mserial_dict = {}
         self.serial_dict['INPUT_DATA'] = {}
         self.mserial_dict['INPUT_DATA'] = {}
+
+    def lst_data(self,nlin: int):
+        pd.set_option('display.max_columns', None)
+        print(self._data.head(nlin))
 
     def _read_data(self, file_name: str) -> pd.DataFrame:
         """
@@ -60,7 +66,7 @@ class Stock:
         pd.DataFrame
             The stock data.
         """
-        return pd.read_csv(file_name, sep=",", index_col=0, parse_dates=True)
+        return pd.read_csv(file_name, sep=self.sep, index_col=0, parse_dates=True, encoding=self.encoding).dropna()
 
     def process_univariate_data(self, win: int) -> None:
         """
@@ -351,8 +357,11 @@ def main(args) -> None:
 
     data_path = config['data']['data_path']
     out_path = config['data']['output_path']
+    sep      = config['data']['sep']
+    encoding = config['data']['encoding']
     filename_structure = config['data']['filename_structure']
     date = config['data']['date']
+    ish  = -1
 
     for scenario in config['scenarios']:
         list_win_size = scenario['win']
@@ -360,6 +369,7 @@ def main(args) -> None:
         stock_list = scenario['tickers']
         n_ftrs = scenario['n_features']
         for win in list_win_size:
+            ish = ish + 1
             for ticker in stock_list:
                 filename = filename_structure.format(ticker=ticker, date=date)
                 file = os.path.join(data_path, filename)
@@ -367,7 +377,11 @@ def main(args) -> None:
                 
                 for tr_tst in scenario['tr_tst']:
                     scen_name = scenario['name']
-                    stock = Stock(ticker, file, lahead, tr_tst, scen_name)
+                    stock = Stock(ticker, file, lahead, tr_tst, scen_name,sep,encoding)
+                    if ish == 0:
+                        print(f"Scn:{scen_name}. Win: {win}. Tick: {ticker}. tr_tst:{tr_tst}")
+                        stock.lst_data(10)
+
                     stock.process_stocks()
 
                     lpar = [win, n_ftrs, tr_tst]
