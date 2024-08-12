@@ -149,7 +149,7 @@ def run_plot_res(list_tr_tst: list, all_results: dict, stock_list: list, lahead:
         for model in all_results[tr_tst].keys():
             tot_res = all_results[tr_tst][model]['tot_res']
             for stock in stock_list:
-                fig, axs = plt.subplots(2, 3, figsize=(15, 10))
+                fig, axs = plt.subplots(nr, nc, figsize=(15, 10))
                 fig.suptitle(f'{stock} - {model.upper()} - {selected_scenario} - {metric} - {tr_tst*100}%', fontsize=16)
                 for i, ahead in enumerate(lahead):
                     res1 = tot_res['OUT_MODEL'][stock]
@@ -158,8 +158,8 @@ def run_plot_res(list_tr_tst: list, all_results: dict, stock_list: list, lahead:
                     DY = DYs.loc[itr]
                     metricp = res1[ahead][f'{metric.upper()}P'][itr]
                     metricy = res1[ahead][f'{metric.upper()}Y'][itr]
-                    row = i // 3
-                    col = i % 3
+                    row = i //nc 
+                    col = i %nc 
                     if 'transformer' not in model:
                         plot_res(axs[row, col], DY, metric, metricp, metricy, ahead)
                     else:
