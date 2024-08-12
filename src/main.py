@@ -14,7 +14,7 @@ def graphical_results(config_file):
     output_path = config['data']['output_path']
     selected_scenario = config['visualization']['scenario']
     metric = config['visualization']['metric']
-    nr, nc = config['visualization']['layout']
+    nr, nc = eval(config['visualization']['layout'])
     plot_path = config['visualization']['plot_path']
     plot_format = config['visualization']['plot_format']
 
