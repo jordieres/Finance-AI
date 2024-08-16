@@ -620,11 +620,13 @@ def main(args) -> None:
         rest['st']  = 0
         rest['sccs']= True
         rest['mCat']= minNcat
-    print(rest)
     xsol.index = stock_list
     lvals= evalres(rest['x'],prms)
+    print(rest)
     #
-    res = pd.DataFrame()
+    prices                = prtflio.get_price(prms['win'], prms['tr_tst'])
+    res                   = pd.DataFrame()
+    ldds                  = prices.T.dot(xsol).to_numpy()
     res.loc[0,xsol.index] = xsol
     res.loc[0,'optm']     = optim
     res.loc[0,'minCat']   = rest['mCat']
@@ -634,6 +636,8 @@ def main(args) -> None:
     res.loc[0,'f(x)']     = rest['fun']
     res.loc[0,'var']      = lvals[0]
     res.loc[0,'perf']     = lvals[1]
+    res.loc[0,'SR']       = (lvals[1] - 1.) / lvals[0]
+    res.loc[0,'DD']       = np.max(ldds[1:] - ldds[0])
     res.loc[0,'status']   = rest['st']
     res.loc[0,'success']  = rest['sccs']
     res.loc[0,'dtime']    = datetime.datetime.strftime(datetime.datetime.now(),\
