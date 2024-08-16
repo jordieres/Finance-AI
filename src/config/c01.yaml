@@ -1,0 +1,68 @@
+data:
+  data_path: "/home/jordieres/soft/Finance-AI/datasets"
+  output_path: "/home/jordieres/soft/Finance-AI/dataprocessed"
+  date: '20240604'
+  sep: ';'
+  encoding: 'ISO-8859-1'
+  filename_structure: "{ticker} US Equity_{date}.csv"
+  fmdls: '/home/jordieres/soft/Finance-AI/Models/{nhn}{tmod}/{tr_tst}/{stock}/'
+
+visualization:
+  plot_path: "/home/jordieres/soft/Finance-AI/figures"
+  plot_format: "pdf"
+  layout: (2,2)
+  scenario: "scenario_1a"
+  metric: "MSE" # MSE, MAE
+
+portfolio:
+  scenario: "scenario_1a"
+  lambda: 0.00001
+  mat_cat: {'c_psrv':["AAPL","ADBE","MSFT","GOOG","GOOGL", "AMZN", "PEP"],
+            'c_entr':["CMCSA", "TMUS", "META", "COST", "AVGO"],
+            'c_hrdw':["CSCO", "NVDA", "TSLA"]}
+  min_cats: 3   #  Minimun of Categories requested
+  selwin: 2     #  Pos of selected win in its list [2,5,10,15] => (2) => 10
+  optim : 1     #  0 => Do eval and not optim. / 1 => Do optim 
+  #     ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "META", "COST", "PEP", "CSCO", "GOOG", "NVDA", "TMUS", "TSLA", "GOOGL", "MSFT"]
+  x0    : [0.5, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  tstrt: '2023-11-01' # Original time
+  tend: 90 # Final time in days
+  treb: [30,60] # Rebalancing time in days
+
+scenarios:
+  - name: scenario_1a
+    tickers: ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "META", "COST", "PEP", "CSCO", "GOOG", "NVDA", "TMUS", "TSLA", "GOOGL", "MSFT"]
+    win: [2,5,10,15]
+    tr_tst: [0.85]
+    lahead: [15, 30, 60, 90]
+    n_features: 1
+    n_itr: 10
+    epochs: 256
+    batch_size: 32
+    nhn: 64
+    LSTM:
+      model: "lstm" #lstm, attlstm, stcklstm
+    Transformer:
+      model: "transformer"
+      num_layers: 8
+      num_heads: 16
+      features: ["PX_LAST", "RSI_14D", "PX_TREND", "PX_VTREND"]
+
+  - name: scenario_2a
+    tickers: ["AAPL", "ADBE", "AMZN", "AVGO", "CMCSA", "META", "COST", "PEP", "CSCO", "GOOG", "NVDA", "TSLA", "TMUS", "GOOGL", "MSFT"]
+    win: [2,5,10,15]
+    tr_tst: [0.85]
+    lahead: [1,7,14]
+    n_features: 1
+    n_itr: 10
+    epochs: 256
+    batch_size: 32
+    nhn: 64
+    LSTM:
+      model: "lstm" #lstm, attlstm, stcklstm
+    Transformer:
+      model: "transformer"
+      num_layers: 8
+      num_heads: 16
+      features: ["PX_LAST", "RSI_14D", "PX_TREND", "PX_VTREND"]
+
