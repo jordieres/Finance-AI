@@ -637,7 +637,7 @@ def main(args) -> None:
     res.loc[0,'var']      = lvals[0]
     res.loc[0,'perf']     = lvals[1]
     res.loc[0,'SR']       = (lvals[1] - 1.) / lvals[0]
-    res.loc[0,'DD']       = np.max(ldds[1:] - ldds[0])
+    res.loc[0,'DD']       = np.max(ldds - ldds[-1])
     res.loc[0,'status']   = rest['st']
     res.loc[0,'success']  = rest['sccs']
     res.loc[0,'dtime']    = datetime.datetime.strftime(datetime.datetime.now(),\
